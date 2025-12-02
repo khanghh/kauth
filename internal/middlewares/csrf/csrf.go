@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/khanghh/cas-go/internal/middlewares/sessions"
-	"github.com/khanghh/cas-go/params"
+	"github.com/khanghh/kauth/internal/middlewares/sessions"
+	"github.com/khanghh/kauth/params"
 )
 
 const (

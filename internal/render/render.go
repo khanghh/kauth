@@ -2,8 +2,8 @@ package render
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/khanghh/cas-go/internal/middlewares/csrf"
-	"github.com/khanghh/cas-go/internal/middlewares/sessions"
+	"github.com/khanghh/kauth/internal/middlewares/csrf"
+	"github.com/khanghh/kauth/internal/middlewares/sessions"
 )
 
 func RenderInternalServerError(ctx *fiber.Ctx) error {

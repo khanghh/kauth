@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/khanghh/cas-go/internal/mail"
-	"github.com/khanghh/cas-go/internal/middlewares/csrf"
-	"github.com/khanghh/cas-go/internal/middlewares/sessions"
-	"github.com/khanghh/cas-go/internal/render"
+	"github.com/khanghh/kauth/internal/mail"
+	"github.com/khanghh/kauth/internal/middlewares/csrf"
+	"github.com/khanghh/kauth/internal/middlewares/sessions"
+	"github.com/khanghh/kauth/internal/render"
 	"golang.org/x/crypto/bcrypt"
 )
 

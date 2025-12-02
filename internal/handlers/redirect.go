@@ -7,7 +7,7 @@ import (
 	"net/url"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/khanghh/cas-go/internal/middlewares/sessions"
+	"github.com/khanghh/kauth/internal/middlewares/sessions"
 )
 
 func redirect(ctx *fiber.Ctx, location string, values ...any) error {

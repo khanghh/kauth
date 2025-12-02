@@ -1,41 +1,41 @@
-# cas-go
+# kauth
 
-**cas-go** is a **Centralized Authentication Service (CAS)** built with **Go**, **MySQL**, and **Redis**.  
+**kauth** is self-hosted **OpenID Provider** with social login built with **Go**, **MySQL**, and **Redis**.  
 It provides a secure, scalable, and easy-to-deploy authentication service for managing user access across multiple applications.
 
 ---
 
 ## 🚀 Features
 
-✅ **Centralized Authentication** — single sign-on (SSO) for multiple services  
-✅ **User Registration** — built-in account registration flow  
-✅ **OAuth Login** — supports login via third-party providers (e.g., Google, Facebook, Discord etc.)  
-✅ **Two-Factor Authentication (2FA)** — supports email OTP, time-based OTP and token verification  
-✅ **Service Registry** — secure way to register and manage services  
-✅ **Session Management** — cookie-based session handling  
-✅ **Customizable Templates** — fully customizable HTML pages and email templates  
+✅ **Centralized Authentication** – Single sign-on (SSO) for multiple services  
+✅ **User Registration** – Built-in account registration flow  
+✅ **OAuth Login** – Supports login via third-party providers (e.g., Google, Discord)  
+✅ **Two-Factor Authentication (2FA)** – Supports email OTP, time-based OTP (TOTP), and token verification  
+✅ **Service Registry** – Secure way to register and manage services  
+✅ **Session Management** – Cookie-based session handling  
+✅ **Customizable Templates** – Fully customizable HTML pages and email templates  
 
 ---
 
-
 ## 🧩 Getting Started
 
-### 1. Clone and build the repository
+### 1. Clone and Build the Repository
 ```bash
-git clone https://github.com/khanghh/cas-go.git
-cd cas-go
-make cas-server
+git clone https://github.com/khanghh/kauth.git
+cd kauth
+make
 ```
 
-### 2. Copy and edit the configuration
-Edit config.yaml to match your environment.
+### 2. Configure the Application
+Copy the example configuration file and edit it to match your environment:
 ```bash
 cp config.example.yaml config.yaml
 ```
-### 3. Setup environment and run
-Make sure your stack have MySQL and Redis running then start the server.
+
+### 3. Set Up Environment and Run
+Ensure MySQL and Redis are running, then start the server:
 ```bash
-./build/bin/cas-server --config ./config.yaml
+./build/bin/kauth --config ./config.yaml
 ```
 ## ⚙️ Configuration
 Edit the config.yaml file to define:
@@ -58,7 +58,7 @@ session:
 redisURL: redis://default:123456@localhost:6379/0
 
 mysql:
-  dsn: user:password@tcp(localhost:3306)/cas?charset=utf8mb4&parseTime=True&loc=Local
+  dsn: user:password@tcp(localhost:3306)/kauth?charset=utf8mb4&parseTime=True&loc=Local
   maxIdleConns: 10
   maxOpenConns: 10
   connMaxIdleTime: 10
@@ -95,18 +95,18 @@ captcha:
 
 ## 🖥️ Screenshots
 <p float="left">
-  <img src="https://github.com/khanghh/cas-go/blob/screenshots/login.png?raw=true" width="49%"> 
-  <img src="https://github.com/khanghh/cas-go/blob/screenshots/profile.png?raw=true" width="49%"> 
+  <img src="https://github.com/khanghh/kauth/blob/screenshots/login.png?raw=true" width="49%"> 
+  <img src="https://github.com/khanghh/kauth/blob/screenshots/profile.png?raw=true" width="49%"> 
 </p>
 
 <p float="left">
-  <img src="https://github.com/khanghh/cas-go/blob/screenshots/2fa_challenge.png?raw=true" width="49%"> 
-  <img src="https://github.com/khanghh/cas-go/blob/screenshots/verify_otp.png?raw=true" width="49%"> 
+  <img src="https://github.com/khanghh/kauth/blob/screenshots/2fa_challenge.png?raw=true" width="49%"> 
+  <img src="https://github.com/khanghh/kauth/blob/screenshots/verify_otp.png?raw=true" width="49%"> 
 </p>
 
 <p float="left">
-  <img src="https://github.com/khanghh/cas-go/blob/screenshots/totp_enrollment.png?raw=true" width="49%"> 
-  <img src="https://github.com/khanghh/cas-go/blob/screenshots/totp_enrollment2.png?raw=true" width="49%"> 
+  <img src="https://github.com/khanghh/kauth/blob/screenshots/totp_enrollment.png?raw=true" width="49%"> 
+  <img src="https://github.com/khanghh/kauth/blob/screenshots/totp_enrollment2.png?raw=true" width="49%"> 
 </p>
 
 ---

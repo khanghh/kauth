@@ -8,8 +8,8 @@ import (
 	"io"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/khanghh/cas-go/internal/common"
-	"github.com/khanghh/cas-go/internal/middlewares/sessions"
+	"github.com/khanghh/kauth/internal/common"
+	"github.com/khanghh/kauth/internal/middlewares/sessions"
 )
 
 type TwoFactorState struct {

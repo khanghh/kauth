@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/khanghh/cas-go/params"
+	"github.com/khanghh/kauth/params"
 )
 
 type OTPChallenger struct {

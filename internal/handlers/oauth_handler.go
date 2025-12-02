@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/khanghh/cas-go/internal/middlewares/sessions"
-	"github.com/khanghh/cas-go/internal/oauth"
-	"github.com/khanghh/cas-go/internal/render"
-	"github.com/khanghh/cas-go/model"
+	"github.com/khanghh/kauth/internal/middlewares/sessions"
+	"github.com/khanghh/kauth/internal/oauth"
+	"github.com/khanghh/kauth/internal/render"
+	"github.com/khanghh/kauth/model"
 )
 
 func makeOAuthProvidersMap(oauthProviders []oauth.OAuthProvider) map[string]oauth.OAuthProvider {

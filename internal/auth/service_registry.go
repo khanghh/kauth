@@ -6,8 +6,8 @@ import (
 	"encoding/base64"
 	"errors"
 
-	"github.com/khanghh/cas-go/model"
-	"github.com/khanghh/cas-go/model/query"
+	"github.com/khanghh/kauth/model"
+	"github.com/khanghh/kauth/model/query"
 	"gorm.io/gorm"
 )
 

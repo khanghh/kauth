@@ -3,8 +3,8 @@ package users
 import (
 	"context"
 
-	"github.com/khanghh/cas-go/model"
-	"github.com/khanghh/cas-go/model/query"
+	"github.com/khanghh/kauth/model"
+	"github.com/khanghh/kauth/model/query"
 	"gorm.io/gen"
 	"gorm.io/gen/field"
 )

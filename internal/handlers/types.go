@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/khanghh/cas-go/internal/auth"
-	"github.com/khanghh/cas-go/internal/twofactor"
-	"github.com/khanghh/cas-go/internal/users"
-	"github.com/khanghh/cas-go/model"
+	"github.com/khanghh/kauth/internal/auth"
+	"github.com/khanghh/kauth/internal/twofactor"
+	"github.com/khanghh/kauth/internal/users"
+	"github.com/khanghh/kauth/model"
 )
 
 type ServiceRegistry interface {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/khanghh/cas-go/params"
+	"github.com/khanghh/kauth/params"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )

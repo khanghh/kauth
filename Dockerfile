@@ -16,19 +16,21 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
       -X 'main.gitCommit=$(git rev-parse HEAD)' \
       -X 'main.gitDate=$(git show -s --format=%cI HEAD)' \
       -X 'main.gitTag=$(git describe --tags --always --dirty)'" \
-    -o cas-server .
-
-RUN ls -lah /workdir/build/bin
+    -o kauth .
 
 # ---- Runtime stage ----
 FROM scratch
+
+ENV TZ=Asia/Ho_Chi_Minh
 
 WORKDIR /app
 
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /workdir/cas-server /app/cas-server
+COPY --from=builder /workdir/kauth /app/kauth
 COPY --from=builder /workdir/templates /app/templates
 COPY --from=builder /workdir/static /app/static
 
-ENTRYPOINT ["/app/cas-server", "--config", "/config.yaml"]
+EXPOSE 3000
+
+ENTRYPOINT ["/app/kauth", "--config", "/config.yaml"]

@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/khanghh/cas-go/internal/auth"
-	"github.com/khanghh/cas-go/internal/common"
-	"github.com/khanghh/cas-go/internal/middlewares/sessions"
-	"github.com/khanghh/cas-go/internal/render"
+	"github.com/khanghh/kauth/internal/auth"
+	"github.com/khanghh/kauth/internal/common"
+	"github.com/khanghh/kauth/internal/middlewares/sessions"
+	"github.com/khanghh/kauth/internal/render"
 )
 
 type AuthHandler struct {

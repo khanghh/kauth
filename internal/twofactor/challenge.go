@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/khanghh/cas-go/internal/store"
-	"github.com/khanghh/cas-go/params"
+	"github.com/khanghh/kauth/internal/store"
+	"github.com/khanghh/kauth/params"
 )
 
 const (

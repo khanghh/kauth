@@ -1,4 +1,4 @@
-# Default values for cas-go.
+# Default values for kauth.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -7,7 +7,7 @@ replicaCount: 3
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
-  repository: registry.mineviet.com/cas-go
+  repository: registry.mineviet.com/kauth
   # This sets the pull policy for images.
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
@@ -17,7 +17,7 @@ image:
 imagePullSecrets: []
 # This is to override the chart name.
 nameOverride: ""
-fullnameOverride: "cas-dev"
+fullnameOverride: "kauth-dev"
 
 # This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:
@@ -129,7 +129,7 @@ config: |
     poolSize: 20
     clusterMode: true
   mysql:
-    dsn: user:password@tcp(localhost:3306)/cas?charset=utf8mb4&parseTime=True&loc=Local
+    dsn: user:password@tcp(localhost:3306)/kauth?charset=utf8mb4&parseTime=True&loc=Local
     maxIdleConns: 10
     maxOpenConns: 10
     connMaxIdleTime: 10

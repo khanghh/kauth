@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ printf "%s-config" (include "cas-go.fullname" .) }}
+  name: {{ printf "%s-config" (include "kauth.fullname" .) }}
   labels:
-    {{- include "cas-go.labels" . | nindent 4 }}
+    {{- include "kauth.labels" . | nindent 4 }}
 data:
   config.yaml: |
     {{- tpl .Values.config . | nindent 4 }}

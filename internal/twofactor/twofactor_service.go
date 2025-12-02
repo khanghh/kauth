@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/khanghh/cas-go/internal/store"
-	"github.com/khanghh/cas-go/internal/users"
-	"github.com/khanghh/cas-go/model/query"
-	"github.com/khanghh/cas-go/params"
+	"github.com/khanghh/kauth/internal/store"
+	"github.com/khanghh/kauth/internal/users"
+	"github.com/khanghh/kauth/model/query"
+	"github.com/khanghh/kauth/params"
 )
 
 type TwoFactorService struct {

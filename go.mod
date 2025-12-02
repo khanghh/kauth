@@ -1,4 +1,4 @@
-module github.com/khanghh/cas-go
+module github.com/khanghh/kauth
 
 go 1.24.0
 

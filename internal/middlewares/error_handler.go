@@ -4,7 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/khanghh/cas-go/internal/render"
+	"github.com/khanghh/kauth/internal/render"
 )
 
 func ErrorHandler(ctx *fiber.Ctx, err error) error {

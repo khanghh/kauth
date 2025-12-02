@@ -7,13 +7,13 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/khanghh/cas-go/internal/mail"
-	"github.com/khanghh/cas-go/internal/middlewares/csrf"
-	"github.com/khanghh/cas-go/internal/middlewares/sessions"
-	"github.com/khanghh/cas-go/internal/render"
-	"github.com/khanghh/cas-go/internal/twofactor"
-	"github.com/khanghh/cas-go/internal/users"
-	"github.com/khanghh/cas-go/model"
+	"github.com/khanghh/kauth/internal/mail"
+	"github.com/khanghh/kauth/internal/middlewares/csrf"
+	"github.com/khanghh/kauth/internal/middlewares/sessions"
+	"github.com/khanghh/kauth/internal/render"
+	"github.com/khanghh/kauth/internal/twofactor"
+	"github.com/khanghh/kauth/internal/users"
+	"github.com/khanghh/kauth/model"
 	"github.com/pquerna/otp/totp"
 )
 

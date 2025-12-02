@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "cas-go.fullname" . }}
+  name: {{ include "kauth.fullname" . }}
   labels:
-    {{- include "cas-go.labels" . | nindent 4 }}
+    {{- include "kauth.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "cas-go.fullname" . }}
+    name: {{ include "kauth.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

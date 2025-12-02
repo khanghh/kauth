@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/khanghh/cas-go/model"
-	"github.com/khanghh/cas-go/model/query"
-	"github.com/khanghh/cas-go/params"
+	"github.com/khanghh/kauth/model"
+	"github.com/khanghh/kauth/model/query"
+	"github.com/khanghh/kauth/params"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )

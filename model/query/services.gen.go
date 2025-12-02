@@ -7,7 +7,7 @@ package query
 import (
 	"context"
 
-	"github.com/khanghh/cas-go/model"
+	"github.com/khanghh/kauth/model"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"

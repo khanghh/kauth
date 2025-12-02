@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/khanghh/cas-go/model"
+	"github.com/khanghh/kauth/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"

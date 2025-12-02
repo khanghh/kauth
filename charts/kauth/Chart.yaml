@@ -1,5 +1,5 @@
 apiVersion: v2
-name: cas-go
+name: kauth
 description: Centralized Authentication Service written in Go
 
 # A chart can be either an 'application' or a 'library' chart.

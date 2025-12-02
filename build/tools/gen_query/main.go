@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/khanghh/cas-go/model"
+	"github.com/khanghh/kauth/model"
 	"gorm.io/gen"
 )
 
