@@ -1,4 +1,4 @@
-package handlers
+package web
 
 // Google JSON API style response structures
 type ErrorResponse struct {

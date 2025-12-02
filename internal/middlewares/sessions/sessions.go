@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/gob"
 	"encoding/hex"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -82,7 +83,7 @@ func newSession(sess *session.Session) *Session {
 	}
 }
 
-func GenerateSessionID() string {
+func generateSessionID() string {
 	b := make([]byte, 16)
 	if _, err := rand.Read(b); err != nil {
 		slog.Error("Could not generate session id", "error", err)
@@ -118,7 +119,24 @@ func Reset(ctx *fiber.Ctx, data SessionData) error {
 	return nil
 }
 
-func New(store *session.Store) fiber.Handler {
+type Config struct {
+	Storage        fiber.Storage
+	SessionMaxAge  time.Duration
+	CookieSecure   bool
+	CookieHttpOnly bool
+	CookieName     string
+}
+
+func New(config Config) fiber.Handler {
+	store := session.New(session.Config{
+		Storage:        config.Storage,
+		Expiration:     config.SessionMaxAge,
+		CookieSecure:   config.CookieSecure,
+		CookieHTTPOnly: config.CookieHttpOnly,
+		KeyLookup:      fmt.Sprintf("cookie:%s", config.CookieName),
+		KeyGenerator:   generateSessionID,
+	})
+
 	return func(ctx *fiber.Ctx) error {
 		sess, err := store.Get(ctx)
 		if err != nil {

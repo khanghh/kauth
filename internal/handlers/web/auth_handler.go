@@ -1,4 +1,4 @@
-package handlers
+package web
 
 import (
 	"errors"
@@ -59,7 +59,6 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 	if err != nil {
 		return forceLogout(ctx, "")
 	}
-
 	service, err := h.authorizeService.GetService(ctx.Context(), serviceURL)
 	if errors.Is(err, auth.ErrServiceNotFound) {
 		return render.RenderNotFoundError(ctx)
