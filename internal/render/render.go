@@ -1,241 +1,113 @@
 package render
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/khanghh/kauth/internal/middlewares/csrf"
-	"github.com/khanghh/kauth/internal/middlewares/sessions"
+	"embed"
+	"fmt"
+	"io/fs"
+	"log"
+	"os"
+	"path/filepath"
+	"strings"
+	"text/template"
+
+	"github.com/valyala/bytebufferpool"
 )
 
-func RenderInternalServerError(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.StatusInternalServerError).Render("error-internal", fiber.Map{
-		"siteName": ctx.Locals("siteName"),
-	})
-}
+//go:embed templates/*.html templates/mail/*.html
+var embedFS embed.FS
+var embedTemplate *template.Template
+var templateDir string
+var globalVars map[string]interface{}
 
-func RenderNotFoundError(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.StatusNotFound).Render("error-not-found", fiber.Map{
-		"siteName": ctx.Locals("siteName"),
-	})
-}
-
-func RenderForbiddenError(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.StatusForbidden).Render("error-forbidden", fiber.Map{
-		"siteName": ctx.Locals("siteName"),
-	})
-}
-
-func RenderBadRequestError(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.StatusBadRequest).Render("error-bad-request", fiber.Map{
-		"siteName": ctx.Locals("siteName"),
-	})
-}
-
-func RenderLogin(ctx *fiber.Ctx, data LoginPageData) error {
-	statusCode := fiber.StatusOK
-	if data.ErrorMsg != "" {
-		statusCode = fiber.StatusUnauthorized
-	}
-	return ctx.Status(statusCode).Render("login", fiber.Map{
-		"siteName":          ctx.Locals("siteName"),
-		"csrfToken":         csrf.Get(sessions.Get(ctx)).Token,
-		"turnstileSiteKey":  ctx.Locals("turnstileSiteKey"),
-		"identifier":        data.Identifier,
-		"googleOAuthURL":    data.OAuthLoginURLs["google"],
-		"facebookOAuthURL":  data.OAuthLoginURLs["facebook"],
-		"discordOAuthURL":   data.OAuthLoginURLs["discord"],
-		"microsoftOAuthURL": data.OAuthLoginURLs["microsoft"],
-		"appleOAuthURL":     data.OAuthLoginURLs["apple"],
-		"errorMsg":          data.ErrorMsg,
-	})
-}
-
-func RenderRegister(ctx *fiber.Ctx, data RegisterPageData) error {
-	return ctx.Render("register", fiber.Map{
-		"siteName":         ctx.Locals("siteName"),
-		"csrfToken":        csrf.Get(sessions.Get(ctx)).Token,
-		"turnstileSiteKey": ctx.Locals("turnstileSiteKey"),
-		"username":         data.Username,
-		"email":            data.Email,
-		"usernameError":    data.FormErrors["username"],
-		"passwordError":    data.FormErrors["password"],
-		"emailError":       data.FormErrors["email"],
-		"errorMsg":         data.ErrorMsg,
-	})
-}
-
-func RenderOAuthRegister(ctx *fiber.Ctx, data RegisterPageData) error {
-	return ctx.Render("oauth-register", fiber.Map{
-		"siteName":         ctx.Locals("siteName"),
-		"csrfToken":        csrf.Get(sessions.Get(ctx)).Token,
-		"turnstileSiteKey": ctx.Locals("turnstileSiteKey"),
-		"username":         data.Username,
-		"fullName":         data.FullName,
-		"email":            data.Email,
-		"picture":          data.Picture,
-		"oauthProvider":    data.OAuthProvider,
-		"usernameError":    data.FormErrors["username"],
-		"passwordError":    data.FormErrors["password"],
-		"emailError":       data.FormErrors["email"],
-		"errorMsg":         data.ErrorMsg,
-	})
-}
-
-func RenderDeniedError(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.StatusForbidden).Render("error-denied", fiber.Map{
-		"siteName": ctx.Locals("siteName"),
-	})
-}
-
-func RenderProfilePage(ctx *fiber.Ctx, data ProfilePageData) error {
-	displayName := data.FullName
-	if displayName == "" {
-		displayName = data.Username
-	}
-	return ctx.Render("profile", fiber.Map{
-		"siteName":     ctx.Locals("siteName"),
-		"displayName":  displayName,
-		"email":        data.Email,
-		"picture":      data.Picture,
-		"twoFAEnabled": data.TwoFAEnabled,
-	})
-}
-
-func RenderVerificationRequired(ctx *fiber.Ctx, data VerificationRequiredPageData) error {
-	email := data.Email
-	phone := formatPhone(data.Phone)
-	if data.IsMasked {
-		email = maskEmail(email)
-		phone = maskPhone(phone)
-	}
-	return ctx.Render("verification-required", fiber.Map{
-		"siteName":     ctx.Locals("siteName"),
-		"csrfToken":    csrf.Get(sessions.Get(ctx)).Token,
-		"emailEnabled": data.EmailEnabled,
-		"smsEnabled":   data.SMSEnableled,
-		"totpEnabled":  data.TOTPEnabled,
-		"email":        email,
-		"phone":        phone,
-		"errorMsg":     data.ErrorMsg,
-	})
-}
-
-func RenderVerifyOTP(ctx *fiber.Ctx, pageData VerifyOTPPageData) error {
-	email := pageData.Email
-	phone := formatPhone(pageData.Phone)
-	if pageData.IsMasked {
-		email = maskEmail(email)
-		phone = maskPhone(phone)
+func Initialize(gVars map[string]interface{}, tmplDir string) error {
+	globalVars = gVars
+	if tmplDir != "" {
+		info, err := os.Stat(tmplDir)
+		if err != nil {
+			return fmt.Errorf("template directory does not exist: %w", err)
+		}
+		if !info.IsDir() {
+			return fmt.Errorf("template path is not a directory: %s", tmplDir)
+		}
+		templateDir = tmplDir
 	}
 
-	emailOrPhone := email
-	if email == "" {
-		emailOrPhone = phone
+	if err := initEmbeddedTemplates(); err != nil {
+		return err
 	}
-	return ctx.Render("verify-otp", fiber.Map{
-		"siteName":     ctx.Locals("siteName"),
-		"csrfToken":    csrf.Get(sessions.Get(ctx)).Token,
-		"emailOrPhone": emailOrPhone,
-		"errorMsg":     pageData.ErrorMsg,
-	})
+	return nil
 }
 
-func RenderRegisterVerifyEmail(ctx *fiber.Ctx, email string) error {
-	return ctx.Render("verify-email", fiber.Map{
-		"siteName": ctx.Locals("siteName"),
-		"email":    email,
+// initEmbeddedTemplates prepares embedded templates for fallback, using names
+// that include their relative path (e.g. "mail/otp.html").
+func initEmbeddedTemplates() error {
+	t := template.New("")
+	err := fs.WalkDir(embedFS, "templates", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		if !strings.HasSuffix(d.Name(), ".html") {
+			return nil
+		}
+		// path is like "templates/foo.html" or "templates/mail/otp.html"
+		rel := strings.TrimPrefix(path, "templates/")
+		content, readErr := embedFS.ReadFile(path)
+		if readErr != nil {
+			return readErr
+		}
+		if _, parseErr := t.New(rel).Parse(string(content)); parseErr != nil {
+			return parseErr
+		}
+		return nil
 	})
+	if err != nil {
+		return fmt.Errorf("failed to parse embedded templates: %w", err)
+	}
+	embedTemplate = t
+	return nil
 }
 
-func RenderEmailVerificationSuccess(ctx *fiber.Ctx, email string) error {
-	return ctx.Render("verify-email-result", fiber.Map{
-		"siteName": ctx.Locals("siteName"),
-		"success":  true,
-		"email":    email,
-	})
-}
+func RenderHTML(templateName string, vars map[string]interface{}) (string, error) {
+	buf := bytebufferpool.Get()
+	defer bytebufferpool.Put(buf)
 
-func RenderEmailVerificationFailure(ctx *fiber.Ctx) error {
-	return ctx.Render("verify-email-result", fiber.Map{
-		"siteName": ctx.Locals("siteName"),
-		"success":  false,
-	})
-}
+	mergedVars := make(map[string]interface{})
+	for k, v := range globalVars {
+		mergedVars[k] = v
+	}
+	for k, v := range vars {
+		mergedVars[k] = v
+	}
 
-func RenderAuthorizeServiceAccess(ctx *fiber.Ctx, data AuthorizeServicePageData) error {
-	return ctx.Render("authorize-service", fiber.Map{
-		"siteName":    ctx.Locals("siteName"),
-		"email":       data.Email,
-		"serviceName": data.ServiceName,
-		"serviceURL":  data.ServiceURL,
-	})
-}
+	if !strings.HasSuffix(templateName, ".html") {
+		templateName += ".html"
+	}
 
-func RenderForgotPassword(ctx *fiber.Ctx, pageData ForgotPasswordPageData) error {
-	return ctx.Render("forgot-password", fiber.Map{
-		"siteName":         ctx.Locals("siteName"),
-		"csrfToken":        csrf.Get(sessions.Get(ctx)).Token,
-		"turnstileSiteKey": ctx.Locals("turnstileSiteKey"),
-		"email":            pageData.Email,
-		"emailSent":        pageData.EmailSent,
-		"errorMsg":         pageData.ErrorMsg,
-	})
-}
+	// On-demand loading when a template directory is set
+	if templateDir != "" {
+		// Compute absolute file filePath
+		filePath := filepath.Join(templateDir, templateName)
+		fallback := true
+		// Read and compile the specific template with its full logical name
+		if contents, err := os.ReadFile(filePath); err == nil {
+			if t, err := template.New(templateName).Parse(string(contents)); err == nil {
+				if err := t.ExecuteTemplate(buf, templateName, mergedVars); err == nil {
+					fallback = false
+					return buf.String(), nil
+				}
+			}
+		}
+		if fallback {
+			log.Printf("Render template %s failed, falling back to embedded", filePath)
+		}
+	}
 
-func RenderSetNewPassword(ctx *fiber.Ctx, errorMsg string) error {
-	return ctx.Render("set-new-password", fiber.Map{
-		"siteName":         ctx.Locals("siteName"),
-		"csrfToken":        csrf.Get(sessions.Get(ctx)).Token,
-		"turnstileSiteKey": ctx.Locals("turnstileSiteKey"),
-		"errorMsg":         errorMsg,
-	})
-}
-
-func RenderPasswordUpdated(ctx *fiber.Ctx) error {
-	return ctx.Render("password-updated", fiber.Map{
-		"siteName": ctx.Locals("siteName"),
-	})
-}
-
-func RenderChangePassword(ctx *fiber.Ctx, errorMsg string) error {
-	return ctx.Render("change-password", fiber.Map{
-		"siteName":         ctx.Locals("siteName"),
-		"csrfToken":        csrf.Get(sessions.Get(ctx)).Token,
-		"turnstileSiteKey": ctx.Locals("turnstileSiteKey"),
-		"errorMsg":         errorMsg,
-	})
-}
-
-func RenderTOTPEnrollment(ctx *fiber.Ctx, data TOTPEnrollmentPageData) error {
-	return ctx.Render("totp-enrollment", fiber.Map{
-		"siteName":      ctx.Locals("siteName"),
-		"csrfToken":     csrf.Get(sessions.Get(ctx)).Token,
-		"secretKey":     data.SecretKey,
-		"enrollmentURL": data.EnrollmentURL,
-		"errorMsg":      data.ErrorMsg,
-	})
-}
-
-func RenderTOTPEnrollSuccess(ctx *fiber.Ctx) error {
-	return ctx.Render("totp-enroll-success", fiber.Map{
-		"siteName": ctx.Locals("siteName"),
-	})
-}
-
-func Render2FASettings(ctx *fiber.Ctx, data TwoFASettingsPageData) error {
-	return ctx.Render("twofactor-settings", fiber.Map{
-		"siteName":     ctx.Locals("siteName"),
-		"csrfToken":    csrf.Get(sessions.Get(ctx)).Token,
-		"email":        data.Email,
-		"emailEnabled": data.EmailEnabled,
-		"totpEnabled":  data.TOTPEnabled,
-		"errorMsg":     data.ErrorMsg,
-	})
-}
-
-func RenderVerifyTOTP(ctx *fiber.Ctx, errorMsg string) error {
-	return ctx.Render("verify-totp", fiber.Map{
-		"siteName":  ctx.Locals("siteName"),
-		"csrfToken": csrf.Get(sessions.Get(ctx)).Token,
-		"errorMsg":  errorMsg,
-	})
+	// fallback to embedded templates
+	if err := embedTemplate.ExecuteTemplate(buf, templateName, mergedVars); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }
