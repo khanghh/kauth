@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/khanghh/kauth/internal/render"
 )
 
 func SendOTP(sender MailSender, email string, otpCode string) error {
@@ -11,7 +12,7 @@ func SendOTP(sender MailSender, email string, otpCode string) error {
 		"otpCode":       otpCode,
 		"expireMinutes": 5,
 	}
-	body, err := renderHTML("mail/otp-code", params)
+	body, err := render.RenderHTML("mail/otp-code", params)
 	if err != nil {
 		return err
 	}
@@ -27,7 +28,7 @@ func SendRegisterVerification(sender MailSender, email string, verifyURL string)
 	params := fiber.Map{
 		"verifyURL": verifyURL,
 	}
-	body, err := renderHTML("mail/confirm-register", params)
+	body, err := render.RenderHTML("mail/confirm-register", params)
 	if err != nil {
 		return err
 	}
@@ -44,7 +45,7 @@ func SendResetPasswordLink(sender MailSender, email string, resetLink string) er
 		"resetLink":     resetLink,
 		"expireMinutes": 5,
 	}
-	body, err := renderHTML("mail/reset-password", params)
+	body, err := render.RenderHTML("mail/reset-password", params)
 	if err != nil {
 		return err
 	}

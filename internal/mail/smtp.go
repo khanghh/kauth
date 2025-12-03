@@ -1,6 +1,12 @@
 package mail
 
-import "gopkg.in/gomail.v2"
+import (
+	"crypto/tls"
+	"crypto/x509"
+	"os"
+
+	"gopkg.in/gomail.v2"
+)
 
 type SMTPMailSender struct {
 	*gomail.Dialer
@@ -18,7 +24,6 @@ func (s *SMTPMailSender) Send(message *Message) error {
 	} else {
 		msg.SetBody("text/plain", message.Body)
 	}
-	msg.SetBody("text/html", message.Body)
 	for cid, file := range message.Embeds {
 		msg.Embed(file, gomail.SetHeader(map[string][]string{
 			"Content-ID": {"<" + cid + ">"},
@@ -30,9 +35,54 @@ func (s *SMTPMailSender) Send(message *Message) error {
 	return s.DialAndSend(msg)
 }
 
-func NewSMTPMailSender(dialer *gomail.Dialer, from string) MailSender {
+type SMTPConfig struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+	TLS      bool
+	CertFile string
+	KeyFile  string
+	CAFile   string
+}
+
+func dialSMTP(smtpCfg SMTPConfig) (*gomail.Dialer, error) {
+	dialer := gomail.NewDialer(smtpCfg.Host, smtpCfg.Port, smtpCfg.Username, smtpCfg.Password)
+	dialer.TLSConfig = &tls.Config{
+		InsecureSkipVerify: true,
+	}
+	if smtpCfg.TLS {
+		cert, err := tls.LoadX509KeyPair(smtpCfg.CertFile, smtpCfg.KeyFile)
+		if err != nil {
+			return nil, err
+		}
+
+		caPool := x509.NewCertPool()
+		if smtpCfg.CAFile != "" {
+			caCert, err := os.ReadFile(smtpCfg.CAFile)
+			if err != nil {
+				return nil, err
+			}
+			caPool.AppendCertsFromPEM(caCert)
+		}
+
+		dialer.TLSConfig = &tls.Config{
+			ServerName:         smtpCfg.Host,
+			InsecureSkipVerify: true,
+			Certificates:       []tls.Certificate{cert},
+			RootCAs:            caPool,
+		}
+	}
+	return dialer, nil
+}
+
+func NewSMTPMailSender(smtpConfig SMTPConfig, from string) (*SMTPMailSender, error) {
+	dialer, err := dialSMTP(smtpConfig)
+	if err != nil {
+		return nil, err
+	}
 	return &SMTPMailSender{
 		Dialer: dialer,
 		From:   from,
-	}
+	}, nil
 }
