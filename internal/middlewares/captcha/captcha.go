@@ -16,7 +16,7 @@ type CaptchaVerifier interface {
 
 var verifier CaptchaVerifier
 
-func InitVerifier(v CaptchaVerifier) {
+func SetVerifier(v CaptchaVerifier) {
 	verifier = v
 }
 
@@ -35,10 +35,6 @@ func (e *CaptchaError) Error() string {
 func (e *CaptchaError) Is(target error) bool {
 	_, ok := target.(*CaptchaError)
 	return ok
-}
-
-func newCaptchaError(message string) *CaptchaError {
-	return &CaptchaError{message: message}
 }
 
 type NullVerifier struct{}
