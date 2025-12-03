@@ -14,13 +14,13 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 	}
 	switch code {
 	case fiber.StatusBadRequest:
-		return render.RenderBadRequestError(ctx)
+		return render.RenderBadRequestErrorPage(ctx)
 	case fiber.StatusForbidden:
-		return render.RenderForbiddenError(ctx)
+		return render.RenderForbiddenErrorPage(ctx)
 	case fiber.StatusNotFound, fiber.StatusMethodNotAllowed:
-		return render.RenderNotFoundError(ctx)
+		return render.RenderNotFoundErrorPage(ctx)
 	default:
 		slog.Error("unhandled error", "path", ctx.Path(), "code", code, "error", err)
-		return render.RenderInternalServerError(ctx)
+		return render.RenderInternalServerErrorPage(ctx)
 	}
 }
