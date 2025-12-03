@@ -55,6 +55,7 @@ type SMTPConfig struct {
 
 type MailConfig struct {
 	Backend string     `mapstructure:"backend"`
+	From    string     `mapstructure:"from"`
 	SMTP    SMTPConfig `mapstructure:"smtp"`
 }
 
