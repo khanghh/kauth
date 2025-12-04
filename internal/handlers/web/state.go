@@ -28,7 +28,6 @@ func getStateEncryptionKey(ctx *fiber.Ctx) string {
 		return ""
 	}
 	session.StateEncryptionKey = hex.EncodeToString(keyBytes)
-	session.Save()
 	return session.StateEncryptionKey
 }
 

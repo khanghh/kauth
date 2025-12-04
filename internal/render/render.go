@@ -4,7 +4,6 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -90,18 +89,13 @@ func RenderHTML(templateName string, vars map[string]interface{}) (string, error
 	if templateDir != "" {
 		// Compute absolute file filePath
 		filePath := filepath.Join(templateDir, templateName)
-		fallback := true
 		// Read and compile the specific template with its full logical name
 		if contents, err := os.ReadFile(filePath); err == nil {
 			if t, err := template.New(templateName).Parse(string(contents)); err == nil {
 				if err := t.ExecuteTemplate(buf, templateName, mergedVars); err == nil {
-					fallback = false
 					return buf.String(), nil
 				}
 			}
-		}
-		if fallback {
-			log.Printf("Render template %s failed, falling back to embedded", filePath)
 		}
 	}
 

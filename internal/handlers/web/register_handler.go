@@ -10,7 +10,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/mail"
 	"github.com/khanghh/kauth/internal/middlewares/captcha"
-	"github.com/khanghh/kauth/internal/middlewares/csrf"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/render"
 	"github.com/khanghh/kauth/internal/users"
@@ -60,7 +59,7 @@ func (h *RegisterHandler) GetRegister(ctx *fiber.Ctx) error {
 	if session.IsLoggedIn() {
 		return ctx.Redirect("/")
 	}
-	return render.RenderRegister(ctx, render.RegisterPageData{})
+	return render.RenderRegisterPage(ctx, render.RegisterPageData{})
 }
 
 type RegisterClaims struct {
@@ -88,16 +87,12 @@ func (h *RegisterHandler) PostRegister(ctx *fiber.Ctx) error {
 
 	if err := captcha.Verify(ctx); err != nil {
 		pageData.ErrorMsg = MsgInvalidCaptcha
-		return render.RenderRegister(ctx, pageData)
+		return render.RenderRegisterPage(ctx, pageData)
 	}
 
-	if !csrf.Verify(ctx) {
-		pageData.ErrorMsg = MsgInvalidRequest
-		return render.RenderRegister(ctx, pageData)
-	}
 	pageData.FormErrors = validateRegisterForm(username, password, email)
 	if len(pageData.FormErrors) > 0 {
-		return render.RenderRegister(ctx, pageData)
+		return render.RenderRegisterPage(ctx, pageData)
 	}
 
 	userOpts := users.CreateUserOptions{
@@ -109,10 +104,10 @@ func (h *RegisterHandler) PostRegister(ctx *fiber.Ctx) error {
 	if err != nil {
 		if errors.Is(err, users.ErrUsernameTaken) {
 			pageData.FormErrors["username"] = MsgUsernameTaken
-			return render.RenderRegister(ctx, pageData)
+			return render.RenderRegisterPage(ctx, pageData)
 		} else if errors.Is(err, users.ErrEmailRegisterd) {
 			pageData.FormErrors["email"] = MsgEmailRegistered
-			return render.RenderRegister(ctx, pageData)
+			return render.RenderRegisterPage(ctx, pageData)
 		}
 		slog.Error("Failed to create user", "error", err)
 		return err
@@ -123,7 +118,7 @@ func (h *RegisterHandler) PostRegister(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	return render.RenderRegisterVerifyEmail(ctx, email)
+	return render.RenderRegisterVerifyEmailPage(ctx, email)
 }
 
 func (h *RegisterHandler) GetRegisterWithOAuth(ctx *fiber.Ctx) error {
@@ -137,7 +132,7 @@ func (h *RegisterHandler) GetRegisterWithOAuth(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	return render.RenderOAuthRegister(ctx, render.RegisterPageData{
+	return render.RenderOAuthRegisterPage(ctx, render.RegisterPageData{
 		Email:         userOAuth.Email,
 		FullName:      userOAuth.DisplayName,
 		Picture:       userOAuth.Picture,
@@ -171,17 +166,12 @@ func (h *RegisterHandler) PostRegisterWithOAuth(ctx *fiber.Ctx) error {
 
 	if err := captcha.Verify(ctx); err != nil {
 		pageData.ErrorMsg = MsgInvalidCaptcha
-		return render.RenderOAuthRegister(ctx, pageData)
-	}
-
-	if !csrf.Verify(ctx) {
-		pageData.ErrorMsg = MsgInvalidRequest
-		return render.RenderOAuthRegister(ctx, pageData)
+		return render.RenderOAuthRegisterPage(ctx, pageData)
 	}
 
 	pageData.FormErrors = validateRegisterForm(username, password, userOAuth.Email)
 	if len(pageData.FormErrors) > 0 {
-		return render.RenderOAuthRegister(ctx, pageData)
+		return render.RenderOAuthRegisterPage(ctx, pageData)
 	}
 
 	userOpts := users.CreateUserOptions{
@@ -196,10 +186,10 @@ func (h *RegisterHandler) PostRegisterWithOAuth(ctx *fiber.Ctx) error {
 	if err != nil {
 		if errors.Is(err, users.ErrUsernameTaken) {
 			pageData.FormErrors["username"] = MsgUsernameTaken
-			return render.RenderOAuthRegister(ctx, pageData)
+			return render.RenderOAuthRegisterPage(ctx, pageData)
 		} else if errors.Is(err, users.ErrEmailRegisterd) {
 			pageData.FormErrors["email"] = MsgEmailRegistered
-			return render.RenderOAuthRegister(ctx, pageData)
+			return render.RenderOAuthRegisterPage(ctx, pageData)
 		}
 		slog.Error("Failed to create user", "error", err)
 		return err
@@ -218,8 +208,8 @@ func (h *RegisterHandler) GetRegisterVerify(ctx *fiber.Ctx) error {
 	token := ctx.Query("token")
 
 	if _, err := h.userService.ApprovePendingUser(ctx.Context(), email, token); err != nil {
-		return render.RenderEmailVerificationFailure(ctx)
+		return render.RenderEmailVerificationFailurePage(ctx)
 	}
 
-	return render.RenderEmailVerificationSuccess(ctx, email)
+	return render.RenderEmailVerificationSuccessPage(ctx, email)
 }

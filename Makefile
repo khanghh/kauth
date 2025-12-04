@@ -10,7 +10,7 @@ LDFLAGS=-ldflags "-w -s -X 'main.gitCommit=$(COMMIT)' -X 'main.gitDate=$(DATE)' 
 kauth:
 	@echo "Building target: $@" 
 	go run ./build/tools/gen_query/main.go
-	go build $(LDFLAGS) -o $(BUILD_DIR)/$@ $(CURDIR)/main.go
+	go build $(LDFLAGS) -o $(BUILD_DIR)/$@ $(CURDIR)
 	@echo "Done building."
 
 clean:

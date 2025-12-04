@@ -39,10 +39,10 @@ func (h *OAuthHandler) handleOAuthLogin(ctx *fiber.Ctx, userOAuth *model.UserOAu
 		return ctx.SendStatus(http.StatusForbidden)
 	}
 
-	sessions.Reset(ctx, sessions.SessionData{
+	sessions.Reset(ctx, sessions.SessionInfo{
 		IP:        ctx.IP(),
 		UserID:    user.ID,
-		LoginTime: time.Now(),
+		LoginTime: time.Now().UnixMilli(),
 		OAuthID:   userOAuth.ID,
 	})
 
@@ -69,10 +69,10 @@ func (h *OAuthHandler) redirectRegisterOAuth(ctx *fiber.Ctx, userOAuth *model.Us
 	}
 
 	if userOAuth.UserID == 0 {
-		sessions.Get(ctx).Save(sessions.SessionData{
+		sessions.Save(ctx, sessions.SessionInfo{
 			IP:        ctx.IP(),
 			OAuthID:   userOAuth.ID,
-			LoginTime: time.Now(),
+			LoginTime: time.Now().UnixMilli(),
 		})
 		return redirect(ctx, "/register/oauth", "service", ctx.Query("service"))
 	}
@@ -85,7 +85,7 @@ func (h *OAuthHandler) GetOAuthCallback(ctx *fiber.Ctx) error {
 
 	provider, ok := h.oauthProviders[providerName]
 	if !ok {
-		return render.RenderNotFoundError(ctx)
+		return render.RenderNotFoundErrorPage(ctx)
 	}
 
 	oauthToken, err := provider.ExchangeToken(ctx.Context(), code)
