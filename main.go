@@ -15,6 +15,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/khanghh/kauth/internal/auth"
 	"github.com/khanghh/kauth/internal/config"
+	"github.com/khanghh/kauth/internal/handlers/api"
 	"github.com/khanghh/kauth/internal/handlers/web"
 	"github.com/khanghh/kauth/internal/mail"
 	"github.com/khanghh/kauth/internal/middlewares"
@@ -188,16 +189,27 @@ func mustInitRenderTemplate(templateDir string, config *config.Config) {
 	}
 }
 
+type apiDependencies struct {
+	authorizeService *auth.AuthorizeService
+	userService      *users.UserService
+	twoFactorService *twofactor.TwoFactorService
+}
+
+func setupAPIRoutes(router fiber.Router, deps *apiDependencies) {
+	authHandler := api.NewAuthHandler(deps.authorizeService, deps.userService, deps.twoFactorService)
+	router.Get("/p3/serviceValidate", authHandler.GetServiceValidate)
+}
+
 type webDependencies struct {
 	statisDir        string
 	captchaConfig    config.CaptchaConfig
 	sessionConfig    config.SessionConfig
 	storage          store.Storage
+	mailSender       mail.MailSender
 	authorizeService *auth.AuthorizeService
 	userService      *users.UserService
 	twoFactorService *twofactor.TwoFactorService
 	oauthProviders   []oauth.OAuthProvider
-	mailSender       mail.MailSender
 }
 
 func setupWebRoutes(router fiber.Router, deps *webDependencies) {
@@ -306,16 +318,22 @@ func run(ctx *cli.Context) error {
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
 
+	setupAPIRoutes(router, &apiDependencies{
+		authorizeService: authorizeService,
+		userService:      userService,
+		twoFactorService: twoFactorService,
+	})
+
 	setupWebRoutes(router, &webDependencies{
 		statisDir:        config.StaticDir,
-		storage:          storage,
 		captchaConfig:    config.Captcha,
 		sessionConfig:    config.Session,
+		storage:          storage,
+		mailSender:       mailSender,
 		authorizeService: authorizeService,
 		userService:      userService,
 		twoFactorService: twoFactorService,
 		oauthProviders:   oauthProviders,
-		mailSender:       mailSender,
 	})
 
 	healthCheckCtx, term := context.WithCancel(ctx.Context)
