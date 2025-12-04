@@ -3,7 +3,6 @@ package web
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/mail"
-	"github.com/khanghh/kauth/internal/middlewares/csrf"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/render"
 	"golang.org/x/crypto/bcrypt"
@@ -21,7 +20,7 @@ func (h *AccountSettingsHandler) GetChangePassword(ctx *fiber.Ctx) error {
 		return redirect(ctx, "/login")
 	}
 
-	return render.RenderChangePassword(ctx, "")
+	return render.RenderChangePasswordPage(ctx, "")
 }
 
 func (h *AccountSettingsHandler) PostChangePassword(ctx *fiber.Ctx) error {
@@ -33,29 +32,25 @@ func (h *AccountSettingsHandler) PostChangePassword(ctx *fiber.Ctx) error {
 		return redirect(ctx, "/login")
 	}
 
-	if !csrf.Verify(ctx) {
-		return render.RenderChangePassword(ctx, MsgInvalidRequest)
-	}
-
 	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
 	if err != nil {
 		return forceLogout(ctx, "")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(currentPassword)); err != nil {
-		return render.RenderChangePassword(ctx, ErrIncorrectPassword)
+		return render.RenderChangePasswordPage(ctx, ErrIncorrectPassword)
 	}
 
 	if err := validatePassword(newPassword); err != nil {
-		return render.RenderChangePassword(ctx, err.Error())
+		return render.RenderChangePasswordPage(ctx, err.Error())
 	}
 
 	if err = h.userService.UpdatePassword(ctx.Context(), user.Email, newPassword); err != nil {
-		return render.RenderInternalServerError(ctx)
+		return render.RenderInternalServerErrorPage(ctx)
 	}
 
 	sessions.Destroy(ctx)
-	return render.RenderPasswordUpdated(ctx)
+	return render.RenderPasswordUpdatedPage(ctx)
 }
 
 func NewAccountSettingsHandler(userService UserService, twofactorService TwoFactorService, mailSender mail.MailSender) *AccountSettingsHandler {

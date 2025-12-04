@@ -8,7 +8,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/mail"
 	"github.com/khanghh/kauth/internal/middlewares/captcha"
-	"github.com/khanghh/kauth/internal/middlewares/csrf"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/render"
 	"github.com/khanghh/kauth/internal/twofactor"
@@ -57,21 +56,21 @@ func (h *ResetPasswordHandler) GetResetPassword(ctx *fiber.Ctx) error {
 	if state != "" {
 		var claims ResetPasswordClaims
 		if err := decryptState(ctx, state, &claims); err != nil {
-			return render.RenderNotFoundError(ctx)
+			return render.RenderNotFoundErrorPage(ctx)
 		}
-		return render.RenderSetNewPassword(ctx, "")
+		return render.RenderSetNewPasswordPage(ctx, "")
 	}
 
 	if token != "" {
 		claims, err := h.verifyResetPasswordToken(ctx, "", token)
 		if err != nil {
-			return render.RenderNotFoundError(ctx)
+			return render.RenderNotFoundErrorPage(ctx)
 		}
-		session.SetExpiry(15 * time.Minute)
+		// session.SetExpiry(15 * time.Minute)
 		return redirect(ctx, "/reset-password", "state", encryptState(ctx, claims))
 	}
 
-	return render.RenderNotFoundError(ctx)
+	return render.RenderNotFoundErrorPage(ctx)
 }
 
 func (h *ResetPasswordHandler) PostResetPassword(ctx *fiber.Ctx) error {
@@ -84,24 +83,20 @@ func (h *ResetPasswordHandler) PostResetPassword(ctx *fiber.Ctx) error {
 	}
 
 	if encryptedState == "" {
-		return render.RenderNotFoundError(ctx)
+		return render.RenderNotFoundErrorPage(ctx)
 	}
 
 	var claims ResetPasswordClaims
 	if err := decryptState(ctx, encryptedState, &claims); err != nil {
-		return render.RenderNotFoundError(ctx)
+		return render.RenderNotFoundErrorPage(ctx)
 	}
 
 	if err := captcha.Verify(ctx); err != nil {
-		return render.RenderSetNewPassword(ctx, MsgInvalidCaptcha)
-	}
-
-	if !csrf.Verify(ctx) {
-		return render.RenderSetNewPassword(ctx, MsgInvalidRequest)
+		return render.RenderSetNewPasswordPage(ctx, MsgInvalidCaptcha)
 	}
 
 	if err := validatePassword(newPassword); err != nil {
-		return render.RenderSetNewPassword(ctx, err.Error())
+		return render.RenderSetNewPasswordPage(ctx, err.Error())
 	}
 
 	err := h.userService.UpdatePassword(ctx.Context(), claims.Email, newPassword)
@@ -109,8 +104,8 @@ func (h *ResetPasswordHandler) PostResetPassword(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	session.Destroy()
-	return render.RenderPasswordUpdated(ctx)
+	sessions.Destroy(ctx)
+	return render.RenderPasswordUpdatedPage(ctx)
 }
 
 func (h *ResetPasswordHandler) GetForogtPassword(ctx *fiber.Ctx) error {
@@ -119,7 +114,7 @@ func (h *ResetPasswordHandler) GetForogtPassword(ctx *fiber.Ctx) error {
 		return ctx.Redirect("/")
 	}
 
-	return render.RenderForgotPassword(ctx, render.ForgotPasswordPageData{})
+	return render.RenderForgotPasswordPage(ctx, render.ForgotPasswordPageData{})
 }
 
 func (h *ResetPasswordHandler) PostForgotPassword(ctx *fiber.Ctx) error {
@@ -134,23 +129,18 @@ func (h *ResetPasswordHandler) PostForgotPassword(ctx *fiber.Ctx) error {
 	pageData := render.ForgotPasswordPageData{}
 	if err := validateEmail(email); err != nil {
 		pageData.ErrorMsg = err.Error()
-		return render.RenderForgotPassword(ctx, pageData)
+		return render.RenderForgotPasswordPage(ctx, pageData)
 	}
 
 	if err := captcha.Verify(ctx); err != nil {
 		pageData.ErrorMsg = MsgInvalidCaptcha
-		return render.RenderForgotPassword(ctx, pageData)
-	}
-
-	if !csrf.Verify(ctx) {
-		pageData.ErrorMsg = MsgInvalidRequest
-		return render.RenderForgotPassword(ctx, pageData)
+		return render.RenderForgotPasswordPage(ctx, pageData)
 	}
 
 	user, err := h.userService.GetUserByEmail(ctx.Context(), email)
 	if errors.Is(err, users.ErrUserNotFound) {
 		pageData.ErrorMsg = MsgUserNotFound
-		return render.RenderForgotPassword(ctx, pageData)
+		return render.RenderForgotPasswordPage(ctx, pageData)
 	}
 	if err != nil {
 		return err
@@ -158,14 +148,14 @@ func (h *ResetPasswordHandler) PostForgotPassword(ctx *fiber.Ctx) error {
 
 	if user.Username != username {
 		pageData.ErrorMsg = MsgUserNotFound
-		return render.RenderForgotPassword(ctx, pageData)
+		return render.RenderForgotPasswordPage(ctx, pageData)
 	}
 
 	token, err := h.generateResetPasswordToken(ctx, email)
 	if err != nil {
 		if errorMsg, ok := mapTwoFactorError(err); ok {
 			pageData.ErrorMsg = errorMsg
-			return render.RenderForgotPassword(ctx, pageData)
+			return render.RenderForgotPasswordPage(ctx, pageData)
 		}
 		return err
 	}
@@ -175,7 +165,7 @@ func (h *ResetPasswordHandler) PostForgotPassword(ctx *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return render.RenderForgotPassword(ctx, render.ForgotPasswordPageData{EmailSent: true})
+	return render.RenderForgotPasswordPage(ctx, render.ForgotPasswordPageData{EmailSent: true})
 }
 
 func NewResetPasswordHandler(userService UserService, twoFactorService TwoFactorService, mailSender mail.MailSender) *ResetPasswordHandler {

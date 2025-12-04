@@ -20,9 +20,9 @@ type AuthHandler struct {
 func (h *AuthHandler) getAuthorizedTime(ctx *fiber.Ctx, serviceURL string) time.Time {
 	session := sessions.Get(ctx)
 	key := "authz:" + common.CalculateHash(session.StateEncryptionKey, serviceURL)
-	nsec, ok := session.Get(key).(int64)
-	if ok {
-		return time.Unix(0, nsec)
+	var miliSec int64
+	if err := session.GetAttr(ctx.Context(), key, &miliSec); err == nil {
+		return time.UnixMilli(miliSec)
 	}
 	return time.Time{}
 }
@@ -30,13 +30,13 @@ func (h *AuthHandler) getAuthorizedTime(ctx *fiber.Ctx, serviceURL string) time.
 func (h *AuthHandler) setAuthorizedTime(ctx *fiber.Ctx, serviceURL string, expiresAt time.Time) {
 	session := sessions.Get(ctx)
 	key := "authz:" + common.CalculateHash(session.StateEncryptionKey, serviceURL)
-	session.Set(key, expiresAt.UnixNano())
+	session.SetAttr(ctx.Context(), key, expiresAt.UnixMilli())
 }
 
 func (h *AuthHandler) handleAuthorizeServiceAccess(ctx *fiber.Ctx, session *sessions.Session, serviceURL string) error {
 	ticket, err := h.authorizeService.GenerateServiceTicket(ctx.Context(), session.UserID, serviceURL)
 	if errors.Is(err, auth.ErrServiceNotFound) {
-		return render.RenderDeniedError(ctx)
+		return render.RenderDeniedErrorPage(ctx)
 	} else if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 	cid := ctx.Query("cid")
 	serviceURL := sanitizeURL(ctx.Query("service"))
 	if serviceURL == "" {
-		return render.RenderNotFoundError(ctx)
+		return render.RenderNotFoundErrorPage(ctx)
 	}
 
 	session := sessions.Get(ctx)
@@ -61,7 +61,7 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 	}
 	service, err := h.authorizeService.GetService(ctx.Context(), serviceURL)
 	if errors.Is(err, auth.ErrServiceNotFound) {
-		return render.RenderNotFoundError(ctx)
+		return render.RenderNotFoundErrorPage(ctx)
 	} else if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 		ServiceName: service.Name,
 		ServiceURL:  service.LoginURL,
 	}
-	return render.RenderAuthorizeServiceAccess(ctx, pageData)
+	return render.RenderAuthorizeServiceAccessPage(ctx, pageData)
 }
 
 func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
@@ -94,7 +94,7 @@ func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
 	confirm := ctx.FormValue("confirm")
 
 	if serviceURL == "" {
-		return render.RenderNotFoundError(ctx)
+		return render.RenderNotFoundErrorPage(ctx)
 	}
 
 	session := sessions.Get(ctx)
@@ -113,7 +113,7 @@ func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
 
 	service, err := h.authorizeService.GetService(ctx.Context(), serviceURL)
 	if errors.Is(err, auth.ErrServiceNotFound) {
-		return render.RenderNotFoundError(ctx)
+		return render.RenderNotFoundErrorPage(ctx)
 	}
 
 	challengeRequired := service.ChallengeRequired && time.Since(h.getAuthorizedTime(ctx, service.LoginURL)) > service.ChallengeValidity
@@ -121,7 +121,7 @@ func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
 		state := TwoFactorState{
 			Action:      "authorize",
 			CallbackURL: appendQuery("/authorize", "service", serviceURL),
-			Timestamp:   time.Now().UnixNano(),
+			Timestamp:   time.Now().UnixMilli(),
 		}
 		return redirect(ctx, "/2fa/challenge", "state", encryptState(ctx, state))
 	}

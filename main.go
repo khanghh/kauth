@@ -2,14 +2,9 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
-	"embed"
 	"fmt"
-	"io/fs"
 	"log"
 	"log/slog"
-	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -18,34 +13,28 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
-	"github.com/gofiber/storage/redis/v3"
-	"github.com/gofiber/template/html/v2"
 	"github.com/khanghh/kauth/internal/auth"
-	"github.com/khanghh/kauth/internal/common"
 	"github.com/khanghh/kauth/internal/config"
 	"github.com/khanghh/kauth/internal/handlers/web"
 	"github.com/khanghh/kauth/internal/mail"
 	"github.com/khanghh/kauth/internal/middlewares"
 	"github.com/khanghh/kauth/internal/middlewares/captcha"
-	"github.com/khanghh/kauth/internal/middlewares/csrf"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/oauth"
+	"github.com/khanghh/kauth/internal/render"
 	"github.com/khanghh/kauth/internal/store"
 	"github.com/khanghh/kauth/internal/twofactor"
 	"github.com/khanghh/kauth/internal/users"
 	"github.com/khanghh/kauth/model"
 	"github.com/khanghh/kauth/model/query"
 	"github.com/khanghh/kauth/params"
+	"github.com/redis/go-redis/v9"
 	"github.com/urfave/cli/v2"
-	"gopkg.in/gomail.v2"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
 	"gorm.io/gorm/schema"
 )
-
-//go:embed templates/*.html
-var templateFS embed.FS
 
 var (
 	app       *cli.App
@@ -131,112 +120,121 @@ func mustInitOAuthProviders(config *config.Config) []oauth.OAuthProvider {
 	return providers
 }
 
-func mustInitHtmlEngine(templateDir string) *html.Engine {
-	var htmlEngine *html.Engine
-	if templateDir != "" {
-		htmlEngine = html.NewFileSystem(http.Dir(templateDir), ".html")
-	} else {
-		renderFS, _ := fs.Sub(templateFS, "templates")
-		htmlEngine = html.NewFileSystem(http.FS(renderFS), ".html")
-	}
-	return htmlEngine
-}
-
-func mustInitSMTPMailSender(smtpCfg config.SMTPConfig) mail.MailSender {
-	dialer := gomail.NewDialer(smtpCfg.Host, smtpCfg.Port, smtpCfg.Username, smtpCfg.Password)
-	dialer.TLSConfig = &tls.Config{
-		InsecureSkipVerify: true,
-	}
-	if smtpCfg.TLS {
-		cert, err := tls.LoadX509KeyPair(smtpCfg.CertFile, smtpCfg.KeyFile)
-		if err != nil {
-			panic(err)
-		}
-
-		caPool := x509.NewCertPool()
-		if smtpCfg.CAFile != "" {
-			caCert, err := os.ReadFile(smtpCfg.CAFile)
-			if err != nil {
-				panic(err)
-			}
-			caPool.AppendCertsFromPEM(caCert)
-		}
-
-		dialer.TLSConfig = &tls.Config{
-			ServerName:         smtpCfg.Host,
-			InsecureSkipVerify: true,
-			Certificates:       []tls.Certificate{cert},
-			RootCAs:            caPool,
-		}
-	}
-	return mail.NewSMTPMailSender(dialer, smtpCfg.From)
-}
-
 func mustInitMailSender(mailCfg config.MailConfig) mail.MailSender {
-	if mailCfg.Backend == "" {
-		log.Fatal("Missing mail sender backend")
+	if mailCfg.From == "" {
+		log.Fatal("Mail from address is required")
 	}
+	mail.SetDefaultFromAddress(mailCfg.From)
 	if mailCfg.Backend == "smtp" {
-		return mustInitSMTPMailSender(mailCfg.SMTP)
+		smtpCfg := mail.SMTPConfig{
+			Host:     mailCfg.SMTP.Host,
+			Port:     mailCfg.SMTP.Port,
+			Username: mailCfg.SMTP.Username,
+			Password: mailCfg.SMTP.Password,
+			TLS:      mailCfg.SMTP.TLS,
+			CertFile: mailCfg.SMTP.CertFile,
+			KeyFile:  mailCfg.SMTP.KeyFile,
+			CAFile:   mailCfg.SMTP.CAFile,
+		}
+		mailSender, err := mail.NewSMTPMailSender(smtpCfg)
+		if err != nil {
+			log.Fatalf("Failed to initialize SMTP mail sender: %v", err)
+		}
+		return mailSender
 	}
-	log.Fatalf("Unsupported mail sender backend %s", mailCfg.Backend)
+	log.Fatal("Invalid mail sender backend")
 	return nil
 }
 
-func mustInitCaptchaVerifier(capchaCfg config.CaptchaConfig) captcha.CaptchaVerifier {
+func mustInitCaptchaVerifier(capchaCfg config.CaptchaConfig) {
+	var verifier captcha.CaptchaVerifier
 	if capchaCfg.Provider == "turnstile" {
-		return captcha.NewTurnstileVerifier(capchaCfg.Turnstile.SecretKey)
+		verifier = captcha.NewTurnstileVerifier(capchaCfg.Turnstile.SecretKey)
+	} else {
+		verifier = captcha.NewNullVerifier()
 	}
-	return captcha.NewNullVerifier()
+	captcha.SetVerifier(verifier)
 }
 
-func mustInitRedisStorage(redisCfg config.RedisConfig) *redis.Storage {
-	return redis.New(redis.Config{
-		URL:           redisCfg.URL,
+func mustInitRedisClient(redisCfg config.RedisConfig) redis.UniversalClient {
+	opts, err := redis.ParseURL(redisCfg.URL)
+	if err != nil {
+		log.Fatalf("Failed to parse redis url: %v", err)
+	}
+	uniOpts := &redis.UniversalOptions{
+		Addrs:         []string{opts.Addr},
+		DB:            opts.DB,
+		Username:      opts.Username,
+		Password:      opts.Password,
 		PoolSize:      redisCfg.PoolSize,
 		IsClusterMode: redisCfg.ClusterMode,
-	})
+	}
+	db := redis.NewUniversalClient(uniOpts)
+	if err := db.Ping(context.Background()).Err(); err != nil {
+		log.Fatalf("Failed to connect to redis: %v", err)
+	}
+	return db
 }
 
-type AppContext struct {
+func mustInitRenderTemplate(templateDir string, config *config.Config) {
+	globalVars := fiber.Map{
+		"siteName":           config.SiteName,
+		"baseURL":            config.BaseURL,
+		"turnstileSiteKey":   config.Captcha.Turnstile.SiteKey,
+		"turnstileSecretKey": config.Captcha.Turnstile.SecretKey,
+	}
+	if err := render.Initialize(globalVars, templateDir); err != nil {
+		log.Fatalf("Failed to initialize render templates: %v", err)
+	}
 }
 
-func setupWebRoutes(
-	router fiber.Router,
-	statisDir string,
-	sessionConfig sessions.Config,
-	authorizeService *auth.AuthorizeService,
-	userService *users.UserService,
-	twoFactorService *twofactor.TwoFactorService,
-	oauthProviders []oauth.OAuthProvider,
-	mailSender mail.MailSender) {
+type webDependencies struct {
+	statisDir        string
+	captchaConfig    config.CaptchaConfig
+	sessionConfig    config.SessionConfig
+	storage          store.Storage
+	authorizeService *auth.AuthorizeService
+	userService      *users.UserService
+	twoFactorService *twofactor.TwoFactorService
+	oauthProviders   []oauth.OAuthProvider
+	mailSender       mail.MailSender
+}
 
+func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 	// handlers
 	var (
-		authHandler            = web.NewAuthHandler(authorizeService, userService, twoFactorService)
-		loginHandler           = web.NewLoginHandler(userService, twoFactorService, oauthProviders)
-		registerHandler        = web.NewRegisterHandler(userService, mailSender)
-		oauthHandler           = web.NewOAuthHandler(userService, oauthProviders)
-		twofactorHandler       = web.NewTwoFactorHandler(twoFactorService, userService, mailSender)
-		resetPasswordHandler   = web.NewResetPasswordHandler(userService, twoFactorService, mailSender)
-		accountSettingsHandler = web.NewAccountSettingsHandler(userService, twoFactorService, mailSender)
+		authHandler            = web.NewAuthHandler(deps.authorizeService, deps.userService, deps.twoFactorService)
+		loginHandler           = web.NewLoginHandler(deps.userService, deps.twoFactorService, deps.oauthProviders)
+		registerHandler        = web.NewRegisterHandler(deps.userService, deps.mailSender)
+		oauthHandler           = web.NewOAuthHandler(deps.userService, deps.oauthProviders)
+		twofactorHandler       = web.NewTwoFactorHandler(deps.twoFactorService, deps.userService, deps.mailSender)
+		resetPasswordHandler   = web.NewResetPasswordHandler(deps.userService, deps.twoFactorService, deps.mailSender)
+		accountSettingsHandler = web.NewAccountSettingsHandler(deps.userService, deps.twoFactorService, deps.mailSender)
 	)
 
+	// middlewares
+	mustInitCaptchaVerifier(deps.captchaConfig)
+	sessionMiddleware := sessions.New(sessions.Config{
+		Storage:        store.StorageWithPrefix(deps.storage, params.SessionKeyPrefix),
+		CookieName:     deps.sessionConfig.CookieName,
+		CookieSecure:   deps.sessionConfig.CookieSecure,
+		CookieHttpOnly: deps.sessionConfig.CookieHttpOnly,
+		SessionMaxAge:  deps.sessionConfig.SessionMaxAge,
+	})
+
 	// routes
-	router.Static("/static", statisDir)
-	router.Use(sessions.New(sessionConfig))
+	router.Static("/static", deps.statisDir)
+	router.Use(sessionMiddleware)
 	router.Get("/", authHandler.GetHome)
-	router.Get("/profile", authHandler.GetProfile)
-	router.Get("/oauth/:provider/callback", oauthHandler.GetOAuthCallback)
-	router.Get("/register/verify", registerHandler.GetRegisterVerify)
-	router.Use(csrf.New(csrf.Config{}))
+	router.Get("/login", loginHandler.GetLogin)
+	router.Post("/login", loginHandler.PostLogin)
 	router.Post("/logout", loginHandler.PostLogout)
 	router.Get("/authorize", authHandler.GetAuthorize)
 	router.Post("/authorize", authHandler.PostAuthorize)
-	router.Get("/login", loginHandler.GetLogin)
-	router.Post("/login", loginHandler.PostLogin)
+	router.Get("/profile", authHandler.GetProfile)
 	router.Get("/register", registerHandler.GetRegister)
 	router.Post("/register", registerHandler.PostRegister)
+	router.Get("/register/verify", registerHandler.GetRegisterVerify)
 	router.Get("/register/oauth", registerHandler.GetRegisterWithOAuth)
 	router.Post("/register/oauth", registerHandler.PostRegisterWithOAuth)
 	router.Get("/reset-password", resetPasswordHandler.GetResetPassword)
@@ -255,6 +253,7 @@ func setupWebRoutes(
 	router.Post("/2fa/settings", twofactorHandler.PostTwoFASettings)
 	router.Get("/account/change-password", accountSettingsHandler.GetChangePassword)
 	router.Post("/account/change-password", accountSettingsHandler.PostChangePassword)
+	router.Get("/oauth/:provider/callback", oauthHandler.GetOAuthCallback)
 }
 
 func run(ctx *cli.Context) error {
@@ -266,25 +265,14 @@ func run(ctx *cli.Context) error {
 
 	mustInitLogger(config.Debug || ctx.IsSet(debugFlag.Name))
 
-	globalVars := fiber.Map{
-		"siteName": config.SiteName,
-		"baseURL":  config.BaseURL,
-	}
-	if config.Captcha.Provider == "turnstile" {
-		globalVars["turnstileSiteKey"] = config.Captcha.Turnstile.SiteKey
-		globalVars["turnstileSecretKey"] = config.Captcha.Turnstile.SecretKey
-	}
-
-	htmlEngine := mustInitHtmlEngine(config.TemplateDir)
-	mail.Initialize(htmlEngine, globalVars)
+	mustInitRenderTemplate(config.TemplateDir, config)
 	mailSender := mustInitMailSender(config.Mail)
-	db := mustInitDatabase(config.MySQL)
-	query.SetDefault(db)
-	captcha.InitVerifier(mustInitCaptchaVerifier(config.Captcha))
-	redisStorage := mustInitRedisStorage(config.Redis)
-	cacheStorage := store.NewRedisStorage(redisStorage.Conn())
+	database := mustInitDatabase(config.MySQL)
+	redisConn := mustInitRedisClient(config.Redis)
+	storage := store.NewRedisStorage(redisConn)
 
 	// repositories
+	query.SetDefault(database)
 	var (
 		userRepo        = users.NewUserRepository(query.Q)
 		pendingUserRepo = users.NewPendingUserRepository(query.Q)
@@ -296,13 +284,9 @@ func run(ctx *cli.Context) error {
 	// services
 	var (
 		userService      = users.NewUserService(userRepo, userOAuthRepo, userFactorRepo, pendingUserRepo)
-		authorizeService = auth.NewAuthorizeService(cacheStorage, serviceRepo)
-		twoFactorService = twofactor.NewTwoFactorService(cacheStorage, userFactorRepo, config.MasterKey)
-	)
-
-	// middlewares and dependencies
-	var (
-		oauthProviders = mustInitOAuthProviders(config)
+		authorizeService = auth.NewAuthorizeService(storage, serviceRepo)
+		twoFactorService = twofactor.NewTwoFactorService(storage, userFactorRepo, config.MasterKey)
+		oauthProviders   = mustInitOAuthProviders(config)
 	)
 
 	router := fiber.New(fiber.Config{
@@ -312,7 +296,6 @@ func run(ctx *cli.Context) error {
 		IdleTimeout:   params.ServerIdleTimeout,
 		ReadTimeout:   params.ServerReadTimeout,
 		WriteTimeout:  params.ServerWriteTimeout,
-		Views:         htmlEngine,
 		ErrorHandler:  middlewares.ErrorHandler,
 	})
 
@@ -323,27 +306,21 @@ func run(ctx *cli.Context) error {
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
 
-	router.Use(middlewares.InjectGlobalVars(globalVars))
-	setupWebRoutes(
-		router,
-		config.StaticDir,
-		sessions.Config{
-			Storage:        redisStorage,
-			SessionMaxAge:  config.Session.SessionMaxAge,
-			CookieSecure:   config.Session.CookieSecure,
-			CookieHttpOnly: config.Session.CookieHttpOnly,
-			CookieName:     config.Session.CookieName,
-		},
-		authorizeService,
-		userService,
-		twoFactorService,
-		oauthProviders,
-		mailSender,
-	)
+	setupWebRoutes(router, &webDependencies{
+		statisDir:        config.StaticDir,
+		storage:          storage,
+		captchaConfig:    config.Captcha,
+		sessionConfig:    config.Session,
+		authorizeService: authorizeService,
+		userService:      userService,
+		twoFactorService: twoFactorService,
+		oauthProviders:   oauthProviders,
+		mailSender:       mailSender,
+	})
 
 	healthCheckCtx, term := context.WithCancel(ctx.Context)
 	done := make(chan struct{})
-	go common.StartHealthCheckServer(healthCheckCtx, done, redisStorage.Conn(), db)
+	go startHealthCheckServer(healthCheckCtx, done, redisConn, database)
 	defer func() {
 		term()
 		<-done

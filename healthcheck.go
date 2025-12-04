@@ -1,4 +1,4 @@
-package common
+package main
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func StartHealthCheckServer(ctx context.Context, done chan struct{}, rdb redis.UniversalClient, db *gorm.DB) {
+func startHealthCheckServer(ctx context.Context, done chan struct{}, rdb redis.UniversalClient, db *gorm.DB) {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/livez", func(w http.ResponseWriter, r *http.Request) {

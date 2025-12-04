@@ -6,7 +6,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/middlewares/captcha"
-	"github.com/khanghh/kauth/internal/middlewares/csrf"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/oauth"
 	"github.com/khanghh/kauth/internal/render"
@@ -53,7 +52,7 @@ func (h *LoginHandler) GetLogin(ctx *fiber.Ctx) error {
 
 	session := sessions.Get(ctx)
 	if !session.IsAuthenticated() {
-		return render.RenderLogin(ctx, render.LoginPageData{
+		return render.RenderLoginPage(ctx, render.LoginPageData{
 			OAuthLoginURLs: h.getOAuthLoginURLs(serviceURL),
 			ErrorMsg:       mapLoginError(errorCode),
 		})
@@ -77,10 +76,10 @@ func (h *LoginHandler) handleLogin2FA(ctx *fiber.Ctx, session *sessions.Session,
 		return err
 	}
 
-	session.Reset(sessions.SessionData{
+	session.Set(ctx.Context(), sessions.SessionInfo{
 		IP:            ctx.IP(),
 		UserID:        user.ID,
-		LoginTime:     time.Now(),
+		LoginTime:     time.Now().UnixMilli(),
 		TwoFARequired: isTwoFAEnabled,
 	})
 
@@ -91,7 +90,7 @@ func (h *LoginHandler) handleLogin2FA(ctx *fiber.Ctx, session *sessions.Session,
 	state := TwoFactorState{
 		Action:      "login",
 		CallbackURL: redirectURL,
-		Timestamp:   time.Now().UnixNano(),
+		Timestamp:   time.Now().UnixMilli(),
 	}
 	return redirect(ctx, "/2fa/challenge", "state", encryptState(ctx, state))
 }
@@ -112,23 +111,18 @@ func (h *LoginHandler) PostLogin(ctx *fiber.Ctx) error {
 
 	if err := captcha.Verify(ctx); err != nil {
 		pageData.ErrorMsg = MsgInvalidCaptcha
-		return render.RenderLogin(ctx, pageData)
-	}
-
-	if !csrf.Verify(ctx) {
-		pageData.ErrorMsg = MsgInvalidRequest
-		return render.RenderLogin(ctx, pageData)
+		return render.RenderLoginPage(ctx, pageData)
 	}
 
 	user, err := h.userService.GetUserByUsernameOrEmail(ctx.Context(), username)
 	if err != nil {
 		pageData.ErrorMsg = MsgLoginWrongCredentials
-		return render.RenderLogin(ctx, pageData)
+		return render.RenderLoginPage(ctx, pageData)
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		pageData.ErrorMsg = MsgLoginWrongCredentials
-		return render.RenderLogin(ctx, pageData)
+		return render.RenderLoginPage(ctx, pageData)
 	}
 
 	return h.handleLogin2FA(ctx, session, user, serviceURL)
