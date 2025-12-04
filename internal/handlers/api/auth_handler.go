@@ -13,7 +13,7 @@ type AuthHandler struct {
 
 func (h *AuthHandler) GetServiceValidate(ctx *fiber.Ctx) error {
 	ticketID := ctx.Query("ticket")
-	serviceURL := urlutil.SanitizeURL(ctx.Query("service"))
+	serviceURL := urlutil.NormalizeURL(ctx.Query("service"))
 	signature := string(ctx.Request().Header.Peek("X-Signature"))
 	timestamp := string(ctx.Request().Header.Peek("X-Timestamp"))
 

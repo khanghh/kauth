@@ -40,7 +40,7 @@ func AppendQuery(rawURL string, values ...interface{}) string {
 	return newURL.String()
 }
 
-func SanitizeURL(rawURL string) string {
+func NormalizeURL(rawURL string) string {
 	if rawURL == "" {
 		return ""
 	}

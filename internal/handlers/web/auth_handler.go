@@ -46,7 +46,7 @@ func (h *AuthHandler) handleAuthorizeServiceAccess(ctx *fiber.Ctx, session *sess
 
 func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 	cid := ctx.Query("cid")
-	serviceURL := urlutil.SanitizeURL(ctx.Query("service"))
+	serviceURL := urlutil.NormalizeURL(ctx.Query("service"))
 	if serviceURL == "" {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
@@ -91,7 +91,7 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 }
 
 func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
-	serviceURL := urlutil.SanitizeURL(ctx.Query("service"))
+	serviceURL := urlutil.NormalizeURL(ctx.Query("service"))
 	confirm := ctx.FormValue("confirm")
 
 	if serviceURL == "" {
