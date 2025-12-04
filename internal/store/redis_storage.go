@@ -11,6 +11,10 @@ type RedisStorage struct {
 	rdb redis.UniversalClient
 }
 
+func (s *RedisStorage) Conn() redis.UniversalClient {
+	return s.rdb
+}
+
 func (s *RedisStorage) Get(ctx context.Context, key string, val any) error {
 	cmd := s.rdb.HGetAll(ctx, key)
 	if len(cmd.Val()) == 0 {
@@ -21,13 +25,24 @@ func (s *RedisStorage) Get(ctx context.Context, key string, val any) error {
 
 func (s *RedisStorage) Set(ctx context.Context, key string, val any, expiresIn time.Duration) error {
 	if expiresIn == -1 {
-		return s.rdb.HSet(ctx, key, val).Err()
+		return s.Save(ctx, key, val)
 	}
 	pipe := s.rdb.TxPipeline()
-	pipe.HSet(ctx, key, val)
-	pipe.Expire(ctx, key, expiresIn)
-	_, err := pipe.Exec(ctx)
+	pipe.HSet(ctx, key, val).Err()
+	pipe.Expire(ctx, key, expiresIn).Err()
+	cmds, err := pipe.Exec(ctx)
+	if err != nil && len(cmds) > 0 {
+		for _, c := range cmds {
+			if err := c.Err(); err != nil {
+				return err
+			}
+		}
+	}
 	return err
+}
+
+func (s *RedisStorage) Save(ctx context.Context, key string, val any) error {
+	return s.rdb.HSet(ctx, key, val).Err()
 }
 
 func (s *RedisStorage) Delete(ctx context.Context, key string) error {
@@ -45,8 +60,8 @@ func (s *RedisStorage) Expire(ctx context.Context, key string, expiresAt time.Ti
 	return s.rdb.ExpireAt(ctx, key, expiresAt).Err()
 }
 
-func (s *RedisStorage) SetAttr(ctx context.Context, key string, values ...any) error {
-	return s.rdb.HSet(ctx, key, values...).Err()
+func (s *RedisStorage) SetAttr(ctx context.Context, key string, field string, val any) error {
+	return s.rdb.HSet(ctx, key, field, val).Err()
 }
 
 func (s *RedisStorage) GetAttr(ctx context.Context, key, field string, val any) error {
