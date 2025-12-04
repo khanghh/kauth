@@ -39,8 +39,8 @@ func (s *store[T]) Expire(ctx context.Context, key string, expiresAt time.Time) 
 	return s.storage.Expire(ctx, key, expiresAt)
 }
 
-func (s *store[T]) SetAttr(ctx context.Context, key string, values ...any) error {
-	return s.storage.SetAttr(ctx, key, values...)
+func (s *store[T]) SetAttr(ctx context.Context, key string, field string, val any) error {
+	return s.storage.SetAttr(ctx, key, field, val)
 }
 
 func (s *store[T]) GetAttr(ctx context.Context, key, field string, val any) error {
