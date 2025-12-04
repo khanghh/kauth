@@ -10,13 +10,9 @@ import (
 	"github.com/khanghh/kauth/model"
 )
 
-type ServiceRegistry interface {
+type AuthorizeService interface {
 	RegisterService(ctx context.Context, service *model.Service) (string, error)
 	GetService(ctx context.Context, serviceURL string) (*model.Service, error)
-}
-
-type AuthorizeService interface {
-	ServiceRegistry
 	GenerateServiceTicket(ctx context.Context, userID uint, callbackURL string) (*auth.ServiceTicket, error)
 	ValidateServiceTicket(ctx context.Context, serviceURL string, ticketId string, timestamp string, signature string) (*auth.ServiceTicket, error)
 }

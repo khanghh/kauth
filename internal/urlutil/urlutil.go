@@ -1,4 +1,4 @@
-package web
+package urlutil
 
 import (
 	"fmt"
@@ -6,7 +6,18 @@ import (
 	"unicode"
 )
 
-func appendQuery(rawURL string, values ...interface{}) string {
+// RemoveQuery parses the URL and returns the base URL without query parameters.
+func RemoveQuery(urlWithQuery string) string {
+	parsed, err := url.Parse(urlWithQuery)
+	if err != nil {
+		return ""
+	}
+	parsed.RawQuery = ""
+	parsed.ForceQuery = false
+	return parsed.String()
+}
+
+func AppendQuery(rawURL string, values ...interface{}) string {
 	u, err := url.Parse(rawURL)
 	if err != nil {
 		return ""
@@ -29,7 +40,7 @@ func appendQuery(rawURL string, values ...interface{}) string {
 	return newURL.String()
 }
 
-func sanitizeURL(rawURL string) string {
+func SanitizeURL(rawURL string) string {
 	if rawURL == "" {
 		return ""
 	}

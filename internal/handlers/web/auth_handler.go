@@ -9,6 +9,7 @@ import (
 	"github.com/khanghh/kauth/internal/common"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/render"
+	"github.com/khanghh/kauth/internal/urlutil"
 )
 
 type AuthHandler struct {
@@ -45,7 +46,7 @@ func (h *AuthHandler) handleAuthorizeServiceAccess(ctx *fiber.Ctx, session *sess
 
 func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 	cid := ctx.Query("cid")
-	serviceURL := sanitizeURL(ctx.Query("service"))
+	serviceURL := urlutil.SanitizeURL(ctx.Query("service"))
 	if serviceURL == "" {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
@@ -73,7 +74,7 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 	}
 	if challengeRequired && cid != "" {
 		sub := getChallengeSubject(ctx, sessions.Get(ctx))
-		endpoint := appendQuery("/authorize", "service", serviceURL)
+		endpoint := urlutil.AppendQuery("/authorize", "service", serviceURL)
 		err = h.twoFactorService.FinalizeChallenge(ctx.Context(), cid, sub, endpoint)
 		if err == nil {
 			h.setAuthorizedTime(ctx, serviceURL, time.Now())
@@ -90,7 +91,7 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 }
 
 func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
-	serviceURL := sanitizeURL(ctx.Query("service"))
+	serviceURL := urlutil.SanitizeURL(ctx.Query("service"))
 	confirm := ctx.FormValue("confirm")
 
 	if serviceURL == "" {
@@ -120,7 +121,7 @@ func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
 	if challengeRequired {
 		state := TwoFactorState{
 			Action:      "authorize",
-			CallbackURL: appendQuery("/authorize", "service", serviceURL),
+			CallbackURL: urlutil.AppendQuery("/authorize", "service", serviceURL),
 			Timestamp:   time.Now().UnixMilli(),
 		}
 		return redirect(ctx, "/2fa/challenge", "state", encryptState(ctx, state))
@@ -159,60 +160,6 @@ func (h *AuthHandler) GetProfile(ctx *fiber.Ctx) error {
 		Email:        user.Email,
 		Picture:      user.Picture,
 		TwoFAEnabled: isTwoFAEnabled,
-	})
-}
-
-type UserInfoResponse struct {
-	UserID   uint   `json:"userId"`
-	Username string `json:"username"`
-	FullName string `json:"fullName"`
-	Email    string `json:"email"`
-	Picture  string `json:"picture,omitempty"`
-}
-
-func (h *AuthHandler) GetServiceValidate(ctx *fiber.Ctx) error {
-	ticketID := ctx.Query("ticket")
-	serviceURL := sanitizeURL(ctx.Query("service"))
-	signature := string(ctx.Request().Header.Peek("X-Signature"))
-	timestamp := string(ctx.Request().Header.Peek("X-Timestamp"))
-
-	if ticketID == "" || serviceURL == "" || signature == "" || timestamp == "" {
-		return ctx.Status(fiber.StatusBadRequest).JSON(APIResponse{
-			Error: &ErrorResponse{
-				Code:    fiber.StatusBadRequest,
-				Message: "missing required parameter",
-			},
-		})
-	}
-
-	ticket, err := h.authorizeService.ValidateServiceTicket(ctx.Context(), serviceURL, ticketID, timestamp, signature)
-	if err != nil {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(APIResponse{
-			Error: &ErrorResponse{
-				Code:    fiber.StatusUnauthorized,
-				Message: err.Error(),
-			},
-		})
-	}
-
-	user, err := h.userService.GetUserByID(ctx.Context(), ticket.UserID)
-	if err != nil {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(APIResponse{
-			Error: &ErrorResponse{
-				Code:    fiber.StatusUnauthorized,
-				Message: err.Error(),
-			},
-		})
-	}
-
-	return ctx.Status(fiber.StatusOK).JSON(APIResponse{
-		Data: UserInfoResponse{
-			UserID:   user.ID,
-			Username: user.Username,
-			FullName: user.FullName,
-			Email:    user.Email,
-			Picture:  user.Picture,
-		},
 	})
 }
 
