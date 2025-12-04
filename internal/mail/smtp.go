@@ -10,12 +10,15 @@ import (
 
 type SMTPMailSender struct {
 	*gomail.Dialer
-	From string
 }
 
 func (s *SMTPMailSender) Send(message *Message) error {
 	msg := gomail.NewMessage()
-	msg.SetHeader("From", s.From)
+	if message.From != "" {
+		msg.SetHeader("From", message.From)
+	} else {
+		msg.SetHeader("From", defaultFromAddr)
+	}
 	msg.SetHeader("To", message.To...)
 	msg.SetHeader("Cc", message.Cc...)
 	msg.SetHeader("Subject", message.Subject)
@@ -76,13 +79,12 @@ func dialSMTP(smtpCfg SMTPConfig) (*gomail.Dialer, error) {
 	return dialer, nil
 }
 
-func NewSMTPMailSender(smtpConfig SMTPConfig, from string) (*SMTPMailSender, error) {
+func NewSMTPMailSender(smtpConfig SMTPConfig) (*SMTPMailSender, error) {
 	dialer, err := dialSMTP(smtpConfig)
 	if err != nil {
 		return nil, err
 	}
 	return &SMTPMailSender{
 		Dialer: dialer,
-		From:   from,
 	}, nil
 }
