@@ -4,7 +4,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
-	"net/url"
 )
 
 func signHMAC(secret, message string) string {
@@ -17,15 +16,4 @@ func signHMAC(secret, message string) string {
 func verifyHMAC(secret, message, signatureB64 string) bool {
 	expected := signHMAC(secret, message)
 	return hmac.Equal([]byte(expected), []byte(signatureB64))
-}
-
-// removeQueryFromURL parses the service URL and returns the base URL without query
-func removeQueryFromURL(urlWithQuery string) string {
-	parsed, err := url.Parse(urlWithQuery)
-	if err != nil {
-		return ""
-	}
-	parsed.RawQuery = ""
-	parsed.ForceQuery = false
-	return parsed.String()
 }

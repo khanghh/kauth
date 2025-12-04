@@ -18,6 +18,10 @@ var embedTemplate *template.Template
 var templateDir string
 var globalVars map[string]interface{}
 
+func GetValue(key string) any {
+	return globalVars[key]
+}
+
 func Initialize(gVars map[string]interface{}, tmplDir string) error {
 	globalVars = gVars
 	if tmplDir != "" {

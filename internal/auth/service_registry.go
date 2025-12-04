@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 
+	"github.com/khanghh/kauth/internal/urlutil"
 	"github.com/khanghh/kauth/model"
 	"github.com/khanghh/kauth/model/query"
 	"gorm.io/gorm"
@@ -39,7 +40,7 @@ func (r *ServiceRegistry) RegisterService(ctx context.Context, service *model.Se
 }
 
 func (r *ServiceRegistry) GetService(ctx context.Context, loginURL string) (*model.Service, error) {
-	loginURL = removeQueryFromURL(loginURL)
+	loginURL = urlutil.RemoveQuery(loginURL)
 	if loginURL == "" {
 		return nil, ErrServiceNotFound
 	}
