@@ -78,7 +78,8 @@ func getOrCreate(ctx *fiber.Ctx, storage store.Storage, id string) (*Session, er
 // saveChanges persists the session data to the storage, if session is fresh create with expiration.
 func saveChanges(ctx *fiber.Ctx, config *Config, sess *Session) error {
 	sess.LastSeen = time.Now()
-	if sess.fresh {
+	renew := time.Until(sess.ExpireTime) < (config.SessionMaxAge / 2)
+	if sess.fresh || renew {
 		sess.ExpireTime = time.Now().Add(config.SessionMaxAge)
 		return config.Storage.Set(ctx.Context(), sess.id, &sess.SessionData, config.SessionMaxAge)
 	} else {
