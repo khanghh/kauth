@@ -1,7 +1,6 @@
 package sessions
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -61,7 +60,7 @@ func getOrCreate(ctx *fiber.Ctx, storage store.Storage, id string) (*Session, er
 		return newSession(storage), nil
 	}
 
-	info := SessionInfo{}
+	info := SessionData{}
 	if err := storage.Get(ctx.Context(), id, &info); err != nil {
 		if err == store.ErrNotFound {
 			return newSession(storage), nil
@@ -70,10 +69,21 @@ func getOrCreate(ctx *fiber.Ctx, storage store.Storage, id string) (*Session, er
 	}
 
 	return &Session{
-		SessionInfo: info,
+		SessionData: info,
 		id:          id,
 		storage:     storage,
 	}, nil
+}
+
+// saveChanges persists the session data to the storage, if session is fresh create with expiration.
+func saveChanges(ctx *fiber.Ctx, config *Config, sess *Session) error {
+	sess.LastSeen = time.Now()
+	if sess.fresh {
+		sess.ExpireTime = time.Now().Add(config.SessionMaxAge)
+		return config.Storage.Set(ctx.Context(), sess.id, &sess.SessionData, config.SessionMaxAge)
+	} else {
+		return config.Storage.Save(ctx.Context(), sess.id, &sess.SessionData)
+	}
 }
 
 func New(config Config) fiber.Handler {
@@ -93,15 +103,8 @@ func New(config Config) fiber.Handler {
 			return err
 		}
 
-		if (sess.SessionInfo != SessionInfo{}) {
-			var err error
-			if sess.fresh {
-				err = sess.storage.Set(ctx.Context(), sess.id, &sess.SessionInfo, config.SessionMaxAge)
-			} else {
-				fmt.Printf("save: %s\n", ctx.Path())
-				err = storage.Save(ctx.Context(), sess.id, &sess.SessionInfo)
-			}
-			if err != nil {
+		if (sess.SessionData != SessionData{}) {
+			if err := saveChanges(ctx, &config, sess); err != nil {
 				log.Printf("Could not save session %s: %v", sess.id, err)
 				return fiber.NewError(fiber.StatusServiceUnavailable)
 			}

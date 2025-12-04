@@ -39,10 +39,10 @@ func (h *OAuthHandler) handleOAuthLogin(ctx *fiber.Ctx, userOAuth *model.UserOAu
 		return ctx.SendStatus(http.StatusForbidden)
 	}
 
-	sessions.Reset(ctx, sessions.SessionInfo{
+	sessions.Reset(ctx, sessions.SessionData{
 		IP:        ctx.IP(),
 		UserID:    user.ID,
-		LoginTime: time.Now().UnixMilli(),
+		LoginTime: time.Now(),
 		OAuthID:   userOAuth.ID,
 	})
 
@@ -69,10 +69,10 @@ func (h *OAuthHandler) redirectRegisterOAuth(ctx *fiber.Ctx, userOAuth *model.Us
 	}
 
 	if userOAuth.UserID == 0 {
-		sessions.Save(ctx, sessions.SessionInfo{
+		sessions.Save(ctx, sessions.SessionData{
 			IP:        ctx.IP(),
 			OAuthID:   userOAuth.ID,
-			LoginTime: time.Now().UnixMilli(),
+			LoginTime: time.Now(),
 		})
 		return redirect(ctx, "/register/oauth", "service", ctx.Query("service"))
 	}

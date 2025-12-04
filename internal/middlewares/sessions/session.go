@@ -5,37 +5,38 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"log/slog"
+	"time"
 
 	"github.com/khanghh/kauth/internal/store"
 )
 
-type SessionInfo struct {
-	IP                 string `mapstructure:"ip,omitempty"                   redis:"ip"`                   // client ip address
-	UserID             uint   `mapstructure:"user_id,omitempty"              redis:"user_id"`              // user id
-	OAuthID            uint   `mapstructure:"oauth_id,omitempty"             redis:"oauth_id"`             // user oauth id
-	LastSeen           int64  `mapstructure:"last_seen,omitempty"            redis:"last_seen"`            // last request time
-	LoginTime          int64  `mapstructure:"login_time,omitempty"           redis:"login_time"`           // last login time
-	TwoFARequired      bool   `mapstructure:"two_fa_required,omitempty"      redis:"two_fa_required"`      // is 2fa required
-	TwoFAChallengeID   string `mapstructure:"two_fa_challenge_id,omitempty"  redis:"two_fa_challenge_id"`  // 2fa challenge id
-	TwoFASuccessAt     int64  `mapstructure:"two_fa_success_at,omitempty"    redis:"two_fa_success_at"`    // 2fa success time
-	StateEncryptionKey string `mapstructure:"state_encryption_key,omitempty" redis:"state_encryption_key"` // state encryption key
-	ExpireTime         int64  `mapstructure:"expire_time,omitempty"          redis:"expire_time"`          // session expire time
+type SessionData struct {
+	IP                 string    `mapstructure:"ip,omitempty"                   redis:"ip"`                   // client ip address
+	UserID             uint      `mapstructure:"user_id,omitempty"              redis:"user_id"`              // user id
+	OAuthID            uint      `mapstructure:"oauth_id,omitempty"             redis:"oauth_id"`             // user oauth id
+	LastSeen           time.Time `mapstructure:"last_seen,omitempty"            redis:"last_seen"`            // last request time
+	LoginTime          time.Time `mapstructure:"login_time,omitempty"           redis:"login_time"`           // last login time
+	TwoFARequired      bool      `mapstructure:"two_fa_required,omitempty"      redis:"two_fa_required"`      // is 2fa required
+	TwoFAChallengeID   string    `mapstructure:"two_fa_challenge_id,omitempty"  redis:"two_fa_challenge_id"`  // 2fa challenge id
+	TwoFASuccessAt     time.Time `mapstructure:"two_fa_success_at,omitempty"    redis:"two_fa_success_at"`    // 2fa success time
+	StateEncryptionKey string    `mapstructure:"state_encryption_key,omitempty" redis:"state_encryption_key"` // state encryption key
+	ExpireTime         time.Time `mapstructure:"expire_time,omitempty"          redis:"expire_time"`          // session expire time
 }
 
-func (s *SessionInfo) IsLoggedIn() bool {
+func (s *SessionData) IsLoggedIn() bool {
 	return s.UserID != 0
 }
 
-func (s *SessionInfo) Is2FARequired() bool {
+func (s *SessionData) Is2FARequired() bool {
 	return s.UserID != 0 && s.TwoFARequired
 }
 
-func (s *SessionInfo) IsAuthenticated() bool {
+func (s *SessionData) IsAuthenticated() bool {
 	return s.UserID != 0 && !s.TwoFARequired
 }
 
 type Session struct {
-	SessionInfo               // basic session info
+	SessionData               // basic session info
 	id          string        // session id
 	storage     store.Storage // storage backend
 	fresh       bool          // is session newly created
@@ -62,16 +63,8 @@ func (s *Session) ID() string {
 	return s.id
 }
 
-func (s *Session) Info() *SessionInfo {
-	return &s.SessionInfo
-}
-
 func (s *Session) IsFresh() bool {
 	return s.fresh
-}
-
-func (s *Session) SetInfo(info SessionInfo) {
-	s.SessionInfo = info
 }
 
 func (s *Session) Get(ctx context.Context, val any) error {
@@ -79,8 +72,8 @@ func (s *Session) Get(ctx context.Context, val any) error {
 }
 
 func (s *Session) Set(ctx context.Context, val any) error {
-	if info, ok := val.(SessionInfo); ok {
-		s.SessionInfo = info
+	if info, ok := val.(SessionData); ok {
+		s.SessionData = info
 	}
 	return s.storage.Save(ctx, s.id, val)
 }
@@ -101,9 +94,9 @@ func (s *Session) Reset(ctx context.Context, val any) error {
 	}
 
 	s.id = generateSessionID()
-	s.SessionInfo = SessionInfo{}
-	if info, ok := val.(SessionInfo); ok {
-		s.SessionInfo = info
+	s.SessionData = SessionData{}
+	if info, ok := val.(SessionData); ok {
+		s.SessionData = info
 	}
 	s.fresh = true
 	return nil

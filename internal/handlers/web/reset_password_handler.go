@@ -11,6 +11,7 @@ import (
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/render"
 	"github.com/khanghh/kauth/internal/twofactor"
+	"github.com/khanghh/kauth/internal/urlutil"
 	"github.com/khanghh/kauth/internal/users"
 )
 
@@ -160,7 +161,7 @@ func (h *ResetPasswordHandler) PostForgotPassword(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	resetPasswordLink := appendQuery(fmt.Sprintf("%s/reset-password", ctx.BaseURL()), "token", token)
+	resetPasswordLink := urlutil.AppendQuery(fmt.Sprintf("%s/reset-password", ctx.BaseURL()), "token", token)
 	err = mail.SendResetPasswordLink(h.mailSender, user.Email, resetPasswordLink)
 	if err != nil {
 		return err

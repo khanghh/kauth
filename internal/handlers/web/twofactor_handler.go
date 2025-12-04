@@ -150,7 +150,7 @@ func (h *TwoFactorHandler) handleChallengeTOTP(ctx *fiber.Ctx, pageData render.V
 func (h *TwoFactorHandler) handleChallengeSuccess(ctx *fiber.Ctx, session *sessions.Session, ch *twofactor.Challenge, sub twofactor.Subject) error {
 	if session.TwoFARequired && session.TwoFAChallengeID == ch.ID {
 		session.TwoFARequired = false
-		session.TwoFASuccessAt = time.Now().UnixMilli()
+		session.TwoFASuccessAt = time.Now()
 	}
 	return redirect(ctx, ch.CallbackURL, "cid", ch.ID)
 }
@@ -330,7 +330,7 @@ func (h *TwoFactorHandler) GetTOTPEnroll(ctx *fiber.Ctx) error {
 		}
 	}
 
-	issuer := ctx.Locals("siteName").(string)
+	issuer, _ := render.GetValue("siteName").(string)
 	enrollmentURL, err := h.generateTOTPEnrollmentURL(issuer, user.Username, secret)
 	if err != nil {
 		return err
@@ -366,7 +366,7 @@ func (h *TwoFactorHandler) PostTOTPEnroll(ctx *fiber.Ctx) error {
 	if err != nil {
 		if errors.Is(err, twofactor.ErrTOTPVerifyFailed) {
 			errMsg := MsgTOTPEnrollFailed
-			issuer := ctx.Locals("siteName").(string)
+			issuer, _ := render.GetValue("siteName").(string)
 			enrollmentURL, err := h.generateTOTPEnrollmentURL(issuer, user.Username, secret)
 			if err != nil {
 				return err

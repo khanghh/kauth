@@ -9,6 +9,7 @@ import (
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/oauth"
 	"github.com/khanghh/kauth/internal/render"
+	"github.com/khanghh/kauth/internal/urlutil"
 	"github.com/khanghh/kauth/model"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -47,7 +48,7 @@ func mapLoginError(errorCode string) string {
 }
 
 func (h *LoginHandler) GetLogin(ctx *fiber.Ctx) error {
-	serviceURL := sanitizeURL(ctx.Query("service"))
+	serviceURL := urlutil.SanitizeURL(ctx.Query("service"))
 	errorCode := ctx.Query("error")
 
 	session := sessions.Get(ctx)
@@ -68,7 +69,7 @@ func (h *LoginHandler) GetLogin(ctx *fiber.Ctx) error {
 func (h *LoginHandler) handleLogin2FA(ctx *fiber.Ctx, session *sessions.Session, user *model.User, serviceURL string) error {
 	redirectURL := "/"
 	if serviceURL != "" {
-		redirectURL = appendQuery("/authorize", "service", serviceURL)
+		redirectURL = urlutil.AppendQuery("/authorize", "service", serviceURL)
 	}
 
 	isTwoFAEnabled, err := h.twoFactorService.IsTwoFAEnabled(ctx.Context(), user.ID)
@@ -76,10 +77,10 @@ func (h *LoginHandler) handleLogin2FA(ctx *fiber.Ctx, session *sessions.Session,
 		return err
 	}
 
-	session.Set(ctx.Context(), sessions.SessionInfo{
+	session.Set(ctx.Context(), sessions.SessionData{
 		IP:            ctx.IP(),
 		UserID:        user.ID,
-		LoginTime:     time.Now().UnixMilli(),
+		LoginTime:     time.Now(),
 		TwoFARequired: isTwoFAEnabled,
 	})
 
@@ -96,7 +97,7 @@ func (h *LoginHandler) handleLogin2FA(ctx *fiber.Ctx, session *sessions.Session,
 }
 
 func (h *LoginHandler) PostLogin(ctx *fiber.Ctx) error {
-	serviceURL := sanitizeURL(ctx.Query("service"))
+	serviceURL := urlutil.SanitizeURL(ctx.Query("service"))
 	username := ctx.FormValue("username")
 	password := ctx.FormValue("password")
 
