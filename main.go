@@ -15,10 +15,10 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/khanghh/kauth/internal/auth"
 	"github.com/khanghh/kauth/internal/config"
+	"github.com/khanghh/kauth/internal/handlers"
 	"github.com/khanghh/kauth/internal/handlers/api"
 	"github.com/khanghh/kauth/internal/handlers/web"
 	"github.com/khanghh/kauth/internal/mail"
-	"github.com/khanghh/kauth/internal/middlewares"
 	"github.com/khanghh/kauth/internal/middlewares/captcha"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/oauth"
@@ -203,8 +203,6 @@ func setupAPIRoutes(router fiber.Router, deps *apiDependencies) {
 type webDependencies struct {
 	statisDir        string
 	captchaConfig    config.CaptchaConfig
-	sessionConfig    config.SessionConfig
-	storage          store.Storage
 	mailSender       mail.MailSender
 	authorizeService *auth.AuthorizeService
 	userService      *users.UserService
@@ -226,17 +224,9 @@ func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 
 	// middlewares
 	mustInitCaptchaVerifier(deps.captchaConfig)
-	sessionMiddleware := sessions.New(sessions.Config{
-		Storage:        store.StorageWithPrefix(deps.storage, params.SessionKeyPrefix),
-		CookieName:     deps.sessionConfig.CookieName,
-		CookieSecure:   deps.sessionConfig.CookieSecure,
-		CookieHttpOnly: deps.sessionConfig.CookieHttpOnly,
-		SessionMaxAge:  deps.sessionConfig.SessionMaxAge,
-	})
 
 	// routes
 	router.Static("/static", deps.statisDir)
-	router.Use(sessionMiddleware)
 	router.Get("/", authHandler.GetHome)
 	router.Get("/login", loginHandler.GetLogin)
 	router.Post("/login", loginHandler.PostLogin)
@@ -308,7 +298,7 @@ func run(ctx *cli.Context) error {
 		IdleTimeout:   params.ServerIdleTimeout,
 		ReadTimeout:   params.ServerReadTimeout,
 		WriteTimeout:  params.ServerWriteTimeout,
-		ErrorHandler:  middlewares.ErrorHandler,
+		ErrorHandler:  handlers.ErrorHandler,
 	})
 
 	router.Use(recover.New())
@@ -316,6 +306,13 @@ func run(ctx *cli.Context) error {
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: strings.Join(config.AllowOrigins, ", "),
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
+	}))
+	router.Use(sessions.Initialize(sessions.Config{
+		Storage:        store.StorageWithPrefix(storage, params.SessionKeyPrefix),
+		SessionMaxAge:  config.Session.SessionMaxAge,
+		CookieSecure:   config.Session.CookieSecure,
+		CookieHttpOnly: config.Session.CookieHttpOnly,
+		CookieName:     config.Session.CookieName,
 	}))
 
 	setupAPIRoutes(router, &apiDependencies{
@@ -327,8 +324,6 @@ func run(ctx *cli.Context) error {
 	setupWebRoutes(router, &webDependencies{
 		statisDir:        config.StaticDir,
 		captchaConfig:    config.Captcha,
-		sessionConfig:    config.Session,
-		storage:          storage,
 		mailSender:       mailSender,
 		authorizeService: authorizeService,
 		userService:      userService,

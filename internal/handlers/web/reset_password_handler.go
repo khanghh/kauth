@@ -47,7 +47,7 @@ func (h *ResetPasswordHandler) verifyResetPasswordToken(ctx *fiber.Ctx, cid, tok
 
 func (h *ResetPasswordHandler) GetResetPassword(ctx *fiber.Ctx) error {
 	session := sessions.Get(ctx)
-	if session.IsLoggedIn() {
+	if session == nil || session.IsLoggedIn() {
 		return ctx.Redirect("/")
 	}
 
@@ -79,7 +79,7 @@ func (h *ResetPasswordHandler) PostResetPassword(ctx *fiber.Ctx) error {
 	newPassword := ctx.FormValue("newPassword")
 
 	session := sessions.Get(ctx)
-	if session.IsLoggedIn() {
+	if session == nil || session.IsLoggedIn() {
 		return ctx.Redirect("/")
 	}
 
@@ -111,7 +111,7 @@ func (h *ResetPasswordHandler) PostResetPassword(ctx *fiber.Ctx) error {
 
 func (h *ResetPasswordHandler) GetForogtPassword(ctx *fiber.Ctx) error {
 	session := sessions.Get(ctx)
-	if session.IsLoggedIn() {
+	if session == nil || session.IsLoggedIn() {
 		return ctx.Redirect("/")
 	}
 
@@ -120,7 +120,7 @@ func (h *ResetPasswordHandler) GetForogtPassword(ctx *fiber.Ctx) error {
 
 func (h *ResetPasswordHandler) PostForgotPassword(ctx *fiber.Ctx) error {
 	session := sessions.Get(ctx)
-	if session.IsLoggedIn() {
+	if session == nil || session.IsLoggedIn() {
 		return ctx.Redirect("/")
 	}
 

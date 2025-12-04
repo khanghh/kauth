@@ -52,7 +52,7 @@ func (h *LoginHandler) GetLogin(ctx *fiber.Ctx) error {
 	errorCode := ctx.Query("error")
 
 	session := sessions.Get(ctx)
-	if !session.IsAuthenticated() {
+	if session == nil || !session.IsAuthenticated() {
 		return render.RenderLoginPage(ctx, render.LoginPageData{
 			OAuthLoginURLs: h.getOAuthLoginURLs(serviceURL),
 			ErrorMsg:       mapLoginError(errorCode),
@@ -102,7 +102,7 @@ func (h *LoginHandler) PostLogin(ctx *fiber.Ctx) error {
 	password := ctx.FormValue("password")
 
 	session := sessions.Get(ctx)
-	if session.IsAuthenticated() {
+	if session != nil && session.IsAuthenticated() {
 		return ctx.Redirect("/")
 	}
 

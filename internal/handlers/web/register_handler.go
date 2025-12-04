@@ -56,7 +56,7 @@ func validateRegisterForm(username string, password string, email string) map[st
 
 func (h *RegisterHandler) GetRegister(ctx *fiber.Ctx) error {
 	session := sessions.Get(ctx)
-	if session.IsLoggedIn() {
+	if session == nil || session.IsLoggedIn() {
 		return ctx.Redirect("/")
 	}
 	return render.RenderRegisterPage(ctx, render.RegisterPageData{})
@@ -70,7 +70,7 @@ type RegisterClaims struct {
 
 func (h *RegisterHandler) PostRegister(ctx *fiber.Ctx) error {
 	session := sessions.Get(ctx)
-	if session.IsLoggedIn() {
+	if session == nil || session.IsLoggedIn() {
 		return ctx.Redirect("/")
 	}
 
@@ -123,7 +123,7 @@ func (h *RegisterHandler) PostRegister(ctx *fiber.Ctx) error {
 
 func (h *RegisterHandler) GetRegisterWithOAuth(ctx *fiber.Ctx) error {
 	session := sessions.Get(ctx)
-	if session.IsLoggedIn() || session.OAuthID == 0 {
+	if session == nil || session.IsLoggedIn() || session.OAuthID == 0 {
 		return ctx.Redirect("/login")
 	}
 
@@ -142,7 +142,7 @@ func (h *RegisterHandler) GetRegisterWithOAuth(ctx *fiber.Ctx) error {
 
 func (h *RegisterHandler) PostRegisterWithOAuth(ctx *fiber.Ctx) error {
 	session := sessions.Get(ctx)
-	if session.IsLoggedIn() || session.OAuthID == 0 {
+	if session == nil || session.IsLoggedIn() || session.OAuthID == 0 {
 		return ctx.Redirect("/")
 	}
 

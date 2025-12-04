@@ -70,7 +70,7 @@ func (h *TwoFactorHandler) GetChallenge(ctx *fiber.Ctx) error {
 	encryptedState := ctx.Query("state")
 
 	session := sessions.Get(ctx)
-	if !session.IsLoggedIn() {
+	if session == nil || !session.IsLoggedIn() {
 		return redirect(ctx, "/login")
 	}
 
@@ -160,7 +160,7 @@ func (h *TwoFactorHandler) PostChallenge(ctx *fiber.Ctx) error {
 	method := ctx.FormValue("method")
 
 	session := sessions.Get(ctx)
-	if !session.IsLoggedIn() {
+	if session == nil || !session.IsLoggedIn() {
 		return redirect(ctx, "/login")
 	}
 
@@ -210,7 +210,7 @@ func (h *TwoFactorHandler) GetVerifyOTP(ctx *fiber.Ctx) error {
 	cid := ctx.Query("cid")
 
 	session := sessions.Get(ctx)
-	if !session.IsLoggedIn() {
+	if session == nil || !session.IsLoggedIn() {
 		return redirect(ctx, "/login")
 	}
 	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
@@ -237,7 +237,7 @@ func (h *TwoFactorHandler) PostVerifyOTP(ctx *fiber.Ctx) error {
 	resend := ctx.FormValue("resend") != ""
 
 	session := sessions.Get(ctx)
-	if !session.IsLoggedIn() {
+	if session == nil || !session.IsLoggedIn() {
 		return redirect(ctx, "/login")
 	}
 	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
@@ -311,7 +311,7 @@ func (h *TwoFactorHandler) generateTOTPEnrollmentURL(issuer string, username str
 func (h *TwoFactorHandler) GetTOTPEnroll(ctx *fiber.Ctx) error {
 	renew := ctx.Query("renew")
 	session := sessions.Get(ctx)
-	if !session.IsAuthenticated() {
+	if session == nil || !session.IsAuthenticated() {
 		return forceLogout(ctx, "")
 	}
 
@@ -347,7 +347,7 @@ func (h *TwoFactorHandler) PostTOTPEnroll(ctx *fiber.Ctx) error {
 	code := ctx.FormValue("verificationCode")
 
 	session := sessions.Get(ctx)
-	if !session.IsAuthenticated() {
+	if session == nil || !session.IsAuthenticated() {
 		return forceLogout(ctx, "")
 	}
 
@@ -389,7 +389,7 @@ func (h *TwoFactorHandler) GetTOTVerify(ctx *fiber.Ctx) error {
 	cid := ctx.Query("cid")
 
 	session := sessions.Get(ctx)
-	if !session.IsLoggedIn() {
+	if session == nil || !session.IsLoggedIn() {
 		return redirect(ctx, "/login")
 	}
 	_, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
@@ -415,7 +415,7 @@ func (h *TwoFactorHandler) PostTOTPVerify(ctx *fiber.Ctx) error {
 	code := ctx.FormValue("code")
 
 	session := sessions.Get(ctx)
-	if !session.IsLoggedIn() {
+	if session == nil || !session.IsLoggedIn() {
 		return redirect(ctx, "/login")
 	}
 
@@ -467,7 +467,7 @@ func isFactorEnabled(authFactors []*model.UserFactor, factorType string) bool {
 
 func (h *TwoFactorHandler) GetTwoFASettings(ctx *fiber.Ctx) error {
 	session := sessions.Get(ctx)
-	if !session.IsAuthenticated() {
+	if session == nil || !session.IsAuthenticated() {
 		return forceLogout(ctx, "")
 	}
 
@@ -493,7 +493,7 @@ func (h *TwoFactorHandler) PostTwoFASettings(ctx *fiber.Ctx) error {
 	totpEnabled := ctx.FormValue("totpEnabled") == "true"
 
 	session := sessions.Get(ctx)
-	if !session.IsAuthenticated() {
+	if session == nil || !session.IsAuthenticated() {
 		return forceLogout(ctx, "")
 	}
 

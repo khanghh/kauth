@@ -13,28 +13,68 @@ const (
 	sessionContextKey = "session"
 )
 
+var sessStore *Store
+
+// getOrCreate retrieves existing session or create a temporary new one.
+func getOrCreate(ctx *fiber.Ctx) (*Session, error) {
+	sess, ok := ctx.Locals(sessionContextKey).(*Session)
+	if ok {
+		return sess, nil
+	}
+
+	if id := ctx.Cookies(sessStore.CookieName); id != "" {
+		sess, err := sessStore.Get(ctx.Context(), id)
+		if err == nil {
+			ctx.Locals(sessionContextKey, sess)
+			return sess, nil
+		} else if err != store.ErrNotFound {
+			log.Printf("Could not load session %s: %v", id, err)
+			return nil, err
+		}
+	}
+
+	sess = newSession(sessStore.Storage)
+	ctx.Locals(sessionContextKey, sess)
+	return sess, nil
+}
+
+// Get retrieves the current session or create a temporary new one.
+// The session will be saved automatically at the end of request if it is modified.
 func Get(ctx *fiber.Ctx) *Session {
-	return ctx.Locals(sessionContextKey).(*Session)
+	sess, _ := getOrCreate(ctx)
+	return sess
 }
 
+// Destroy immediately deletes the current session and clear the cookie.
 func Destroy(ctx *fiber.Ctx) error {
-	ctx.ClearCookie()
-	return Reset(ctx, nil)
+	ctx.ClearCookie(sessStore.CookieName)
+	_, err := Reset(ctx, SessionData{})
+	return err
 }
 
-// Reset creates a new session, discarding the previous session data.
-func Reset(ctx *fiber.Ctx, data any) error {
-	sess := ctx.Locals(sessionContextKey).(*Session)
-	if err := sess.Reset(ctx.Context(), data); err != nil {
+// Reset immediately deletes the current session and create tempory new one with given data.
+func Reset(ctx *fiber.Ctx, data SessionData) (*Session, error) {
+	if id := ctx.Cookies(sessStore.CookieName); id != "" {
+		err := sessStore.Delete(ctx.Context(), id)
+		if err != nil && err != store.ErrNotFound {
+			return nil, err
+		}
+	}
+
+	sess := newSession(sessStore.Storage)
+	sess.SessionData = data
+	ctx.Locals(sessionContextKey, sess)
+	return sess, nil
+}
+
+// Save immediately persists the current session data to the storage.
+func Save(ctx *fiber.Ctx, data SessionData) error {
+	sess, err := getOrCreate(ctx)
+	if err != nil {
 		return err
 	}
-	return nil
-}
-
-// Save persists the session data and keep the expiration time unchanged.
-func Save(ctx *fiber.Ctx, data any) error {
-	sess := ctx.Locals(sessionContextKey).(*Session)
-	return sess.Set(ctx.Context(), data)
+	sess.SessionData = data
+	return sessStore.Save(ctx.Context(), sess)
 }
 
 type Config struct {
@@ -55,62 +95,23 @@ func applyDefaults(conf Config) Config {
 	return conf
 }
 
-func getOrCreate(ctx *fiber.Ctx, storage store.Storage, id string) (*Session, error) {
-	if id == "" {
-		return newSession(storage), nil
+func Initialize(config Config) fiber.Handler {
+	sessStore = &Store{
+		Config: applyDefaults(config),
 	}
-
-	info := SessionData{}
-	if err := storage.Get(ctx.Context(), id, &info); err != nil {
-		if err == store.ErrNotFound {
-			return newSession(storage), nil
-		}
-		return nil, err
-	}
-
-	return &Session{
-		SessionData: info,
-		id:          id,
-		storage:     storage,
-	}, nil
-}
-
-// saveChanges persists the session data to the storage, if session is fresh create with expiration.
-func saveChanges(ctx *fiber.Ctx, config *Config, sess *Session) error {
-	sess.LastSeen = time.Now()
-	renew := time.Until(sess.ExpireTime) < (config.SessionMaxAge / 2)
-	if sess.fresh || renew {
-		sess.ExpireTime = time.Now().Add(config.SessionMaxAge)
-		return config.Storage.Set(ctx.Context(), sess.id, &sess.SessionData, config.SessionMaxAge)
-	} else {
-		return config.Storage.Save(ctx.Context(), sess.id, &sess.SessionData)
-	}
-}
-
-func New(config Config) fiber.Handler {
-	config = applyDefaults(config)
-	storage := config.Storage
 	return func(ctx *fiber.Ctx) error {
-		id := ctx.Cookies(config.CookieName)
-		sess, err := getOrCreate(ctx, storage, id)
-		if err != nil {
-			log.Printf("Could not get session %s: %v", id, err)
-			return fiber.NewError(fiber.StatusServiceUnavailable)
-		}
-
-		ctx.Locals(sessionContextKey, sess)
-
 		if err := ctx.Next(); err != nil {
 			return err
 		}
 
-		if (sess.SessionData != SessionData{}) {
-			if err := saveChanges(ctx, &config, sess); err != nil {
+		sess, ok := ctx.Locals(sessionContextKey).(*Session)
+		if ok && (sess.SessionData != SessionData{}) {
+			if err := sessStore.Save(ctx.Context(), sess); err != nil {
 				log.Printf("Could not save session %s: %v", sess.id, err)
-				return fiber.NewError(fiber.StatusServiceUnavailable)
+				return err
 			}
 			if sess.fresh {
-				setCookie(ctx, &config, sess)
+				setCookie(ctx, &sessStore.Config, sess)
 			}
 		}
 
