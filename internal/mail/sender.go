@@ -1,5 +1,11 @@
 package mail
 
+var defaultFromAddr string
+
+func SetDefaultFromAddress(from string) {
+	defaultFromAddr = from
+}
+
 type Message struct {
 	From        string
 	To          []string
