@@ -16,7 +16,7 @@ type AccountSettingsHandler struct {
 
 func (h *AccountSettingsHandler) GetChangePassword(ctx *fiber.Ctx) error {
 	session := sessions.Get(ctx)
-	if !session.IsAuthenticated() {
+	if session == nil || !session.IsAuthenticated() {
 		return redirect(ctx, "/login")
 	}
 
@@ -28,7 +28,7 @@ func (h *AccountSettingsHandler) PostChangePassword(ctx *fiber.Ctx) error {
 	newPassword := ctx.FormValue("newPassword")
 
 	session := sessions.Get(ctx)
-	if !session.IsAuthenticated() {
+	if session == nil || !session.IsAuthenticated() {
 		return redirect(ctx, "/login")
 	}
 

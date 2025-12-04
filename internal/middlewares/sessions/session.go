@@ -103,5 +103,5 @@ func (s *Session) Reset(ctx context.Context, val any) error {
 }
 
 func (s *Session) Save(ctx context.Context) error {
-	return nil
+	return s.storage.Save(ctx, s.id, s.SessionData)
 }
