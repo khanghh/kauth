@@ -7,7 +7,7 @@ import (
 )
 
 type Token struct {
-	ID           uint   `gorm:"primarykey"`
+	ID           uint   `gorm:"primarykey,autoIncrement"`
 	Code         string `gorm:"size:32;not null"`
 	User         string `gorm:"size:32;not null"`
 	Realm        string `gorm:"size:32;not null"`
