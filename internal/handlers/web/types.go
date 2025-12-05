@@ -11,10 +11,12 @@ import (
 )
 
 type AuthorizeService interface {
-	RegisterService(ctx context.Context, service *model.Service) (string, error)
-	GetService(ctx context.Context, serviceURL string) (*model.Service, error)
+	RegisterService(ctx context.Context, service *model.Service) error
+	GetServiceByCallbackURL(ctx context.Context, serviceURL string) (*model.Service, error)
+	GetServiceByClientID(ctx context.Context, clientID string) (*model.Service, error)
+	DeleteService(ctx context.Context, serviceID uint) error
 	GenerateServiceTicket(ctx context.Context, userID uint, callbackURL string) (*auth.ServiceTicket, error)
-	ValidateServiceTicket(ctx context.Context, serviceURL string, ticketId string, timestamp string, signature string) (*auth.ServiceTicket, error)
+	ValidateServiceTicket(ctx context.Context, serviceURL string, ticketId string) (*auth.ServiceTicket, error)
 }
 
 type TwoFactorService interface {

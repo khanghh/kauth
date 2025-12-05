@@ -17,10 +17,10 @@ import (
 )
 
 type TwoFactorService struct {
+	masterKey      string
 	userStateStore *userStateStore
 	challengeStore *challengeStore
 	userFactorRepo users.UserFactorRepository
-	masterKey      string
 }
 
 type Subject struct {
@@ -223,11 +223,11 @@ func (s *TwoFactorService) Token() *TokenChallenger {
 	return &TokenChallenger{s}
 }
 
-func NewTwoFactorService(storage store.Storage, userFactorRepo users.UserFactorRepository, masterKey string) *TwoFactorService {
+func NewTwoFactorService(masterKey string, storage store.Storage, userFactorRepo users.UserFactorRepository) *TwoFactorService {
 	return &TwoFactorService{
+		masterKey:      masterKey,
 		userStateStore: newUserStateStore(storage),
 		challengeStore: newChallengeStore(storage),
 		userFactorRepo: userFactorRepo,
-		masterKey:      masterKey,
 	}
 }

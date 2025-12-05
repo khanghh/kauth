@@ -197,7 +197,7 @@ type apiDependencies struct {
 
 func setupAPIRoutes(router fiber.Router, deps *apiDependencies) {
 	authHandler := api.NewAuthHandler(deps.authorizeService, deps.userService, deps.twoFactorService)
-	router.Get("/p3/serviceValidate", authHandler.GetServiceValidate)
+	router.Post("/p3/serviceValidate", authHandler.PostServiceValidate)
 }
 
 type webDependencies struct {
@@ -286,8 +286,8 @@ func run(ctx *cli.Context) error {
 	// services
 	var (
 		userService      = users.NewUserService(userRepo, userOAuthRepo, userFactorRepo, pendingUserRepo)
-		authorizeService = auth.NewAuthorizeService(storage, serviceRepo)
-		twoFactorService = twofactor.NewTwoFactorService(storage, userFactorRepo, config.MasterKey)
+		authorizeService = auth.NewAuthorizeService(config.MasterKey, storage, serviceRepo)
+		twoFactorService = twofactor.NewTwoFactorService(config.MasterKey, storage, userFactorRepo)
 		oauthProviders   = mustInitOAuthProviders(config)
 	)
 
