@@ -41,7 +41,7 @@ func (h *AuthHandler) handleAuthorizeServiceAccess(ctx *fiber.Ctx, session *sess
 	} else if err != nil {
 		return err
 	}
-	return redirect(ctx, ticket.ServiceURL, "ticket", ticket.TicketID)
+	return redirect(ctx, ticket.CallbackURL, "ticket", ticket.TicketID)
 }
 
 func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
@@ -60,7 +60,7 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 	if err != nil {
 		return forceLogout(ctx, "")
 	}
-	service, err := h.authorizeService.GetService(ctx.Context(), serviceURL)
+	service, err := h.authorizeService.GetServiceByCallbackURL(ctx.Context(), serviceURL)
 	if errors.Is(err, auth.ErrServiceNotFound) {
 		return render.RenderNotFoundErrorPage(ctx)
 	} else if err != nil {
@@ -112,7 +112,7 @@ func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
 		return forceLogout(ctx, "")
 	}
 
-	service, err := h.authorizeService.GetService(ctx.Context(), serviceURL)
+	service, err := h.authorizeService.GetServiceByCallbackURL(ctx.Context(), serviceURL)
 	if errors.Is(err, auth.ErrServiceNotFound) {
 		return render.RenderNotFoundErrorPage(ctx)
 	}

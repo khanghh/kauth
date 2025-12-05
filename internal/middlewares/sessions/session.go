@@ -16,9 +16,9 @@ type SessionData struct {
 	OAuthID            uint      `mapstructure:"oauth_id,omitempty"             redis:"oauth_id"`             // user oauth id
 	LastSeen           time.Time `mapstructure:"last_seen,omitempty"            redis:"last_seen"`            // last request time
 	LoginTime          time.Time `mapstructure:"login_time,omitempty"           redis:"login_time"`           // last login time
-	TwoFARequired      bool      `mapstructure:"two_fa_required,omitempty"      redis:"two_fa_required"`      // is 2fa required
-	TwoFAChallengeID   string    `mapstructure:"two_fa_challenge_id,omitempty"  redis:"two_fa_challenge_id"`  // 2fa challenge id
-	TwoFASuccessAt     time.Time `mapstructure:"two_fa_success_at,omitempty"    redis:"two_fa_success_at"`    // 2fa success time
+	TwoFARequired      bool      `mapstructure:"twofa_required,omitempty"       redis:"twofa_required"`       // is 2fa required
+	TwoFAChallengeID   string    `mapstructure:"twofa_challenge_id,omitempty"   redis:"twofa_challenge_id"`   // 2fa challenge id
+	TwoFASuccessAt     time.Time `mapstructure:"twofa_success_at,omitempty"     redis:"twofa_success_at"`     // 2fa success time
 	StateEncryptionKey string    `mapstructure:"state_encryption_key,omitempty" redis:"state_encryption_key"` // state encryption key
 	ExpireTime         time.Time `mapstructure:"expire_time,omitempty"          redis:"expire_time"`          // session expire time
 }

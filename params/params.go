@@ -22,6 +22,9 @@ const (
 	TwoFactorOTPRefreshCooldown   = 1 * time.Minute // otp code refresh cooldown
 	TwoFactorStateMaxAge          = 24 * time.Hour  // time to live for user state
 	TwoFactorJWTExpiration        = 1 * time.Hour   // jwt token expiration duration
+	TwoFactorValidity             = 24 * time.Hour  // jwt token expiration duration
 	CSRFTokenExpiration           = 5 * time.Minute // csrf token expiration duration
+	ServiceClientSecretLength     = 32              // length of service client secret
 	HealthCheckServerAddr         = ":3001"
+	ServiceAccessTokenExpiration  = 5 * 24 * time.Hour * 365 // 5 year
 )

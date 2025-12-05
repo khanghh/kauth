@@ -18,10 +18,28 @@ type APIErrorDetail struct {
 	Message string `json:"message"`
 }
 
-type UserInfoResponse struct {
-	UserID   uint   `json:"userId"`
-	Username string `json:"username"`
-	FullName string `json:"fullName"`
-	Email    string `json:"email"`
-	Picture  string `json:"picture,omitempty"`
+func NewDataResponse(data any) APIResponse {
+	return APIResponse{
+		APIVersion: "1.0",
+		Data:       data,
+	}
+}
+
+func NewErrorResponse(code int, message string, details ...APIErrorDetail) APIResponse {
+	return APIResponse{
+		APIVersion: "1.0",
+		Error: &APIErrorInfo{
+			Code:    code,
+			Message: message,
+			Errors:  details,
+		},
+	}
+}
+
+func NewErrorDetail(domain, reason, message string) APIErrorDetail {
+	return APIErrorDetail{
+		Domain:  domain,
+		Reason:  reason,
+		Message: message,
+	}
 }

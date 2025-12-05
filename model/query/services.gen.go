@@ -28,9 +28,10 @@ func newService(db *gorm.DB, opts ...gen.DOOption) service {
 	_service.ALL = field.NewAsterisk(tableName)
 	_service.ID = field.NewUint(tableName, "id")
 	_service.Name = field.NewString(tableName, "name")
+	_service.ClientID = field.NewString(tableName, "client_id")
+	_service.ClientSecret = field.NewString(tableName, "client_secret")
 	_service.LoginURL = field.NewString(tableName, "login_url")
 	_service.LogoutURL = field.NewString(tableName, "logout_url")
-	_service.SigningKey = field.NewString(tableName, "signing_key")
 	_service.StripQuery = field.NewBool(tableName, "strip_query")
 	_service.AutoLogin = field.NewBool(tableName, "auto_login")
 	_service.ChallengeRequired = field.NewBool(tableName, "challenge_required")
@@ -50,9 +51,10 @@ type service struct {
 	ALL               field.Asterisk
 	ID                field.Uint
 	Name              field.String
+	ClientID          field.String
+	ClientSecret      field.String
 	LoginURL          field.String
 	LogoutURL         field.String
-	SigningKey        field.String
 	StripQuery        field.Bool
 	AutoLogin         field.Bool
 	ChallengeRequired field.Bool
@@ -78,9 +80,10 @@ func (s *service) updateTableName(table string) *service {
 	s.ALL = field.NewAsterisk(table)
 	s.ID = field.NewUint(table, "id")
 	s.Name = field.NewString(table, "name")
+	s.ClientID = field.NewString(table, "client_id")
+	s.ClientSecret = field.NewString(table, "client_secret")
 	s.LoginURL = field.NewString(table, "login_url")
 	s.LogoutURL = field.NewString(table, "logout_url")
-	s.SigningKey = field.NewString(table, "signing_key")
 	s.StripQuery = field.NewBool(table, "strip_query")
 	s.AutoLogin = field.NewBool(table, "auto_login")
 	s.ChallengeRequired = field.NewBool(table, "challenge_required")
@@ -104,12 +107,13 @@ func (s *service) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (s *service) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 12)
+	s.fieldMap = make(map[string]field.Expr, 13)
 	s.fieldMap["id"] = s.ID
 	s.fieldMap["name"] = s.Name
+	s.fieldMap["client_id"] = s.ClientID
+	s.fieldMap["client_secret"] = s.ClientSecret
 	s.fieldMap["login_url"] = s.LoginURL
 	s.fieldMap["logout_url"] = s.LogoutURL
-	s.fieldMap["signing_key"] = s.SigningKey
 	s.fieldMap["strip_query"] = s.StripQuery
 	s.fieldMap["auto_login"] = s.AutoLogin
 	s.fieldMap["challenge_required"] = s.ChallengeRequired
