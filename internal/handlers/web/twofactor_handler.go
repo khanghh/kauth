@@ -194,11 +194,20 @@ func (h *TwoFactorHandler) PostChallenge(ctx *fiber.Ctx) error {
 		return nil
 	}
 
+	userFactors, err := h.userService.GetAuthFactors(ctx.Context(), session.UserID)
+	if err != nil {
+		return err
+	}
+
 	sub := getChallengeSubject(ctx, session)
 	switch method {
 	case "email":
 		return h.handleChallengeEmailOTP(ctx, pageData, sub, state.CallbackURL, postCreateFunc)
 	case "totp":
+		if !isFactorEnabled(userFactors, string(users.AuthFactorTOTP)) {
+			pageData.ErrorMsg = MsgInvalid2FAMethod
+			return render.RenderVerificationRequiredPage(ctx, pageData)
+		}
 		return h.handleChallengeTOTP(ctx, pageData, sub, state.CallbackURL, postCreateFunc)
 	default:
 		pageData.ErrorMsg = MsgInvalid2FAMethod
@@ -462,6 +471,10 @@ func isFactorEnabled(authFactors []*model.UserFactor, factorType string) bool {
 			return true
 		}
 	}
+	// make email 2FA enabled by default if no factors are set up
+	if factorType == string(users.AuthFactorEmail) && len(authFactors) == 0 {
+		return true
+	}
 	return false
 }
 
@@ -482,8 +495,8 @@ func (h *TwoFactorHandler) GetTwoFASettings(ctx *fiber.Ctx) error {
 
 	pageData := render.TwoFASettingsPageData{
 		Email:        user.Email,
-		EmailEnabled: isFactorEnabled(authFactors, "email"),
-		TOTPEnabled:  isFactorEnabled(authFactors, "totp"),
+		EmailEnabled: isFactorEnabled(authFactors, string(users.AuthFactorEmail)),
+		TOTPEnabled:  isFactorEnabled(authFactors, string(users.AuthFactorTOTP)),
 	}
 	return render.Render2FASettingsPage(ctx, pageData)
 }
