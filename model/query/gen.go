@@ -17,6 +17,7 @@ import (
 
 var (
 	Q           = new(Query)
+	AuditEvent  *auditEvent
 	PendingUser *pendingUser
 	Service     *service
 	Token       *token
@@ -27,6 +28,7 @@ var (
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
+	AuditEvent = &Q.AuditEvent
 	PendingUser = &Q.PendingUser
 	Service = &Q.Service
 	Token = &Q.Token
@@ -38,6 +40,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
 		db:          db,
+		AuditEvent:  newAuditEvent(db, opts...),
 		PendingUser: newPendingUser(db, opts...),
 		Service:     newService(db, opts...),
 		Token:       newToken(db, opts...),
@@ -50,6 +53,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 type Query struct {
 	db *gorm.DB
 
+	AuditEvent  auditEvent
 	PendingUser pendingUser
 	Service     service
 	Token       token
@@ -63,6 +67,7 @@ func (q *Query) Available() bool { return q.db != nil }
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
 		db:          db,
+		AuditEvent:  q.AuditEvent.clone(db),
 		PendingUser: q.PendingUser.clone(db),
 		Service:     q.Service.clone(db),
 		Token:       q.Token.clone(db),
@@ -83,6 +88,7 @@ func (q *Query) WriteDB() *Query {
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
 		db:          db,
+		AuditEvent:  q.AuditEvent.replaceDB(db),
 		PendingUser: q.PendingUser.replaceDB(db),
 		Service:     q.Service.replaceDB(db),
 		Token:       q.Token.replaceDB(db),
@@ -93,6 +99,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 }
 
 type queryCtx struct {
+	AuditEvent  *auditEventDo
 	PendingUser *pendingUserDo
 	Service     *serviceDo
 	Token       *tokenDo
@@ -103,6 +110,7 @@ type queryCtx struct {
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
+		AuditEvent:  q.AuditEvent.WithContext(ctx),
 		PendingUser: q.PendingUser.WithContext(ctx),
 		Service:     q.Service.WithContext(ctx),
 		Token:       q.Token.WithContext(ctx),
