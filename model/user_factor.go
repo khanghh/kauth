@@ -7,7 +7,7 @@ import (
 )
 
 type UserFactor struct {
-	ID        uint   `gorm:"primarykey"`
+	ID        uint   `gorm:"primarykey,autoIncrement"`
 	UserID    uint   `gorm:"not null;index:idx_user_factor,unique"`
 	Type      string `gorm:"size:32;not null;index:idx_user_factor,unique"`
 	Secret    string `gorm:"size:128;not null"`

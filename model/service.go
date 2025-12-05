@@ -7,7 +7,7 @@ import (
 )
 
 type Service struct {
-	ID                uint          `gorm:"primarykey"`
+	ID                uint          `gorm:"primarykey,autoIncrement"`
 	Name              string        `gorm:"size:128;not null"`
 	ClientID          string        `gorm:"size:64;not null;uniqueIndex"`
 	ClientSecret      string        `gorm:"size:128;not null"`

@@ -8,7 +8,8 @@ import (
 var snowflakeNode *snowflake.Node
 
 var Models = []interface{}{
-	&User{}, &UserOAuth{}, &Service{}, &Token{}, &PendingUser{}, &UserFactor{},
+	&User{}, &UserOAuth{}, &Service{}, &Token{},
+	&PendingUser{}, &UserFactor{}, &AuditEvent{},
 }
 
 func init() {
