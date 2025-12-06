@@ -251,7 +251,7 @@ func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 	router.Get("/2fa/totp/enroll", twofactorHandler.GetTOTPEnroll)
 	router.Post("/2fa/totp/enroll", twofactorHandler.PostTOTPEnroll)
 	router.Get("/2fa/totp/verify", twofactorHandler.GetTOTVerify)
-	router.Post("/2fa/totp/verify", twofactorHandler.PostTOTPVerify)
+	router.Post("/2fa/totp/verify", twofactorHandler.PostVerifyTOTP)
 	router.Get("/2fa/settings", twofactorHandler.GetTwoFASettings)
 	router.Post("/2fa/settings", twofactorHandler.PostTwoFASettings)
 	router.Get("/account/change-password", accountSettingsHandler.GetChangePassword)

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/khanghh/kauth/internal/audit"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/oauth"
 	"github.com/khanghh/kauth/internal/render"
@@ -45,6 +46,8 @@ func (h *OAuthHandler) handleOAuthLogin(ctx *fiber.Ctx, userOAuth *model.UserOAu
 		LoginTime: time.Now(),
 		OAuthID:   userOAuth.ID,
 	})
+
+	audit.RecordLoginSuccess(ctx, user, audit.AuthMethodOAuth)
 
 	state := ctx.Query("state")
 	queryParams, err := url.ParseQuery(state)

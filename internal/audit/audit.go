@@ -1,132 +1,116 @@
 package audit
 
 import (
-	"context"
 	"sync"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/model"
 )
 
-var auditRepo AuditEventRepository
+var auditRepo AuditLogRepository
 var initOnce sync.Once
 
-func Initialize(repo AuditEventRepository) {
+func Initialize(repo AuditLogRepository) {
 	initOnce.Do(func() {
 		auditRepo = repo
 	})
 }
 
 const (
-	EventTypeLoginSuccess           = "login_success"
-	EventTypeLoginFailure           = "login_failure"
-	EventTypeServiceAuthorized      = "service_authorized"
-	EventTypeTwoFAChallengeCreated  = "2fa_challenge_created"
-	EventTypeTwoFAChallengeVerified = "2fa_challenge_verified"
-	EventTypeTwoFAChallengeFailed   = "2fa_challenge_failed"
-	EventTypeTwoFAAttemptSuccess    = "2fa_attempt_success"
-	EventTypeTwoFAAttemptFailure    = "2fa_attempt_failure"
+	EventTypeLoginSuccess        = "login_success"
+	EventTypeLoginFailure        = "login_failure"
+	EventTypeUserLogout          = "logout"
+	EventTypeServiceAuthorized   = "service_authorized"
+	EventType2FAChallengeCreated = "2fa_challenge_created"
+	EventType2FAAttemptSuccess   = "2fa_attempt_success"
+	EventType2FAAttemptFailure   = "2fa_attempt_failure"
 )
 
 const (
-	TwoFAStateCreated uint = iota
-	TwoFAStateVerified
-	TwoFAStateFailed
+	AuthMethodPassword = "password"
+	AuthMethodOAuth    = "oauth"
 )
 
-type LoginRecord struct {
-	UserID    uint
-	Username  string
-	Method    string
-	IP        string
-	UserAgent string
-	Success   bool
-	Reason    string
-}
-
-type ServiceAuthorizedRecord struct {
-	UserID      uint
-	Username    string
-	ServiceID   uint
-	ServiceName string
-	IP          string
-	UserAgent   string
-}
-
-type TwoFAChallengeRecord struct {
-	UserID     uint
-	Username   string
-	TwoFAState uint
-	IP         string
-	UserAgent  string
-	Reason     string
-}
-
-type TwoFAChallengeAttemptRecord struct {
-	UserID    uint
-	Username  string
-	Success   bool
-	IP        string
-	UserAgent string
-	Reason    string
-}
-
-func RecordLogin(ctx context.Context, record LoginRecord) error {
-	loginEventType := EventTypeLoginFailure
-	if record.Success {
-		loginEventType = EventTypeLoginSuccess
-	}
-	return auditRepo.RecordEvent(ctx, &model.AuditEvent{
-		UserID:     record.UserID,
-		Username:   record.Username,
-		EventType:  loginEventType,
-		AuthMethod: record.Method,
-		IP:         record.IP,
-		UserAgent:  record.UserAgent,
-		Reason:     record.Reason,
+func RecordLoginSuccess(ctx *fiber.Ctx, user *model.User, method string) error {
+	return auditRepo.RecordEvent(ctx.Context(), &model.AuditEvent{
+		UserID:     user.ID,
+		Username:   user.Username,
+		EventType:  EventTypeLoginSuccess,
+		AuthMethod: method,
+		IP:         ctx.IP(),
+		UserAgent:  ctx.Get("User-Agent"),
 	})
 }
 
-func RecordServiceAuthorized(ctx context.Context, record ServiceAuthorizedRecord) error {
-	return auditRepo.RecordEvent(ctx, &model.AuditEvent{
-		UserID:    record.UserID,
-		Username:  record.Username,
-		EventType: EventTypeServiceAuthorized,
-		IP:        record.IP,
-		UserAgent: record.UserAgent,
+func RecordLoginFailure(ctx *fiber.Ctx, user *model.User, method string, reason string) error {
+	return auditRepo.RecordEvent(ctx.Context(), &model.AuditEvent{
+		UserID:     user.ID,
+		Username:   user.Username,
+		EventType:  EventTypeLoginFailure,
+		AuthMethod: method,
+		Reason:     reason,
+		IP:         ctx.IP(),
+		UserAgent:  ctx.Get("User-Agent"),
 	})
 }
 
-func RecordTwoFAChallenge(ctx context.Context, record TwoFAChallengeRecord) error {
-	var eventType string
-	switch record.TwoFAState {
-	case TwoFAStateVerified:
-		eventType = EventTypeTwoFAChallengeVerified
-	case TwoFAStateFailed:
-		eventType = EventTypeTwoFAChallengeFailed
-	default:
-		eventType = EventTypeTwoFAChallengeCreated
-	}
-	return auditRepo.RecordEvent(ctx, &model.AuditEvent{
-		UserID:    record.UserID,
-		Username:  record.Username,
-		EventType: eventType,
-		IP:        record.IP,
-		UserAgent: record.UserAgent,
-		Reason:    record.Reason,
+func RecordUserLogout(ctx *fiber.Ctx, userID uint, username string) error {
+	return auditRepo.RecordEvent(ctx.Context(), &model.AuditEvent{
+		UserID:    userID,
+		Username:  username,
+		EventType: EventTypeUserLogout,
+		IP:        ctx.IP(),
+		UserAgent: ctx.Get("User-Agent"),
 	})
 }
 
-func Record2FAChallengeAttempt(ctx context.Context, record TwoFAChallengeAttemptRecord) error {
-	eventType := EventTypeTwoFAAttemptFailure
-	if record.Success {
-		eventType = EventTypeTwoFAAttemptSuccess
-	}
-	return auditRepo.RecordEvent(ctx, &model.AuditEvent{
-		UserID:    record.UserID,
-		Username:  record.Username,
-		EventType: eventType,
-		IP:        record.IP,
-		UserAgent: record.UserAgent,
-		Reason:    record.Reason,
+func RecordServiceAuthorized(ctx *fiber.Ctx, user *model.User, service *model.Service, callbackURL string) error {
+	return auditRepo.RecordEvent(ctx.Context(), &model.AuditEvent{
+		UserID:      user.ID,
+		Username:    user.Username,
+		EventType:   EventTypeServiceAuthorized,
+		ServiceID:   service.ID,
+		ServiceName: service.Name,
+		CallbackURL: callbackURL,
+		IP:          ctx.IP(),
+		UserAgent:   ctx.Get("User-Agent"),
+	})
+}
+
+func Record2FAChallengeCreated(ctx *fiber.Ctx, user *model.User, cid string, ctype string, callbackURL string) error {
+	return auditRepo.RecordEvent(ctx.Context(), &model.AuditEvent{
+		UserID:        user.ID,
+		Username:      user.Username,
+		EventType:     EventType2FAChallengeCreated,
+		ChallengeID:   cid,
+		ChallengeType: ctype,
+		CallbackURL:   callbackURL,
+		IP:            ctx.IP(),
+		UserAgent:     ctx.Get("User-Agent"),
+	})
+}
+
+func Record2FAAttemptSuccess(ctx *fiber.Ctx, user *model.User, cid string, ctype string) error {
+	return auditRepo.RecordEvent(ctx.Context(), &model.AuditEvent{
+		UserID:        user.ID,
+		Username:      user.Username,
+		EventType:     EventType2FAAttemptSuccess,
+		ChallengeID:   cid,
+		ChallengeType: ctype,
+		IP:            ctx.IP(),
+		UserAgent:     ctx.Get("User-Agent"),
+	})
+}
+
+func Record2FAAttemptFailure(ctx *fiber.Ctx, user *model.User, cid string, ctype string, reason string) error {
+	return auditRepo.RecordEvent(ctx.Context(), &model.AuditEvent{
+		UserID:        user.ID,
+		Username:      user.Username,
+		EventType:     EventType2FAAttemptFailure,
+		ChallengeID:   cid,
+		ChallengeType: ctype,
+		Reason:        reason,
+		IP:            ctx.IP(),
+		UserAgent:     ctx.Get("User-Agent"),
 	})
 }
