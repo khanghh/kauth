@@ -97,9 +97,17 @@ func (h *TwoFactorHandler) GetChallenge(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	anyFactorEnabled := false
+	for _, factor := range authFactors {
+		if factor.Enabled {
+			anyFactorEnabled = true
+			break
+		}
+	}
+
 	pageData := render.VerificationRequiredPageData{
 		Email:        user.Email,
-		EmailEnabled: isFactorEnabled(authFactors, string(users.AuthFactorEmail)),
+		EmailEnabled: !anyFactorEnabled || isFactorEnabled(authFactors, string(users.AuthFactorEmail)),
 		TOTPEnabled:  isFactorEnabled(authFactors, string(users.AuthFactorTOTP)),
 		IsMasked:     true,
 	}
@@ -476,10 +484,6 @@ func isFactorEnabled(authFactors []*model.UserFactor, factorType string) bool {
 		if factor.Type == factorType && factor.Enabled {
 			return true
 		}
-	}
-	// make email 2FA enabled by default if no factors are set up
-	if factorType == string(users.AuthFactorEmail) && len(authFactors) == 0 {
-		return true
 	}
 	return false
 }
