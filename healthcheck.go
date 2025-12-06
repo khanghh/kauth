@@ -1,15 +1,13 @@
 package main
 
 import (
-	"context"
 	"net/http"
 
-	"github.com/khanghh/kauth/params"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
-func startHealthCheckServer(ctx context.Context, done chan struct{}, rdb redis.UniversalClient, db *gorm.DB) {
+func startHealthCheckServer(addr string, rdb redis.UniversalClient, db *gorm.DB) {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/livez", func(w http.ResponseWriter, r *http.Request) {
@@ -35,20 +33,5 @@ func startHealthCheckServer(ctx context.Context, done chan struct{}, rdb redis.U
 		w.WriteHeader(http.StatusOK)
 	})
 
-	server := &http.Server{
-		Addr:    params.HealthCheckServerAddr,
-		Handler: mux,
-	}
-
-	serverErr := make(chan error, 1)
-	go func() {
-		serverErr <- server.ListenAndServe()
-	}()
-
-	select {
-	case <-ctx.Done():
-		close(done)
-	case <-serverErr:
-		close(done)
-	}
+	http.ListenAndServe(addr, mux)
 }
