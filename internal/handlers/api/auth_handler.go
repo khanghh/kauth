@@ -2,6 +2,7 @@ package api
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/auth"
@@ -15,7 +16,7 @@ type AuthHandler struct {
 }
 
 type userInfoResponse struct {
-	UserID   uint   `json:"userId"`
+	UserID   string `json:"userId"`
 	Username string `json:"username"`
 	FullName string `json:"fullName"`
 	Email    string `json:"email"`
@@ -98,7 +99,7 @@ func (h *AuthHandler) PostServiceValidate(ctx *fiber.Ctx) error {
 	}
 
 	userInfo := userInfoResponse{
-		UserID:   user.ID,
+		UserID:   strconv.FormatUint(uint64(user.ID), 10),
 		Username: user.Username,
 		FullName: user.FullName,
 		Email:    user.Email,
