@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/khanghh/kauth/internal/audit"
 	"github.com/khanghh/kauth/internal/mail"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/render"
@@ -147,7 +148,7 @@ func (h *TwoFactorHandler) handleChallengeTOTP(ctx *fiber.Ctx, pageData render.V
 	return redirect(ctx, "/2fa/totp/verify", "cid", ch.ID)
 }
 
-func (h *TwoFactorHandler) handleChallengeSuccess(ctx *fiber.Ctx, session *sessions.Session, ch *twofactor.Challenge, sub twofactor.Subject) error {
+func (h *TwoFactorHandler) handleChallengeSuccess(ctx *fiber.Ctx, user *model.User, session *sessions.Session, ch *twofactor.Challenge) error {
 	if session.TwoFARequired && session.TwoFAChallengeID == ch.ID {
 		session.TwoFARequired = false
 		session.TwoFASuccessAt = time.Now()
@@ -191,6 +192,7 @@ func (h *TwoFactorHandler) PostChallenge(ctx *fiber.Ctx) error {
 		if state.Action == "login" && session.TwoFARequired {
 			session.TwoFAChallengeID = ch.ID
 		}
+		audit.Record2FAChallengeCreated(ctx, user, ch.ID, ch.Type, ch.CallbackURL)
 		return nil
 	}
 
@@ -292,10 +294,12 @@ func (h *TwoFactorHandler) PostVerifyOTP(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.twoFactorService.OTP().Verify(ctx.Context(), ch, subject, code); err != nil {
+		audit.Record2FAAttemptFailure(ctx, user, ch.ID, ch.Type, err.Error())
 		return handleTwoFactorError(ctx, err)
 	}
 
-	return h.handleChallengeSuccess(ctx, session, ch, subject)
+	audit.Record2FAAttemptSuccess(ctx, user, ch.ID, ch.Type)
+	return h.handleChallengeSuccess(ctx, user, session, ch)
 }
 
 func (h *TwoFactorHandler) generateTOTPEnrollmentURL(issuer string, username string, secret string) (string, error) {
@@ -419,7 +423,7 @@ func (h *TwoFactorHandler) GetTOTVerify(ctx *fiber.Ctx) error {
 	return render.RenderVerifyTOTPPage(ctx, "")
 }
 
-func (h *TwoFactorHandler) PostTOTPVerify(ctx *fiber.Ctx) error {
+func (h *TwoFactorHandler) PostVerifyTOTP(ctx *fiber.Ctx) error {
 	cid := ctx.FormValue("cid")
 	code := ctx.FormValue("code")
 
@@ -432,7 +436,7 @@ func (h *TwoFactorHandler) PostTOTPVerify(ctx *fiber.Ctx) error {
 		return render.RenderVerifyTOTPPage(ctx, MsgOTPCodeEmpty)
 	}
 
-	_, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
+	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
 	if err != nil {
 		return forceLogout(ctx, "")
 	}
@@ -459,10 +463,12 @@ func (h *TwoFactorHandler) PostTOTPVerify(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.twoFactorService.TOTP().Verify(ctx.Context(), ch, subject, code); err != nil {
+		audit.Record2FAAttemptFailure(ctx, user, ch.ID, ch.Type, err.Error())
 		return handleTwoFactorError(ctx, err)
 	}
 
-	return h.handleChallengeSuccess(ctx, session, ch, subject)
+	audit.Record2FAAttemptSuccess(ctx, user, ch.ID, ch.Type)
+	return h.handleChallengeSuccess(ctx, user, session, ch)
 }
 
 func isFactorEnabled(authFactors []*model.UserFactor, factorType string) bool {

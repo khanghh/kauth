@@ -30,9 +30,12 @@ func newAuditEvent(db *gorm.DB, opts ...gen.DOOption) auditEvent {
 	_auditEvent.UserID = field.NewUint(tableName, "user_id")
 	_auditEvent.Username = field.NewString(tableName, "username")
 	_auditEvent.EventType = field.NewString(tableName, "event_type")
+	_auditEvent.AuthMethod = field.NewString(tableName, "auth_method")
 	_auditEvent.ServiceID = field.NewUint(tableName, "service_id")
+	_auditEvent.ChallengeID = field.NewString(tableName, "challenge_id")
+	_auditEvent.ChallengeType = field.NewString(tableName, "challenge_type")
 	_auditEvent.ServiceName = field.NewString(tableName, "service_name")
-	_auditEvent.Success = field.NewBool(tableName, "success")
+	_auditEvent.CallbackURL = field.NewString(tableName, "callback_url")
 	_auditEvent.Reason = field.NewString(tableName, "reason")
 	_auditEvent.IP = field.NewString(tableName, "ip")
 	_auditEvent.UserAgent = field.NewString(tableName, "user_agent")
@@ -46,18 +49,21 @@ func newAuditEvent(db *gorm.DB, opts ...gen.DOOption) auditEvent {
 type auditEvent struct {
 	auditEventDo
 
-	ALL         field.Asterisk
-	ID          field.Uint64
-	UserID      field.Uint
-	Username    field.String
-	EventType   field.String
-	ServiceID   field.Uint
-	ServiceName field.String
-	Success     field.Bool
-	Reason      field.String
-	IP          field.String
-	UserAgent   field.String
-	CreatedAt   field.Time
+	ALL           field.Asterisk
+	ID            field.Uint64
+	UserID        field.Uint
+	Username      field.String
+	EventType     field.String
+	AuthMethod    field.String
+	ServiceID     field.Uint
+	ChallengeID   field.String
+	ChallengeType field.String
+	ServiceName   field.String
+	CallbackURL   field.String
+	Reason        field.String
+	IP            field.String
+	UserAgent     field.String
+	CreatedAt     field.Time
 
 	fieldMap map[string]field.Expr
 }
@@ -78,9 +84,12 @@ func (a *auditEvent) updateTableName(table string) *auditEvent {
 	a.UserID = field.NewUint(table, "user_id")
 	a.Username = field.NewString(table, "username")
 	a.EventType = field.NewString(table, "event_type")
+	a.AuthMethod = field.NewString(table, "auth_method")
 	a.ServiceID = field.NewUint(table, "service_id")
+	a.ChallengeID = field.NewString(table, "challenge_id")
+	a.ChallengeType = field.NewString(table, "challenge_type")
 	a.ServiceName = field.NewString(table, "service_name")
-	a.Success = field.NewBool(table, "success")
+	a.CallbackURL = field.NewString(table, "callback_url")
 	a.Reason = field.NewString(table, "reason")
 	a.IP = field.NewString(table, "ip")
 	a.UserAgent = field.NewString(table, "user_agent")
@@ -101,14 +110,17 @@ func (a *auditEvent) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *auditEvent) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 11)
+	a.fieldMap = make(map[string]field.Expr, 14)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["user_id"] = a.UserID
 	a.fieldMap["username"] = a.Username
 	a.fieldMap["event_type"] = a.EventType
+	a.fieldMap["auth_method"] = a.AuthMethod
 	a.fieldMap["service_id"] = a.ServiceID
+	a.fieldMap["challenge_id"] = a.ChallengeID
+	a.fieldMap["challenge_type"] = a.ChallengeType
 	a.fieldMap["service_name"] = a.ServiceName
-	a.fieldMap["success"] = a.Success
+	a.fieldMap["callback_url"] = a.CallbackURL
 	a.fieldMap["reason"] = a.Reason
 	a.fieldMap["ip"] = a.IP
 	a.fieldMap["user_agent"] = a.UserAgent

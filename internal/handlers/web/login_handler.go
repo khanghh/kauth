@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/khanghh/kauth/internal/audit"
 	"github.com/khanghh/kauth/internal/middlewares/captcha"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/oauth"
@@ -123,13 +124,17 @@ func (h *LoginHandler) PostLogin(ctx *fiber.Ctx) error {
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		pageData.ErrorMsg = MsgLoginWrongCredentials
+		audit.RecordLoginFailure(ctx, user, audit.AuthMethodPassword, "")
 		return render.RenderLoginPage(ctx, pageData)
 	}
 
+	audit.RecordLoginSuccess(ctx, user, audit.AuthMethodPassword)
 	return h.handleLogin2FA(ctx, session, user, serviceURL)
 }
 
 func (h *LoginHandler) PostLogout(ctx *fiber.Ctx) error {
+	session := sessions.Get(ctx)
+	audit.RecordUserLogout(ctx, session.UserID, "")
 	return forceLogout(ctx, "")
 }
 

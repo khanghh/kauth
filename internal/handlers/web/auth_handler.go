@@ -2,14 +2,17 @@ package web
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/khanghh/kauth/internal/audit"
 	"github.com/khanghh/kauth/internal/auth"
 	"github.com/khanghh/kauth/internal/common"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/render"
 	"github.com/khanghh/kauth/internal/urlutil"
+	"github.com/khanghh/kauth/model"
 )
 
 type AuthHandler struct {
@@ -34,13 +37,14 @@ func (h *AuthHandler) setAuthorizedTime(ctx *fiber.Ctx, serviceURL string, expir
 	session.SetAttr(ctx.Context(), key, expiresAt.UnixMilli())
 }
 
-func (h *AuthHandler) handleAuthorizeServiceAccess(ctx *fiber.Ctx, session *sessions.Session, serviceURL string) error {
+func (h *AuthHandler) handleAuthorizeServiceAccess(ctx *fiber.Ctx, user *model.User, session *sessions.Session, service *model.Service, serviceURL string) error {
 	ticket, err := h.authorizeService.GenerateServiceTicket(ctx.Context(), session.UserID, serviceURL)
 	if errors.Is(err, auth.ErrServiceNotFound) {
 		return render.RenderDeniedErrorPage(ctx)
 	} else if err != nil {
 		return err
 	}
+	audit.RecordServiceAuthorized(ctx, user, service, fmt.Sprintf("%s?ticket=%s", ticket.CallbackURL, ticket.TicketID))
 	return redirect(ctx, ticket.CallbackURL, "ticket", ticket.TicketID)
 }
 
@@ -70,7 +74,7 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 	authorizeTime := h.getAuthorizedTime(ctx, service.LoginURL)
 	challengeRequired := service.ChallengeRequired && time.Since(authorizeTime) > service.ChallengeValidity
 	if !challengeRequired && service.AutoLogin {
-		return h.handleAuthorizeServiceAccess(ctx, session, serviceURL)
+		return h.handleAuthorizeServiceAccess(ctx, user, session, service, serviceURL)
 	}
 	if challengeRequired && cid != "" {
 		sub := getChallengeSubject(ctx, sessions.Get(ctx))
@@ -78,7 +82,7 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 		err = h.twoFactorService.FinalizeChallenge(ctx.Context(), cid, sub, endpoint)
 		if err == nil {
 			h.setAuthorizedTime(ctx, serviceURL, time.Now())
-			return h.handleAuthorizeServiceAccess(ctx, session, serviceURL)
+			return h.handleAuthorizeServiceAccess(ctx, user, session, service, serviceURL)
 		}
 	}
 
@@ -107,7 +111,7 @@ func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
 		return ctx.Redirect("/")
 	}
 
-	_, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
+	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
 	if err != nil {
 		return forceLogout(ctx, "")
 	}
@@ -128,7 +132,7 @@ func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
 	}
 
 	h.setAuthorizedTime(ctx, service.LoginURL, time.Now())
-	return h.handleAuthorizeServiceAccess(ctx, session, serviceURL)
+	return h.handleAuthorizeServiceAccess(ctx, user, session, service, serviceURL)
 }
 
 func (h *AuthHandler) GetHome(ctx *fiber.Ctx) error {
