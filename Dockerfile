@@ -28,7 +28,6 @@ WORKDIR /app
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /workdir/kauth /app/kauth
-COPY --from=builder /workdir/templates /app/templates
 COPY --from=builder /workdir/static /app/static
 
 EXPOSE 3000

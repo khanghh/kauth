@@ -1,53 +1,67 @@
-# Default values for kauth.
+# Default values for mcrunner
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
-replicaCount: 3
-
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
-  repository: registry.mineviet.com/kauth
+  repository: registry.example.com/kauth
   # This sets the pull policy for images.
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
-# This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-imagePullSecrets: []
 # This is to override the chart name.
 nameOverride: ""
-fullnameOverride: "kauth-dev"
+fullnameOverride: ""
 
-# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: false
-  # Automatically mount a ServiceAccount's API credentials?
-  automount: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
+# -- The service account the pods will use to interact with the Kubernetes API
+serviceAccount:  # @schema additionalProperties: false
+  # If set, an existing service account is used
+  # If not set, a service account is created automatically using the fullname template
   name: ""
 
-# This is for setting Kubernetes Annotations to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-podAnnotations: {}
-# This is for setting Kubernetes Labels to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-podLabels: {}
+# Tolerations allow the scheduler to schedule pods with matching taints.
+tolerations: []
 
-podSecurityContext: {}
-  # fsGroup: 2000
+# https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes-using-node-affinity/
+affinity: {}
+  # nodeAffinity:
+  #   required:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: node-role.kubernetes.io/control-plane
+  #         operator: Exists
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+# nodeSelector is the simplest recommended form of node selection constraint.
+nodeSelector: {}
+  # kubernetes.io/hostname: hcm01
+
+# Additional volumes on the output Deployment definition.
+additionalVolumes: []
+
+deployment:
+  kind: Deployment
+  # This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+  replicas: 3
+  # This is for setting Kubernetes Annotations to a Pod.
+  # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  podAnnotations: {}
+  # This is for setting Kubernetes Labels to a Pod.
+  # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  podLabels: {}
+  # -- Security context to be added to spire agent pods.
+  # SecurityContext holds pod-level security attributes and common container settings.
+  # ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  podSecurityContext: {}
+    # runAsGroup: 65532
+    # runAsNonRoot: true
+    # runAsUser: 65532
+  # Additional volumeMounts on the output Deployment definition.
+  additionalVolumeMounts: []
+  envFrom: []
+  # - configMapRef:
+  #   name: special-config
+  initContainers: []
 
 # This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
@@ -55,35 +69,6 @@ service:
   type: ClusterIP
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   port: 3000
-
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
-# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-livenessProbe:
-  enabled: true
-  initialDelaySeconds: 30
-  periodSeconds: 30
-  timeoutSeconds: 5
-  failureThreshold: 3
-  successThreshold: 1
-
-readinessProbe:
-  enabled: true
-  initialDelaySeconds: 15
-  periodSeconds: 15
-  timeoutSeconds: 5
-  failureThreshold: 1
-  successThreshold: 1
 
 # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:
@@ -93,32 +78,42 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
-# Additional volumes on the output Deployment definition.
-volumes:
-- name: mail-tls
-  secret:
-    secretName: mail-tls
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  requests:
+    cpu: "100m"
+    memory: 64Mi
+  limits:
+    cpu: "1.0"
+    memory: 256Mi
 
-# Additional volumeMounts on the output Deployment definition.
-volumeMounts:
-- name: mail-tls
-  mountPath: "/app/certs/"
-  readOnly: true
+# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+livenessProbe:
+  enabled: false
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
 
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
+readinessProbe:
+  enabled: false
+  initialDelaySeconds: 15
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 1
+  successThreshold: 1
 
 config: |
   debug: false
-  baseURL: http://localhost:3000
+  siteName: Example App
+  baseURL: https://auth.example.com
   listenAddr : ":3000" 
   staticDir: "./static"
-  templateDir: "./templates"
-  allowOrigins: 
-  - http://localhost:8080
+  allowOrigins: [] 
   session:
     sessionMaxAge: "24h"
     cookieName: "sid"
@@ -134,13 +129,13 @@ config: |
     maxOpenConns: 10
     connMaxIdleTime: 10
     connMaxLifetime: 10
-
   authProviders: 
     oauth:
       google:
         clientId: xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com
         clientSecret: xxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
   mail:
+    from: "Example App <noreply@example.com>"
     backend: smtp
     smtp:
       host: smtp.example.com
@@ -150,7 +145,7 @@ config: |
       from: noreply@example.com
       tls: true
       certFile: "/app/certs/cert.pem"
-      keyFile: "/app/certs/keypem"
+      keyFile: "/app/certs/key.pem"
       caFile: "/app/certs/ca.pem"
   captcha:
     provider: turnstile
