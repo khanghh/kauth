@@ -13,6 +13,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/khanghh/kauth/internal/audit"
 	"github.com/khanghh/kauth/internal/auth"
 	"github.com/khanghh/kauth/internal/config"
 	"github.com/khanghh/kauth/internal/handlers"
@@ -281,6 +282,7 @@ func run(ctx *cli.Context) error {
 		userOAuthRepo   = users.NewUserOAuthRepository(query.Q)
 		userFactorRepo  = users.NewUserFactorRepository(query.Q)
 		serviceRepo     = auth.NewServiceRepository(query.Q)
+		auditRepo       = audit.NewAuditLogRepository(query.Q)
 	)
 
 	// services
@@ -290,6 +292,8 @@ func run(ctx *cli.Context) error {
 		twoFactorService = twofactor.NewTwoFactorService(config.MasterKey, storage, userFactorRepo)
 		oauthProviders   = mustInitOAuthProviders(config)
 	)
+
+	audit.Initialize(auditRepo)
 
 	router := fiber.New(fiber.Config{
 		Prefork:       false,
@@ -331,13 +335,7 @@ func run(ctx *cli.Context) error {
 		oauthProviders:   oauthProviders,
 	})
 
-	healthCheckCtx, term := context.WithCancel(ctx.Context)
-	done := make(chan struct{})
-	go startHealthCheckServer(healthCheckCtx, done, redisConn, database)
-	defer func() {
-		term()
-		<-done
-	}()
+	go startHealthCheckServer(params.HealthCheckServerAddr, redisConn, database)
 	return router.Listen(config.ListenAddr)
 }
 
