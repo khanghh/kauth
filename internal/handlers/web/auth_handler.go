@@ -3,6 +3,8 @@ package web
 import (
 	"errors"
 	"fmt"
+	"log"
+	"net/http"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -37,15 +39,34 @@ func (h *AuthHandler) setAuthorizedTime(ctx *fiber.Ctx, serviceURL string, expir
 	session.SetAttr(ctx.Context(), key, expiresAt.UnixMilli())
 }
 
+func doServerCallback(ctx *fiber.Ctx, callbackURL string) error {
+	resp, err := http.Get(callbackURL)
+	if err != nil {
+		log.Printf("Error during callback to %s: %v", callbackURL, err)
+		return render.RenderInternalServerErrorPage(ctx)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return render.RenderAccessDeniedPage(ctx)
+	}
+	return render.RenderAccessGrantedPage(ctx)
+}
+
 func (h *AuthHandler) handleAuthorizeServiceAccess(ctx *fiber.Ctx, user *model.User, session *sessions.Session, service *model.Service, serviceURL string) error {
 	ticket, err := h.authorizeService.GenerateServiceTicket(ctx.Context(), session.UserID, serviceURL)
 	if errors.Is(err, auth.ErrServiceNotFound) {
-		return render.RenderDeniedErrorPage(ctx)
+		return render.RenderAccessDeniedPage(ctx)
 	} else if err != nil {
-		return err
+		return render.RenderInternalServerErrorPage(ctx)
 	}
+
 	audit.RecordServiceAuthorized(ctx, user, service, fmt.Sprintf("%s?ticket=%s", ticket.CallbackURL, ticket.TicketID))
-	return redirect(ctx, ticket.CallbackURL, "ticket", ticket.TicketID)
+
+	callbackURL := urlutil.AppendQuery(ticket.CallbackURL, "ticket", ticket.TicketID)
+	if service.IsServerCallback {
+		return doServerCallback(ctx, callbackURL)
+	}
+	return ctx.Redirect(callbackURL)
 }
 
 func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {

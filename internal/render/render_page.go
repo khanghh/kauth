@@ -103,8 +103,8 @@ func RenderOAuthRegisterPage(ctx *fiber.Ctx, data RegisterPageData) error {
 	return ctx.Status(fiber.StatusOK).SendString(body)
 }
 
-func RenderDeniedErrorPage(ctx *fiber.Ctx) error {
-	body, err := RenderHTML("error-denied", fiber.Map{
+func RenderAccessDeniedPage(ctx *fiber.Ctx) error {
+	body, err := RenderHTML("access-denied", fiber.Map{
 		"siteName": globalVars["siteName"],
 	})
 	if err != nil {
@@ -112,6 +112,17 @@ func RenderDeniedErrorPage(ctx *fiber.Ctx) error {
 	}
 	ctx.Set("Content-Type", "text/html; charset=utf-8")
 	return ctx.Status(fiber.StatusForbidden).SendString(body)
+}
+
+func RenderAccessGrantedPage(ctx *fiber.Ctx) error {
+	body, err := RenderHTML("access-granted", fiber.Map{
+		"siteName": globalVars["siteName"],
+	})
+	if err != nil {
+		return err
+	}
+	ctx.Set("Content-Type", "text/html; charset=utf-8")
+	return ctx.Status(fiber.StatusOK).SendString(body)
 }
 
 func RenderProfilePage(ctx *fiber.Ctx, data ProfilePageData) error {
