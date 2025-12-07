@@ -28,8 +28,8 @@ func init() {
 
 func TestInitDatabase(t *testing.T) {
 	err := Service.Create(&model.Service{
-		Name:     "test",
-		LoginURL: "http://localhost:3000/callback",
+		Name:        "test",
+		CallbackURL: "http://localhost:3000/callback",
 	})
 	if err != nil {
 		t.Fatal(err)

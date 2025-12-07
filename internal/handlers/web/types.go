@@ -12,7 +12,7 @@ import (
 
 type AuthorizeService interface {
 	RegisterService(ctx context.Context, service *model.Service) error
-	GetServiceByCallbackURL(ctx context.Context, serviceURL string) (*model.Service, error)
+	GetServiceByCallbackURL(ctx context.Context, callbackURL string) (*model.Service, error)
 	GetServiceByClientID(ctx context.Context, clientID string) (*model.Service, error)
 	DeleteService(ctx context.Context, serviceID uint) error
 	GenerateServiceTicket(ctx context.Context, userID uint, callbackURL string) (*auth.ServiceTicket, error)

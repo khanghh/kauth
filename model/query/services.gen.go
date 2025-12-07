@@ -30,8 +30,7 @@ func newService(db *gorm.DB, opts ...gen.DOOption) service {
 	_service.Name = field.NewString(tableName, "name")
 	_service.ClientID = field.NewString(tableName, "client_id")
 	_service.ClientSecret = field.NewString(tableName, "client_secret")
-	_service.LoginURL = field.NewString(tableName, "login_url")
-	_service.LogoutURL = field.NewString(tableName, "logout_url")
+	_service.CallbackURL = field.NewString(tableName, "callback_url")
 	_service.IsServerCallback = field.NewBool(tableName, "is_server_callback")
 	_service.StripQuery = field.NewBool(tableName, "strip_query")
 	_service.AutoLogin = field.NewBool(tableName, "auto_login")
@@ -54,8 +53,7 @@ type service struct {
 	Name              field.String
 	ClientID          field.String
 	ClientSecret      field.String
-	LoginURL          field.String
-	LogoutURL         field.String
+	CallbackURL       field.String
 	IsServerCallback  field.Bool
 	StripQuery        field.Bool
 	AutoLogin         field.Bool
@@ -84,8 +82,7 @@ func (s *service) updateTableName(table string) *service {
 	s.Name = field.NewString(table, "name")
 	s.ClientID = field.NewString(table, "client_id")
 	s.ClientSecret = field.NewString(table, "client_secret")
-	s.LoginURL = field.NewString(table, "login_url")
-	s.LogoutURL = field.NewString(table, "logout_url")
+	s.CallbackURL = field.NewString(table, "callback_url")
 	s.IsServerCallback = field.NewBool(table, "is_server_callback")
 	s.StripQuery = field.NewBool(table, "strip_query")
 	s.AutoLogin = field.NewBool(table, "auto_login")
@@ -110,13 +107,12 @@ func (s *service) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (s *service) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 14)
+	s.fieldMap = make(map[string]field.Expr, 13)
 	s.fieldMap["id"] = s.ID
 	s.fieldMap["name"] = s.Name
 	s.fieldMap["client_id"] = s.ClientID
 	s.fieldMap["client_secret"] = s.ClientSecret
-	s.fieldMap["login_url"] = s.LoginURL
-	s.fieldMap["logout_url"] = s.LogoutURL
+	s.fieldMap["callback_url"] = s.CallbackURL
 	s.fieldMap["is_server_callback"] = s.IsServerCallback
 	s.fieldMap["strip_query"] = s.StripQuery
 	s.fieldMap["auto_login"] = s.AutoLogin

@@ -11,8 +11,7 @@ type Service struct {
 	Name              string        `gorm:"size:128;not null"`
 	ClientID          string        `gorm:"size:64;not null;uniqueIndex"`
 	ClientSecret      string        `gorm:"size:128;not null"`
-	LoginURL          string        `gorm:"size:1024;not null"`
-	LogoutURL         string        `gorm:"size:1024;not null"`
+	CallbackURL       string        `gorm:"size:1024;not null"`
 	IsServerCallback  bool          `gorm:"not null;default:false"`
 	StripQuery        bool          `gorm:"not null;default:false"`
 	AutoLogin         bool          `gorm:"not null;default:false"`
