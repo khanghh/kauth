@@ -64,10 +64,6 @@ func (s *AuthorizeService) ValidateServiceTicket(ctx context.Context, serviceCal
 		return &ticket, ErrTicketExpired
 	}
 
-	if _, err := s.GetServiceByCallbackURL(ctx, serviceCallbackURL); err != nil {
-		return &ticket, ErrServiceNotFound
-	}
-
 	if ticket.CallbackURL != serviceCallbackURL {
 		return &ticket, ErrServiceMismatch
 	}
@@ -145,6 +141,14 @@ func (s *AuthorizeService) GetServiceByClientID(ctx context.Context, clientID st
 
 func (s *AuthorizeService) DeleteService(ctx context.Context, serviceID uint) error {
 	return s.serviceRepo.Delete(ctx, query.Service.ID.Eq(serviceID))
+}
+
+func (s *AuthorizeService) HasCallbackURL(ctx context.Context, callbackURL string) (bool, error) {
+	_, err := s.GetServiceByCallbackURL(ctx, callbackURL)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, nil
+	}
+	return true, nil
 }
 
 func NewAuthorizeService(masterKey string, storage store.Storage, serviceRepo ServiceRepository) *AuthorizeService {
