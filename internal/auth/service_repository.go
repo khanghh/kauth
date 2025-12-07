@@ -34,7 +34,10 @@ func (r *serviceRepository) Delete(ctx context.Context, conds ...gen.Condition) 
 }
 
 func (r *serviceRepository) GetServiceByCallbackURL(ctx context.Context, callbackURL string) (*model.Service, error) {
-	return r.query.Service.WithContext(ctx).Where(r.query.Service.LoginURL.Eq(callbackURL)).First()
+	return r.query.Service.WithContext(ctx).
+		Where(r.query.Service.LoginURL.Eq(callbackURL)).
+		Or(r.query.Service.LogoutURL.Eq(callbackURL)).
+		First()
 }
 
 func (r *serviceRepository) GetServiceByClientID(ctx context.Context, clientID string) (*model.Service, error) {
