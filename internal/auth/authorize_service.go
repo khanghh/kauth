@@ -24,8 +24,6 @@ type ServiceRepository interface {
 	Create(ctx context.Context, service *model.Service) error
 	Updates(ctx context.Context, columns map[string]interface{}, conds ...gen.Condition) (gen.ResultInfo, error)
 	Delete(ctx context.Context, conds ...gen.Condition) error
-	GetServiceByCallbackURL(ctx context.Context, callbackURL string) (*model.Service, error)
-	GetServiceByClientID(ctx context.Context, clientID string) (*model.Service, error)
 }
 
 type ServiceTicket struct {
@@ -102,7 +100,7 @@ func (s *AuthorizeService) GenerateServiceTicket(ctx context.Context, userId uin
 func (s *AuthorizeService) RegisterService(ctx context.Context, service *model.Service) error {
 	if service.Name == "" {
 		return ErrServiceNameEmpty
-	} else if service.LoginURL == "" {
+	} else if service.CallbackURL == "" {
 		return ErrServiceCallbackEmpty
 	}
 
@@ -123,8 +121,8 @@ func (s *AuthorizeService) GetServiceByID(ctx context.Context, serviceID uint) (
 	return service, err
 }
 
-func (s *AuthorizeService) GetServiceByCallbackURL(ctx context.Context, serviceCallbackURL string) (*model.Service, error) {
-	service, err := s.serviceRepo.GetServiceByCallbackURL(ctx, serviceCallbackURL)
+func (s *AuthorizeService) GetServiceByCallbackURL(ctx context.Context, callbackURL string) (*model.Service, error) {
+	service, err := s.serviceRepo.First(ctx, query.Service.CallbackURL.Eq(callbackURL))
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, ErrServiceNotFound
 	}
@@ -141,14 +139,6 @@ func (s *AuthorizeService) GetServiceByClientID(ctx context.Context, clientID st
 
 func (s *AuthorizeService) DeleteService(ctx context.Context, serviceID uint) error {
 	return s.serviceRepo.Delete(ctx, query.Service.ID.Eq(serviceID))
-}
-
-func (s *AuthorizeService) HasCallbackURL(ctx context.Context, callbackURL string) (bool, error) {
-	_, err := s.GetServiceByCallbackURL(ctx, callbackURL)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return false, nil
-	}
-	return true, nil
 }
 
 func NewAuthorizeService(masterKey string, storage store.Storage, serviceRepo ServiceRepository) *AuthorizeService {

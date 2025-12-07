@@ -92,7 +92,7 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	authorizeTime := h.getAuthorizedTime(ctx, service.LoginURL)
+	authorizeTime := h.getAuthorizedTime(ctx, service.CallbackURL)
 	challengeRequired := service.ChallengeRequired && time.Since(authorizeTime) > service.ChallengeValidity
 	if !challengeRequired && service.AutoLogin {
 		return h.handleAuthorizeServiceAccess(ctx, user, session, service, serviceURL)
@@ -110,7 +110,7 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 	pageData := render.AuthorizeServicePageData{
 		Email:       user.Email,
 		ServiceName: service.Name,
-		ServiceURL:  service.LoginURL,
+		ServiceURL:  service.CallbackURL,
 	}
 	return render.RenderAuthorizeServiceAccessPage(ctx, pageData)
 }
@@ -142,7 +142,7 @@ func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
 
-	challengeRequired := service.ChallengeRequired && time.Since(h.getAuthorizedTime(ctx, service.LoginURL)) > service.ChallengeValidity
+	challengeRequired := service.ChallengeRequired && time.Since(h.getAuthorizedTime(ctx, service.CallbackURL)) > service.ChallengeValidity
 	if challengeRequired {
 		state := TwoFactorState{
 			Action:      "authorize",
@@ -152,7 +152,7 @@ func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
 		return redirect(ctx, "/2fa/challenge", "state", encryptState(ctx, state))
 	}
 
-	h.setAuthorizedTime(ctx, service.LoginURL, time.Now())
+	h.setAuthorizedTime(ctx, service.CallbackURL, time.Now())
 	return h.handleAuthorizeServiceAccess(ctx, user, session, service, serviceURL)
 }
 
