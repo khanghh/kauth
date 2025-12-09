@@ -41,7 +41,7 @@ type casValidateResponse struct {
 
 func (h *AuthHandler) PostServiceValidate(ctx *fiber.Ctx) error {
 	ticketID := ctx.FormValue("ticket")
-	serviceURL := urlutil.NormalizeURL(ctx.FormValue("service"))
+	serviceURL := urlutil.RemoveQuery(ctx.FormValue("service"))
 	clientID := ctx.FormValue("client_id")
 	clientSecret := ctx.FormValue("client_secret")
 	if clientID == "" || clientSecret == "" {

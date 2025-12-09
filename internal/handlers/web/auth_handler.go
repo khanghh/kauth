@@ -2,7 +2,6 @@ package web
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -54,6 +53,8 @@ func mapLoginError(errorCode string) string {
 		return MsgTwoFactorChallengeFailed
 	case "login_locked":
 		return MsgTooManyFailedLogin
+	case "unknown_service":
+		return MsgUnknownService
 	default:
 		return ""
 	}
@@ -120,12 +121,11 @@ func (h *AuthHandler) handleAuthorizeServiceAccess(ctx *fiber.Ctx, user *model.U
 	if errors.Is(err, auth.ErrServiceNotFound) {
 		return render.RenderAccessDeniedPage(ctx)
 	} else if err != nil {
-		return render.RenderInternalServerErrorPage(ctx)
+		return err
 	}
 
-	audit.RecordServiceAuthorized(ctx, user, service, fmt.Sprintf("%s?ticket=%s", ticket.CallbackURL, ticket.TicketID))
-
 	callbackURL := urlutil.AppendQuery(ticket.CallbackURL, "ticket", ticket.TicketID)
+	audit.RecordServiceAuthorized(ctx, user, service, callbackURL)
 	if service.IsServerCallback {
 		return doServerCallback(ctx, callbackURL)
 	}
@@ -136,13 +136,19 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 	cid := ctx.Query("cid")
 	serviceNameOrURL := urlutil.NormalizeURL(ctx.Query("service"))
 	serviceState := ctx.Query("state")
+
 	if serviceNameOrURL == "" {
-		return render.RenderNotFoundErrorPage(ctx)
+		return redirect(ctx, "/")
 	}
 
 	session := sessions.Get(ctx)
-	if !session.IsAuthenticated() {
+	if session == nil || !session.IsAuthenticated() {
 		return redirect(ctx, "/login", "service", serviceNameOrURL, "state", serviceState)
+	}
+
+	service, err := h.authorizeService.GetServiceByNameOrURL(ctx.Context(), serviceNameOrURL)
+	if err != nil {
+		return ctx.Redirect("/")
 	}
 
 	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
@@ -150,16 +156,10 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 		return forceLogout(ctx, "")
 	}
 
-	service, err := h.authorizeService.GetServiceByNameOrURL(ctx.Context(), serviceNameOrURL)
-	if errors.Is(err, auth.ErrServiceNotFound) {
-		return render.RenderNotFoundErrorPage(ctx)
-	} else if err != nil {
-		return err
-	}
-
 	serviceCallbackURL := urlutil.AppendQuery(service.CallbackURL, "state", serviceState)
 
 	authorizeTime := h.getAuthorizedTime(ctx, service.CallbackURL)
+
 	challengeRequired := service.ChallengeRequired && time.Since(authorizeTime) > service.ChallengeValidity
 	if !challengeRequired && service.AutoLogin {
 		return h.handleAuthorizeServiceAccess(ctx, user, session, service, serviceCallbackURL)
@@ -205,8 +205,8 @@ func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
 	}
 
 	service, err := h.authorizeService.GetServiceByNameOrURL(ctx.Context(), serviceNameOrURL)
-	if errors.Is(err, auth.ErrServiceNotFound) {
-		return render.RenderNotFoundErrorPage(ctx)
+	if err != nil {
+		return ctx.Redirect("/")
 	}
 
 	authorizeTime := h.getAuthorizedTime(ctx, service.CallbackURL)
@@ -258,20 +258,25 @@ func (h *AuthHandler) GetProfile(ctx *fiber.Ctx) error {
 
 func (h *AuthHandler) GetLogin(ctx *fiber.Ctx) error {
 	serviceNameOrURL := urlutil.RemoveQuery(ctx.Query("service"))
+	serviceState := ctx.Query("state")
 	errorCode := ctx.Query("error")
 
 	session := sessions.Get(ctx)
 	if session == nil || !session.IsAuthenticated() {
+		var errMsg string
+		if errorCode != "" {
+			errMsg = mapLoginError(errorCode)
+		}
 		return render.RenderLoginPage(ctx, render.LoginPageData{
 			OAuthLoginURLs: h.getOAuthLoginURLs(serviceNameOrURL),
-			ErrorMsg:       mapLoginError(errorCode),
+			ErrorMsg:       errMsg,
 		})
 	}
 
 	if serviceNameOrURL == "" {
-		return ctx.Redirect("/")
+		return redirect(ctx, "/")
 	}
-	return redirect(ctx, "/authorize", "service", serviceNameOrURL)
+	return redirect(ctx, "/authorize", "service", serviceNameOrURL, "state", serviceState)
 }
 
 func (h *AuthHandler) PostLogin(ctx *fiber.Ctx) error {
