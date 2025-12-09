@@ -31,16 +31,16 @@ func (h *AuthHandler) getAuthorizedTime(ctx *fiber.Ctx, serviceURL string) time.
 	session := sessions.Get(ctx)
 	key := "authz:" + common.CalculateHash(session.StateEncryptionKey, serviceURL)
 	var miliSec int64
-	if err := session.GetAttr(ctx.Context(), key, &miliSec); err == nil {
+	if err := session.GetField(ctx.Context(), key, &miliSec); err == nil {
 		return time.UnixMilli(miliSec)
 	}
 	return time.Time{}
 }
 
-func (h *AuthHandler) setAuthorizedTime(ctx *fiber.Ctx, serviceURL string, expiresAt time.Time) {
+func (h *AuthHandler) setAuthorizedTime(ctx *fiber.Ctx, serviceURL string, authTime time.Time) {
 	session := sessions.Get(ctx)
 	key := "authz:" + common.CalculateHash(session.StateEncryptionKey, serviceURL)
-	session.SetAttr(ctx.Context(), key, expiresAt.UnixMilli())
+	session.SetField(ctx.Context(), key, authTime.UnixMilli())
 }
 
 func mapLoginError(errorCode string) string {
@@ -85,7 +85,7 @@ func (h *AuthHandler) handleLogin2FA(ctx *fiber.Ctx, session *sessions.Session, 
 		return err
 	}
 
-	session.Set(ctx.Context(), sessions.SessionData{
+	session.SetData(ctx.Context(), sessions.SessionData{
 		IP:            ctx.IP(),
 		UserID:        user.ID,
 		LoginTime:     time.Now(),
