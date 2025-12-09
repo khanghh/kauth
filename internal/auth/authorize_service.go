@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -76,7 +77,7 @@ func (s *AuthorizeService) ValidateServiceTicket(ctx context.Context, serviceCal
 
 func (s *AuthorizeService) GenerateServiceTicket(ctx context.Context, userId uint, serviceCallbackURL string) (*ServiceTicket, error) {
 	cleanServiceURL := urlutil.RemoveQuery(serviceCallbackURL)
-	svc, err := s.GetServiceByCallbackURL(ctx, cleanServiceURL)
+	svc, err := s.GetServiceByNameOrURL(ctx, cleanServiceURL)
 	if err != nil {
 		return nil, err
 	}
@@ -121,11 +122,17 @@ func (s *AuthorizeService) GetServiceByID(ctx context.Context, serviceID uint) (
 	return service, err
 }
 
-func (s *AuthorizeService) GetServiceByCallbackURL(ctx context.Context, callbackURL string) (*model.Service, error) {
-	service, err := s.serviceRepo.First(ctx, query.Service.CallbackURL.Eq(callbackURL))
+func (s *AuthorizeService) GetServiceByNameOrURL(ctx context.Context, nameOrURL string) (service *model.Service, err error) {
+	if strings.HasPrefix(nameOrURL, "http://") || strings.HasPrefix(nameOrURL, "https://") {
+		service, err = s.serviceRepo.First(ctx, query.Service.CallbackURL.Eq(nameOrURL))
+	} else {
+		service, err = s.serviceRepo.First(ctx, query.Service.Name.Eq(nameOrURL))
+	}
+
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, ErrServiceNotFound
 	}
+
 	return service, nil
 }
 

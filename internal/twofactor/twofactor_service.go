@@ -31,14 +31,14 @@ type Subject struct {
 }
 
 func (s *TwoFactorService) subjectHash(sub Subject) string {
-	return s.calculateHash(sub.UserID, sub.SessionID, sub.IPAddress, sub.UserAgent)
+	return s.CalculateHash(sub.UserID, sub.SessionID, sub.IPAddress, sub.UserAgent)
 }
 
 func (s *TwoFactorService) getStateID(sub Subject) string {
-	return s.calculateHash(sub.UserID, sub.IPAddress)
+	return s.CalculateHash(sub.UserID, sub.IPAddress)
 }
 
-func (s *TwoFactorService) calculateHash(inputs ...interface{}) string {
+func (s *TwoFactorService) CalculateHash(inputs ...interface{}) string {
 	if len(inputs) == 0 {
 		return ""
 	}
@@ -73,7 +73,7 @@ func (s *TwoFactorService) prepareChallenge(ctx context.Context, subject Subject
 		CallbackURL: callbackURL,
 	}
 
-	stateID := s.calculateHash(subject.UserID, subject.IPAddress)
+	stateID := s.CalculateHash(subject.UserID, subject.IPAddress)
 	userState, err := s.getUserState(ctx, stateID)
 	if err != nil {
 		return nil, err
@@ -131,7 +131,7 @@ func (s *TwoFactorService) ValidateChallenge(ctx context.Context, ch *Challenge,
 type verifyFunc func(userState *UserState) (bool, error)
 
 func (s *TwoFactorService) verifyChallenge(ctx context.Context, ch *Challenge, sub Subject, doChallengerVerify verifyFunc) error {
-	stateID := s.calculateHash(sub.UserID, sub.IPAddress)
+	stateID := s.CalculateHash(sub.UserID, sub.IPAddress)
 	userState, err := s.getUserState(ctx, stateID)
 	if err != nil {
 		return err
