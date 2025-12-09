@@ -16,10 +16,11 @@ type Storage interface {
 	Save(ctx context.Context, key string, val any) error
 	Delete(ctx context.Context, key string) error
 	Expire(ctx context.Context, key string, expiresAt time.Time) error
-	SetAttr(ctx context.Context, key string, field string, val any) error
+	SetAttr(ctx context.Context, key string, field string, val any, exp ...time.Duration) error
 	GetAttr(ctx context.Context, key, field string, val any) error
 	IncrAttr(ctx context.Context, key, field string, delta int64) (int64, error)
 	ExpireAttr(ctx context.Context, key string, expires time.Time, fields ...string) error
+	DelAttr(ctx context.Context, key string, field string) error
 }
 
 type Store[T any] interface {
@@ -30,8 +31,9 @@ type Store[T any] interface {
 	Delete(ctx context.Context, key string) error
 	Remove(ctx context.Context, key string) (*T, error)
 	Expire(ctx context.Context, key string, expiresAt time.Time) error
-	SetAttr(ctx context.Context, key string, field string, val any) error
+	SetAttr(ctx context.Context, key string, field string, val any, exp ...time.Duration) error
 	GetAttr(ctx context.Context, key, field string, val any) error
 	IncrAttr(ctx context.Context, key, field string, delta int64) (int64, error)
 	ExpireAttr(ctx context.Context, key string, expiresAt time.Time, fields ...string) error
+	DelAttr(ctx context.Context, key string, field string) error
 }

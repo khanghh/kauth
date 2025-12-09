@@ -30,8 +30,8 @@ func (p *prefixedStorage) Expire(ctx context.Context, key string, expiresAt time
 	return p.underlying.Expire(ctx, p.prefix+key, expiresAt)
 }
 
-func (p *prefixedStorage) SetAttr(ctx context.Context, key string, field string, val any) error {
-	return p.underlying.SetAttr(ctx, p.prefix+key, field, val)
+func (p *prefixedStorage) SetAttr(ctx context.Context, key string, field string, val any, exp ...time.Duration) error {
+	return p.underlying.SetAttr(ctx, p.prefix+key, field, val, exp...)
 }
 
 func (p *prefixedStorage) GetAttr(ctx context.Context, key string, field string, val any) error {
@@ -44,6 +44,10 @@ func (p *prefixedStorage) IncrAttr(ctx context.Context, key string, field string
 
 func (p *prefixedStorage) ExpireAttr(ctx context.Context, key string, expires time.Time, fields ...string) error {
 	return p.underlying.ExpireAttr(ctx, p.prefix+key, expires, fields...)
+}
+
+func (p *prefixedStorage) DelAttr(ctx context.Context, key string, field string) error {
+	return p.underlying.DelAttr(ctx, p.prefix+key, field)
 }
 
 func StorageWithPrefix(storage Storage, prefix string) Storage {

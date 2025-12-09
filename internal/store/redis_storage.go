@@ -60,8 +60,22 @@ func (s *RedisStorage) Expire(ctx context.Context, key string, expiresAt time.Ti
 	return s.rdb.ExpireAt(ctx, key, expiresAt).Err()
 }
 
-func (s *RedisStorage) SetAttr(ctx context.Context, key string, field string, val any) error {
-	return s.rdb.HSet(ctx, key, field, val).Err()
+func (s *RedisStorage) SetAttr(ctx context.Context, key string, field string, val any, exp ...time.Duration) error {
+	if len(exp) == 0 {
+		return s.rdb.HSet(ctx, key, field, val).Err()
+	}
+	pipe := s.rdb.TxPipeline()
+	pipe.HSet(ctx, key, field, val).Err()
+	pipe.HExpire(ctx, key, exp[0]).Err()
+	cmds, err := pipe.Exec(ctx)
+	if err != nil && len(cmds) > 0 {
+		for _, c := range cmds {
+			if err := c.Err(); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (s *RedisStorage) GetAttr(ctx context.Context, key, field string, val any) error {
@@ -74,6 +88,10 @@ func (s *RedisStorage) IncrAttr(ctx context.Context, key, field string, delta in
 
 func (s *RedisStorage) ExpireAttr(ctx context.Context, key string, expiresAt time.Time, fields ...string) error {
 	return s.rdb.HExpireAt(ctx, key, expiresAt, fields...).Err()
+}
+
+func (s *RedisStorage) DelAttr(ctx context.Context, key string, field string) error {
+	return s.rdb.HDel(ctx, key, field).Err()
 }
 
 func NewRedisStorage(db redis.UniversalClient) *RedisStorage {
