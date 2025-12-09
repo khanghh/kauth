@@ -61,7 +61,7 @@ func (s *OTPChallenger) Generate(ctx context.Context, ch *Challenge, subject Sub
 
 	otpCode := generateOTP(6)
 	ch.Type = ChallengeTypeOTP
-	ch.Secret = s.svc.calculateHash(otpCode, userState.OTPRequestCount, s.svc.masterKey)
+	ch.Secret = s.svc.CalculateHash(otpCode, userState.OTPRequestCount, s.svc.masterKey)
 	ch.UpdateAt = time.Now()
 	if err := s.svc.challengeStore.Save(ctx, ch.ID, *ch); err != nil {
 		return "", err
@@ -71,7 +71,7 @@ func (s *OTPChallenger) Generate(ctx context.Context, ch *Challenge, subject Sub
 
 func (s *OTPChallenger) Verify(ctx context.Context, ch *Challenge, subject Subject, code string) error {
 	verifyFunc := func(userState *UserState) (bool, error) {
-		success := ch.Secret == s.svc.calculateHash(code, userState.OTPRequestCount, s.svc.masterKey)
+		success := ch.Secret == s.svc.CalculateHash(code, userState.OTPRequestCount, s.svc.masterKey)
 		if success {
 			if time.Since(ch.UpdateAt) > params.TwoFactorOTPExpiration {
 				return false, ErrOTPCodeExpired

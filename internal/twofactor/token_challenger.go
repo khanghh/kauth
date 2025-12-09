@@ -22,7 +22,7 @@ func (s *TokenChallenger) Create(ctx context.Context, sub Subject, callbackURL s
 	}
 	currentTime := time.Now()
 	token := randomSecretKey(32)
-	ch.ID = s.svc.calculateHash(token)
+	ch.ID = s.svc.CalculateHash(token)
 	ch.Type = ChallengeTypeToken
 	ch.Secret = string(blob)
 	ch.UpdateAt = currentTime
@@ -38,7 +38,7 @@ func (s *TokenChallenger) Generate(ctx context.Context, ch *Challenge, sub Subje
 }
 
 func (s *TokenChallenger) Verify(ctx context.Context, token string, data interface{}) error {
-	ch, err := s.svc.challengeStore.Get(ctx, s.svc.calculateHash(token))
+	ch, err := s.svc.challengeStore.Get(ctx, s.svc.CalculateHash(token))
 	if err != nil {
 		return ErrTokenInvalid
 	}

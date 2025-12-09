@@ -21,6 +21,7 @@ const (
 	MsgTwoFactorChallengeFailed = "Two-factor authentication failed."
 	MsgTwoFactorUserLocked      = "%s. Please try again in %s."
 	MsgTooManyFailedLogin       = "Too many failed login attempts. Please try again later."
+	MsgUnknownService           = "Unknown service. Please check the service name or URL and try again."
 	MsgUserNotFound             = "No account found with that username and email address."
 	MsgTOTPEnrollFailed         = "Verification failed. Please try again."
 	MsgInvalid2FAMethod         = "The selected 2FA method is invalid or not supported."

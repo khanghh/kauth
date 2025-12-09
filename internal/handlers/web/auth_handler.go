@@ -73,10 +73,10 @@ func doServerCallback(ctx *fiber.Ctx, callbackURL string) error {
 }
 
 // handleLogin2FA triggers 2FA challenge if user has enabled 2FA
-func (h *AuthHandler) handleLogin2FA(ctx *fiber.Ctx, session *sessions.Session, user *model.User, serviceURL string) error {
+func (h *AuthHandler) handleLogin2FA(ctx *fiber.Ctx, session *sessions.Session, user *model.User, serviceNameOrURL string, serviceState string) error {
 	redirectURL := "/"
-	if serviceURL != "" {
-		redirectURL = urlutil.AppendQuery("/authorize", "service", serviceURL)
+	if serviceNameOrURL != "" {
+		redirectURL = urlutil.AppendQuery("/authorize", "service", serviceNameOrURL, "state", serviceState)
 	}
 
 	isTwoFAEnabled, err := h.twoFactorService.IsTwoFAEnabled(ctx.Context(), user.ID)
@@ -114,8 +114,9 @@ func (h *AuthHandler) getOAuthLoginURLs(serviceURL string) map[string]string {
 	return oauthLoginURLs
 }
 
-func (h *AuthHandler) handleAuthorizeServiceAccess(ctx *fiber.Ctx, user *model.User, session *sessions.Session, service *model.Service, serviceURL string) error {
-	ticket, err := h.authorizeService.GenerateServiceTicket(ctx.Context(), session.UserID, serviceURL)
+func (h *AuthHandler) handleAuthorizeServiceAccess(ctx *fiber.Ctx, user *model.User, session *sessions.Session, service *model.Service, serviceCallbackURL string) error {
+	h.setAuthorizedTime(ctx, service.CallbackURL, time.Now())
+	ticket, err := h.authorizeService.GenerateServiceTicket(ctx.Context(), session.UserID, serviceCallbackURL)
 	if errors.Is(err, auth.ErrServiceNotFound) {
 		return render.RenderAccessDeniedPage(ctx)
 	} else if err != nil {
@@ -133,39 +134,42 @@ func (h *AuthHandler) handleAuthorizeServiceAccess(ctx *fiber.Ctx, user *model.U
 
 func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 	cid := ctx.Query("cid")
-	serviceURL := urlutil.NormalizeURL(ctx.Query("service"))
-	if serviceURL == "" {
+	serviceNameOrURL := urlutil.NormalizeURL(ctx.Query("service"))
+	serviceState := ctx.Query("state")
+	if serviceNameOrURL == "" {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
 
 	session := sessions.Get(ctx)
 	if !session.IsAuthenticated() {
-		return redirect(ctx, "/login", "service", serviceURL)
+		return redirect(ctx, "/login", "service", serviceNameOrURL, "state", serviceState)
 	}
 
 	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
 	if err != nil {
 		return forceLogout(ctx, "")
 	}
-	service, err := h.authorizeService.GetServiceByCallbackURL(ctx.Context(), serviceURL)
+
+	service, err := h.authorizeService.GetServiceByNameOrURL(ctx.Context(), serviceNameOrURL)
 	if errors.Is(err, auth.ErrServiceNotFound) {
 		return render.RenderNotFoundErrorPage(ctx)
 	} else if err != nil {
 		return err
 	}
 
+	serviceCallbackURL := urlutil.AppendQuery(service.CallbackURL, "state", serviceState)
+
 	authorizeTime := h.getAuthorizedTime(ctx, service.CallbackURL)
 	challengeRequired := service.ChallengeRequired && time.Since(authorizeTime) > service.ChallengeValidity
 	if !challengeRequired && service.AutoLogin {
-		return h.handleAuthorizeServiceAccess(ctx, user, session, service, serviceURL)
+		return h.handleAuthorizeServiceAccess(ctx, user, session, service, serviceCallbackURL)
 	}
 	if challengeRequired && cid != "" {
 		sub := getChallengeSubject(ctx, sessions.Get(ctx))
-		endpoint := urlutil.AppendQuery("/authorize", "service", serviceURL)
+		endpoint := urlutil.AppendQuery("/authorize", "service", serviceNameOrURL, "state", serviceState)
 		err = h.twoFactorService.FinalizeChallenge(ctx.Context(), cid, sub, endpoint)
 		if err == nil {
-			h.setAuthorizedTime(ctx, serviceURL, time.Now())
-			return h.handleAuthorizeServiceAccess(ctx, user, session, service, serviceURL)
+			return h.handleAuthorizeServiceAccess(ctx, user, session, service, serviceCallbackURL)
 		}
 	}
 
@@ -178,16 +182,17 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 }
 
 func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
-	serviceURL := urlutil.NormalizeURL(ctx.Query("service"))
+	serviceNameOrURL := urlutil.NormalizeURL(ctx.Query("service"))
+	serviceState := ctx.Query("state")
 	confirm := ctx.FormValue("confirm")
 
-	if serviceURL == "" {
+	if serviceNameOrURL == "" {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
 
 	session := sessions.Get(ctx)
 	if !session.IsAuthenticated() {
-		return redirect(ctx, "/login", "service", serviceURL)
+		return redirect(ctx, "/login", "service", serviceNameOrURL, "state", serviceState)
 	}
 
 	if confirm != "true" {
@@ -199,23 +204,24 @@ func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
 		return forceLogout(ctx, "")
 	}
 
-	service, err := h.authorizeService.GetServiceByCallbackURL(ctx.Context(), serviceURL)
+	service, err := h.authorizeService.GetServiceByNameOrURL(ctx.Context(), serviceNameOrURL)
 	if errors.Is(err, auth.ErrServiceNotFound) {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
 
-	challengeRequired := service.ChallengeRequired && time.Since(h.getAuthorizedTime(ctx, service.CallbackURL)) > service.ChallengeValidity
+	authorizeTime := h.getAuthorizedTime(ctx, service.CallbackURL)
+	challengeRequired := service.ChallengeRequired && time.Since(authorizeTime) > service.ChallengeValidity
 	if challengeRequired {
 		state := TwoFactorState{
 			Action:      "authorize",
-			CallbackURL: urlutil.AppendQuery("/authorize", "service", serviceURL),
+			CallbackURL: urlutil.AppendQuery("/authorize", "service", serviceNameOrURL, "state", serviceState),
 			Timestamp:   time.Now().UnixMilli(),
 		}
 		return redirect(ctx, "/2fa/challenge", "state", encryptState(ctx, state))
 	}
 
-	h.setAuthorizedTime(ctx, service.CallbackURL, time.Now())
-	return h.handleAuthorizeServiceAccess(ctx, user, session, service, serviceURL)
+	serviceCallbackURL := urlutil.AppendQuery(service.CallbackURL, "state", serviceState)
+	return h.handleAuthorizeServiceAccess(ctx, user, session, service, serviceCallbackURL)
 }
 
 func (h *AuthHandler) GetHome(ctx *fiber.Ctx) error {
@@ -269,7 +275,8 @@ func (h *AuthHandler) GetLogin(ctx *fiber.Ctx) error {
 }
 
 func (h *AuthHandler) PostLogin(ctx *fiber.Ctx) error {
-	serviceURL := urlutil.NormalizeURL(ctx.Query("service"))
+	serviceNameOrURL := urlutil.RemoveQuery(ctx.Query("service"))
+	serviceState := ctx.Query("state")
 	username := ctx.FormValue("username")
 	password := ctx.FormValue("password")
 
@@ -279,7 +286,7 @@ func (h *AuthHandler) PostLogin(ctx *fiber.Ctx) error {
 	}
 
 	pageData := render.LoginPageData{
-		OAuthLoginURLs: h.getOAuthLoginURLs(serviceURL),
+		OAuthLoginURLs: h.getOAuthLoginURLs(serviceNameOrURL),
 	}
 
 	if err := captcha.Verify(ctx); err != nil {
@@ -300,7 +307,7 @@ func (h *AuthHandler) PostLogin(ctx *fiber.Ctx) error {
 	}
 
 	audit.RecordLoginSuccess(ctx, user, audit.AuthMethodPassword)
-	return h.handleLogin2FA(ctx, session, user, serviceURL)
+	return h.handleLogin2FA(ctx, session, user, serviceNameOrURL, serviceState)
 }
 
 func (h *AuthHandler) PostLogout(ctx *fiber.Ctx) error {
