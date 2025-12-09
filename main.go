@@ -214,8 +214,7 @@ type webDependencies struct {
 func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 	// handlers
 	var (
-		authHandler            = web.NewAuthHandler(deps.authorizeService, deps.userService, deps.twoFactorService)
-		loginHandler           = web.NewLoginHandler(deps.userService, deps.twoFactorService, deps.oauthProviders)
+		authHandler            = web.NewAuthHandler(deps.authorizeService, deps.userService, deps.twoFactorService, deps.oauthProviders)
 		registerHandler        = web.NewRegisterHandler(deps.userService, deps.mailSender)
 		oauthHandler           = web.NewOAuthHandler(deps.userService, deps.oauthProviders)
 		twofactorHandler       = web.NewTwoFactorHandler(deps.twoFactorService, deps.userService, deps.mailSender)
@@ -229,9 +228,9 @@ func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 	// routes
 	router.Static("/static", deps.statisDir)
 	router.Get("/", authHandler.GetHome)
-	router.Get("/login", loginHandler.GetLogin)
-	router.Post("/login", loginHandler.PostLogin)
-	router.Post("/logout", loginHandler.PostLogout)
+	router.Get("/login", authHandler.GetLogin)
+	router.Post("/login", authHandler.PostLogin)
+	router.Post("/logout", authHandler.PostLogout)
 	router.Get("/authorize", authHandler.GetAuthorize)
 	router.Post("/authorize", authHandler.PostAuthorize)
 	router.Get("/profile", authHandler.GetProfile)

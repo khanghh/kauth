@@ -18,16 +18,17 @@ const (
 type ChallengeStatus string
 
 type Challenge struct {
-	ID          string    `json:"id"           redis:"id"`
-	Type        string    `json:"type"         redis:"type"`
-	Subject     string    `json:"subject"      redis:"subject"`
-	Secret      string    `json:"secret"       redis:"secret"`
-	Attempts    int       `json:"attempts"     redis:"attempts"`
-	CallbackURL string    `json:"callbackURL"  redis:"callback_url"`
-	Success     int       `json:"success"      redis:"success"`
-	UpdateAt    time.Time `json:"updateAt"     redis:"update_at"`
-	VerifiedAt  time.Time `json:"verifiedAt"   redis:"verified_at"`
-	ExpiresAt   time.Time `json:"expiresAt"    redis:"expires_at"`
+	ID            string    `json:"id"            redis:"id"`
+	Type          string    `json:"type"          redis:"type"`
+	Subject       string    `json:"subject"       redis:"subject"`
+	Secret        string    `json:"secret"        redis:"secret"`
+	Attempts      int       `json:"attempts"      redis:"attempts"`
+	CallbackURL   string    `json:"callbackURL"   redis:"callback_url"`
+	CallbackState string    `json:"callbackState" redis:"callback_state"`
+	Success       int       `json:"success"       redis:"success"`
+	UpdateAt      time.Time `json:"updateAt"      redis:"update_at"`
+	VerifiedAt    time.Time `json:"verifiedAt"    redis:"verified_at"`
+	ExpiresAt     time.Time `json:"expiresAt"     redis:"expires_at"`
 }
 
 func (c *Challenge) IsExpired() bool {

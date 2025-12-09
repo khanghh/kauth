@@ -13,7 +13,6 @@ type Service struct {
 	ClientSecret      string        `gorm:"size:128;not null"`
 	CallbackURL       string        `gorm:"size:1024;not null"`
 	IsServerCallback  bool          `gorm:"not null;default:false"`
-	StripQuery        bool          `gorm:"not null;default:false"`
 	AutoLogin         bool          `gorm:"not null;default:false"`
 	ChallengeRequired bool          `gorm:"not null;default:false"`
 	ChallengeValidity time.Duration `gorm:"not null;default:0"`
