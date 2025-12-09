@@ -33,7 +33,9 @@ func AppendQuery(rawURL string, values ...interface{}) string {
 	for i := 0; i+1 < len(values); i += 2 {
 		key := fmt.Sprint(values[i])
 		val := fmt.Sprint(values[i+1])
-		q.Set(key, val) // replaces existing or adds new
+		if val != "" {
+			q.Set(key, val) // replaces existing or adds new
+		}
 	}
 
 	newURL.RawQuery = q.Encode()

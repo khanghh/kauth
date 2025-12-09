@@ -23,7 +23,10 @@ func redirect(ctx *fiber.Ctx, location string, values ...any) error {
 			slog.Error("invalid query parameter", "key", i)
 			continue
 		}
-		if values[i+1] != nil {
+		if v := values[i+1]; v != nil {
+			if s, ok := v.(string); ok && s == "" {
+				continue
+			}
 			query.Set(key, fmt.Sprint(values[i+1]))
 		}
 	}

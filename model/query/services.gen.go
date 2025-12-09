@@ -32,7 +32,6 @@ func newService(db *gorm.DB, opts ...gen.DOOption) service {
 	_service.ClientSecret = field.NewString(tableName, "client_secret")
 	_service.CallbackURL = field.NewString(tableName, "callback_url")
 	_service.IsServerCallback = field.NewBool(tableName, "is_server_callback")
-	_service.StripQuery = field.NewBool(tableName, "strip_query")
 	_service.AutoLogin = field.NewBool(tableName, "auto_login")
 	_service.ChallengeRequired = field.NewBool(tableName, "challenge_required")
 	_service.ChallengeValidity = field.NewInt64(tableName, "challenge_validity")
@@ -55,7 +54,6 @@ type service struct {
 	ClientSecret      field.String
 	CallbackURL       field.String
 	IsServerCallback  field.Bool
-	StripQuery        field.Bool
 	AutoLogin         field.Bool
 	ChallengeRequired field.Bool
 	ChallengeValidity field.Int64
@@ -84,7 +82,6 @@ func (s *service) updateTableName(table string) *service {
 	s.ClientSecret = field.NewString(table, "client_secret")
 	s.CallbackURL = field.NewString(table, "callback_url")
 	s.IsServerCallback = field.NewBool(table, "is_server_callback")
-	s.StripQuery = field.NewBool(table, "strip_query")
 	s.AutoLogin = field.NewBool(table, "auto_login")
 	s.ChallengeRequired = field.NewBool(table, "challenge_required")
 	s.ChallengeValidity = field.NewInt64(table, "challenge_validity")
@@ -107,14 +104,13 @@ func (s *service) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (s *service) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 13)
+	s.fieldMap = make(map[string]field.Expr, 12)
 	s.fieldMap["id"] = s.ID
 	s.fieldMap["name"] = s.Name
 	s.fieldMap["client_id"] = s.ClientID
 	s.fieldMap["client_secret"] = s.ClientSecret
 	s.fieldMap["callback_url"] = s.CallbackURL
 	s.fieldMap["is_server_callback"] = s.IsServerCallback
-	s.fieldMap["strip_query"] = s.StripQuery
 	s.fieldMap["auto_login"] = s.AutoLogin
 	s.fieldMap["challenge_required"] = s.ChallengeRequired
 	s.fieldMap["challenge_validity"] = s.ChallengeValidity
