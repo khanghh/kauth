@@ -67,23 +67,31 @@ func (s *Session) IsFresh() bool {
 	return s.fresh
 }
 
-func (s *Session) Get(ctx context.Context, val any) error {
+func (s *Session) GetData(ctx context.Context, val any) error {
 	return s.storage.Get(ctx, s.id, val)
 }
 
-func (s *Session) Set(ctx context.Context, val any) error {
+func (s *Session) SetData(ctx context.Context, val any) error {
 	if info, ok := val.(SessionData); ok {
 		s.SessionData = info
 	}
 	return s.storage.Save(ctx, s.id, val)
 }
 
-func (s *Session) SetAttr(ctx context.Context, key string, val any) error {
-	return s.storage.SetAttr(ctx, s.id, key, val)
+func (s *Session) SetField(ctx context.Context, field string, val any, exp ...time.Duration) error {
+	return s.storage.SetAttr(ctx, s.id, field, val, exp...)
 }
 
-func (s *Session) GetAttr(ctx context.Context, key string, val any) error {
-	return s.storage.GetAttr(ctx, s.id, key, val)
+func (s *Session) GetField(ctx context.Context, field string, val any) error {
+	return s.storage.GetAttr(ctx, s.id, field, val)
+}
+
+func (s *Session) IncrField(ctx context.Context, field string, delta int64) (int64, error) {
+	return s.storage.IncrAttr(ctx, s.id, field, delta)
+}
+
+func (s *Session) DeleteField(ctx context.Context, field string) error {
+	return s.storage.DelAttr(ctx, s.id, field)
 }
 
 func (s *Session) Reset(ctx context.Context, val any) error {

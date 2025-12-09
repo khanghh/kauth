@@ -342,10 +342,10 @@ func (h *TwoFactorHandler) GetTOTPEnroll(ctx *fiber.Ctx) error {
 	}
 
 	var secret string
-	err = session.GetAttr(ctx.Context(), totpEnrollSecretSessionKey, &secret)
+	err = session.GetField(ctx.Context(), totpEnrollSecretSessionKey, &secret)
 	if err != nil || renew == "true" {
 		secret = h.twoFactorService.TOTP().GenerateSecret()
-		err := session.SetAttr(ctx.Context(), totpEnrollSecretSessionKey, secret)
+		err := session.SetField(ctx.Context(), totpEnrollSecretSessionKey, secret)
 		if err != nil {
 			return err
 		}
@@ -378,7 +378,7 @@ func (h *TwoFactorHandler) PostTOTPEnroll(ctx *fiber.Ctx) error {
 	}
 
 	var secret string
-	err = session.GetAttr(context.Background(), totpEnrollSecretSessionKey, &secret)
+	err = session.GetField(context.Background(), totpEnrollSecretSessionKey, &secret)
 	if err != nil || secret == "" {
 		return ctx.Redirect(ctx.OriginalURL(), fiber.StatusFound)
 	}
@@ -402,7 +402,7 @@ func (h *TwoFactorHandler) PostTOTPEnroll(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	session.SetAttr(ctx.Context(), totpEnrollSecretSessionKey, "")
+	session.DeleteField(ctx.Context(), totpEnrollSecretSessionKey)
 	return render.RenderTOTPEnrollSuccessPage(ctx)
 }
 
