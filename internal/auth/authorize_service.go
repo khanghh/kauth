@@ -2,14 +2,13 @@ package auth
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/base64"
 	"errors"
 	"strings"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
+	"github.com/khanghh/kauth/internal/common"
 	"github.com/khanghh/kauth/internal/store"
 	"github.com/khanghh/kauth/internal/urlutil"
 	"github.com/khanghh/kauth/model"
@@ -40,17 +39,6 @@ type AuthorizeService struct {
 	masterKey   string
 	serviceRepo ServiceRepository
 	ticketStore store.Store[ServiceTicket]
-}
-
-func generateSecret(n int) (string, error) {
-	// each 3 bytes → 4 Base64 chars
-	rawSize := (n*3 + 3) / 4
-	raw := make([]byte, rawSize)
-	if _, err := rand.Read(raw); err != nil {
-		return "", err
-	}
-	secret := base64.RawURLEncoding.EncodeToString(raw)
-	return secret[:n], nil
 }
 
 func (s *AuthorizeService) ValidateServiceTicket(ctx context.Context, serviceCallbackURL string, ticketID string) (*ServiceTicket, error) {
@@ -106,7 +94,7 @@ func (s *AuthorizeService) RegisterService(ctx context.Context, service *model.S
 	}
 
 	service.ClientID = uuid.NewString()
-	service.ClientSecret, _ = generateSecret(params.ServiceClientSecretLength)
+	service.ClientSecret, _ = common.GenerateSecret(params.ServiceClientSecretLength)
 	var mysqlErr *mysql.MySQLError
 	if err := s.serviceRepo.Create(ctx, service); errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
 		return ErrServiceAlreadyRegistered

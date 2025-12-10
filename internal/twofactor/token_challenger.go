@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	"github.com/khanghh/kauth/internal/common"
 )
 
 type TokenChallenger struct {
@@ -21,7 +23,7 @@ func (s *TokenChallenger) Create(ctx context.Context, sub Subject, callbackURL s
 		return "", nil, err
 	}
 	currentTime := time.Now()
-	token := randomSecretKey(32)
+	token, _ := common.GenerateSecret(32)
 	ch.ID = s.svc.CalculateHash(token)
 	ch.Type = ChallengeTypeToken
 	ch.Secret = string(blob)

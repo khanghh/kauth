@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/audit"
+	"github.com/khanghh/kauth/internal/common"
 	"github.com/khanghh/kauth/internal/mail"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/render"
@@ -341,10 +342,9 @@ func (h *TwoFactorHandler) GetTOTPEnroll(ctx *fiber.Ctx) error {
 		return forceLogout(ctx, "")
 	}
 
-	var secret string
+	secret, err := common.GenerateSecret(32)
 	err = session.GetField(ctx.Context(), totpEnrollSecretSessionKey, &secret)
 	if err != nil || renew == "true" {
-		secret = h.twoFactorService.TOTP().GenerateSecret()
 		err := session.SetField(ctx.Context(), totpEnrollSecretSessionKey, secret)
 		if err != nil {
 			return err

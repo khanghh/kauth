@@ -20,10 +20,6 @@ type TOTPSecret struct {
 	Secret      string `json:"secret"`
 }
 
-func (s *TOTPChallenger) GenerateSecret() string {
-	return randomSecretKey(32)
-}
-
 func (s *TOTPChallenger) Enroll(ctx context.Context, userID uint, secret string, code string) error {
 	if !totp.Validate(code, secret) {
 		return ErrTOTPVerifyFailed
