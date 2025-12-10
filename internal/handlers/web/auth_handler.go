@@ -29,7 +29,7 @@ type AuthHandler struct {
 
 func (h *AuthHandler) getAuthorizedTime(ctx *fiber.Ctx, serviceURL string) time.Time {
 	session := sessions.Get(ctx)
-	key := "authz:" + common.CalculateHash(session.StateEncryptionKey, serviceURL)
+	key := "authz:" + common.CalculateHash(session.SecretKey, serviceURL)
 	var miliSec int64
 	if err := session.GetField(ctx.Context(), key, &miliSec); err == nil {
 		return time.UnixMilli(miliSec)
@@ -39,7 +39,7 @@ func (h *AuthHandler) getAuthorizedTime(ctx *fiber.Ctx, serviceURL string) time.
 
 func (h *AuthHandler) setAuthorizedTime(ctx *fiber.Ctx, serviceURL string, authTime time.Time) {
 	session := sessions.Get(ctx)
-	key := "authz:" + common.CalculateHash(session.StateEncryptionKey, serviceURL)
+	key := "authz:" + common.CalculateHash(session.SecretKey, serviceURL)
 	session.SetField(ctx.Context(), key, authTime.UnixMilli())
 }
 

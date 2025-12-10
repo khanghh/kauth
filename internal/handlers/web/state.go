@@ -20,15 +20,15 @@ type TwoFactorState struct {
 
 func getStateEncryptionKey(ctx *fiber.Ctx) string {
 	session := sessions.Get(ctx)
-	if session.StateEncryptionKey != "" {
-		return session.StateEncryptionKey
+	if session.SecretKey != "" {
+		return session.SecretKey
 	}
 	keyBytes := make([]byte, 32)
 	if _, err := io.ReadFull(rand.Reader, keyBytes); err != nil {
 		return ""
 	}
-	session.StateEncryptionKey = hex.EncodeToString(keyBytes)
-	return session.StateEncryptionKey
+	session.SecretKey = hex.EncodeToString(keyBytes)
+	return session.SecretKey
 }
 
 func xorBytes(data, key []byte) []byte {
