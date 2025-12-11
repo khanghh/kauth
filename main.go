@@ -249,7 +249,7 @@ func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 	router.Post("/2fa/otp/verify", twofactorHandler.PostVerifyOTP)
 	router.Get("/2fa/totp/enroll", twofactorHandler.GetTOTPEnroll)
 	router.Post("/2fa/totp/enroll", twofactorHandler.PostTOTPEnroll)
-	router.Get("/2fa/totp/verify", twofactorHandler.GetTOTVerify)
+	router.Get("/2fa/totp/verify", twofactorHandler.GetVerifyTOTP)
 	router.Post("/2fa/totp/verify", twofactorHandler.PostVerifyTOTP)
 	router.Get("/2fa/settings", twofactorHandler.GetTwoFASettings)
 	router.Post("/2fa/settings", twofactorHandler.PostTwoFASettings)
