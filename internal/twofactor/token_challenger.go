@@ -13,12 +13,12 @@ type TokenChallenger struct {
 	svc *TwoFactorService
 }
 
-func (s *TokenChallenger) Create(ctx context.Context, sub Subject, callbackURL string, data interface{}, expiresIn time.Duration) (string, *Challenge, error) {
+func (s *TokenChallenger) Create(ctx context.Context, sub Subject, resource string, data interface{}, expiresIn time.Duration) (string, *Challenge, error) {
 	blob, err := json.Marshal(data)
 	if err != nil {
 		return "", nil, err
 	}
-	ch, err := s.svc.prepareChallenge(ctx, sub, callbackURL)
+	ch, err := s.svc.prepareChallenge(ctx, sub, resource)
 	if err != nil {
 		return "", nil, err
 	}

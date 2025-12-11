@@ -66,11 +66,12 @@ func (s *TwoFactorService) getUserState(ctx context.Context, stateID string) (*U
 	return userState, err
 }
 
-func (s *TwoFactorService) prepareChallenge(ctx context.Context, subject Subject, callbackURL string) (*Challenge, error) {
+func (s *TwoFactorService) prepareChallenge(ctx context.Context, subject Subject, resource string) (*Challenge, error) {
+	cid := uuid.NewString()
 	ch := Challenge{
-		ID:          uuid.NewString(),
-		Subject:     s.subjectHash(subject),
-		CallbackURL: callbackURL,
+		ID:            cid,
+		Subject:       s.subjectHash(subject),
+		FinalizeToken: s.CalculateHash(cid, resource),
 	}
 
 	stateID := s.CalculateHash(subject.UserID, subject.IPAddress)
@@ -92,8 +93,8 @@ func (s *TwoFactorService) prepareChallenge(ctx context.Context, subject Subject
 	return &ch, err
 }
 
-func (s *TwoFactorService) CreateChallenge(ctx context.Context, subject Subject, callbackURL string, expiresIn time.Duration) (*Challenge, error) {
-	ch, err := s.prepareChallenge(ctx, subject, callbackURL)
+func (s *TwoFactorService) CreateChallenge(ctx context.Context, subject Subject, resource string, expiresIn time.Duration) (*Challenge, error) {
+	ch, err := s.prepareChallenge(ctx, subject, resource)
 	if err != nil {
 		return nil, err
 	}
@@ -131,6 +132,10 @@ func (s *TwoFactorService) ValidateChallenge(ctx context.Context, ch *Challenge,
 type verifyFunc func(userState *UserState) (bool, error)
 
 func (s *TwoFactorService) verifyChallenge(ctx context.Context, ch *Challenge, sub Subject, doChallengerVerify verifyFunc) error {
+	if ch.Success != 0 {
+		return ErrChallengeAlreadyVerified
+	}
+
 	stateID := s.CalculateHash(sub.UserID, sub.IPAddress)
 	userState, err := s.getUserState(ctx, stateID)
 	if err != nil {
@@ -173,7 +178,7 @@ func (s *TwoFactorService) verifyChallenge(ctx context.Context, ch *Challenge, s
 	return NewAttemptFailError(attemptsLeft)
 }
 
-func (s *TwoFactorService) FinalizeChallenge(ctx context.Context, cid string, sub Subject, callbackURL string) error {
+func (s *TwoFactorService) FinalizeChallenge(ctx context.Context, cid string, sub Subject, token string) error {
 	ch, err := s.challengeStore.Get(ctx, cid)
 	if errors.Is(err, store.ErrNotFound) {
 		return ErrChallengeNotFound
@@ -184,8 +189,8 @@ func (s *TwoFactorService) FinalizeChallenge(ctx context.Context, cid string, su
 	if ch.Subject != s.subjectHash(sub) {
 		return ErrChallengeSubjectMismatch
 	}
-	if ch.CallbackURL != callbackURL {
-		return ErrChallengeCallbackURLMismatch
+	if ch.FinalizeToken != token {
+		return ErrInvalidFinalizeToken
 	}
 	err = s.challengeStore.Delete(ctx, ch.ID)
 	if errors.Is(err, store.ErrNotFound) {

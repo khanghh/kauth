@@ -18,8 +18,8 @@ type JWTChallenger struct {
 	svc *TwoFactorService
 }
 
-func (s *JWTChallenger) Create(ctx context.Context, subject Subject, redirecrURL string, expiresIn time.Duration, data interface{}) (string, *Challenge, error) {
-	ch, err := s.svc.CreateChallenge(ctx, subject, redirecrURL, expiresIn)
+func (s *JWTChallenger) Create(ctx context.Context, subject Subject, resource string, expiresIn time.Duration, data interface{}) (string, *Challenge, error) {
+	ch, err := s.svc.CreateChallenge(ctx, subject, resource, expiresIn)
 	if err != nil {
 		return "", nil, err
 	}
