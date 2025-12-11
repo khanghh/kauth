@@ -2,7 +2,6 @@ package twofactor
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/khanghh/kauth/model"
@@ -33,8 +32,8 @@ func (s *TOTPChallenger) Enroll(ctx context.Context, userID uint, secret string,
 	return s.svc.userFactorRepo.Upsert(ctx, userFactor)
 }
 
-func (s *TOTPChallenger) Create(ctx context.Context, sub Subject, callbackURL string, expiresIn time.Duration) (*Challenge, error) {
-	ch, err := s.svc.prepareChallenge(ctx, sub, callbackURL)
+func (s *TOTPChallenger) Create(ctx context.Context, sub Subject, resource string, expiresIn time.Duration) (*Challenge, error) {
+	ch, err := s.svc.prepareChallenge(ctx, sub, resource)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +48,13 @@ func (s *TOTPChallenger) Create(ctx context.Context, sub Subject, callbackURL st
 }
 
 func (c *TOTPChallenger) Generate(ctx context.Context, ch *Challenge, sub Subject) (string, error) {
-	return "", fmt.Errorf("not supported")
+	currentTime := time.Now()
+	ch.Type = ChallengeTypeTOTP
+	ch.UpdateAt = currentTime
+	if err := c.svc.challengeStore.Save(ctx, ch.ID, *ch); err != nil {
+		return "", err
+	}
+	return "", nil
 }
 
 func (c *TOTPChallenger) Verify(ctx context.Context, ch *Challenge, sub Subject, code string) error {
