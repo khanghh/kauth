@@ -48,3 +48,21 @@ func forceLogout(ctx *fiber.Ctx, errCode string) error {
 	}
 	return redirect(ctx, "/login")
 }
+
+func redirectAuthorize(ctx *fiber.Ctx, session *sessions.Session, serviceNameOrURL, serviceState string) error {
+	stateBase64, _ := marshalBase64(State{
+		Action:  "authorize",
+		Service: serviceNameOrURL,
+		State:   serviceState,
+	})
+
+	nonce, err := createNonce(ctx.Context(), session, stateBase64)
+	if err != nil {
+		return err
+	}
+	return redirect(ctx, "/authorize",
+		"service", serviceNameOrURL,
+		"state", serviceState,
+		"nonce", nonce,
+	)
+}

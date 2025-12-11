@@ -6,7 +6,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/auth"
-	"github.com/khanghh/kauth/internal/urlutil"
 )
 
 type AuthHandler struct {
@@ -41,7 +40,7 @@ type casValidateResponse struct {
 
 func (h *AuthHandler) PostServiceValidate(ctx *fiber.Ctx) error {
 	ticketID := ctx.FormValue("ticket")
-	serviceURL := urlutil.RemoveQuery(ctx.FormValue("service"))
+	serviceNameOrURL := ctx.FormValue("service")
 	clientID := ctx.FormValue("client_id")
 	clientSecret := ctx.FormValue("client_secret")
 	if clientID == "" || clientSecret == "" {
@@ -53,13 +52,13 @@ func (h *AuthHandler) PostServiceValidate(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(fiber.StatusUnauthorized)
 	}
 
-	if ticketID == "" || serviceURL == "" {
+	if ticketID == "" || serviceNameOrURL == "" {
 		return ctx.Status(fiber.StatusBadRequest).JSON(
 			NewErrorResponse(fiber.StatusBadRequest, "Missing required parameters"),
 		)
 	}
 
-	ticket, err := h.authorizeService.ValidateServiceTicket(ctx.Context(), serviceURL, ticketID)
+	ticket, err := h.authorizeService.ValidateServiceTicket(ctx.Context(), serviceNameOrURL, ticketID)
 	if err != nil {
 		var failure *authenticationFailure
 		switch err {

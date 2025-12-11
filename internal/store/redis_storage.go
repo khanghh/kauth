@@ -27,17 +27,10 @@ func (s *RedisStorage) Set(ctx context.Context, key string, val any, expiresIn t
 	if expiresIn == -1 {
 		return s.Save(ctx, key, val)
 	}
-	pipe := s.rdb.TxPipeline()
-	pipe.HSet(ctx, key, val).Err()
-	pipe.Expire(ctx, key, expiresIn).Err()
-	cmds, err := pipe.Exec(ctx)
-	if err != nil && len(cmds) > 0 {
-		for _, c := range cmds {
-			if err := c.Err(); err != nil {
-				return err
-			}
-		}
-	}
+	pipe := s.rdb.Pipeline()
+	pipe.HSet(ctx, key, val)
+	pipe.Expire(ctx, key, expiresIn)
+	_, err := pipe.Exec(ctx)
 	return err
 }
 
@@ -64,18 +57,11 @@ func (s *RedisStorage) SetAttr(ctx context.Context, key string, field string, va
 	if len(exp) == 0 {
 		return s.rdb.HSet(ctx, key, field, val).Err()
 	}
-	pipe := s.rdb.TxPipeline()
-	pipe.HSet(ctx, key, field, val).Err()
-	pipe.HExpire(ctx, key, exp[0]).Err()
-	cmds, err := pipe.Exec(ctx)
-	if err != nil && len(cmds) > 0 {
-		for _, c := range cmds {
-			if err := c.Err(); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
+	pipe := s.rdb.Pipeline()
+	pipe.HSet(ctx, key, field, val)
+	pipe.HExpire(ctx, key, exp[0], field)
+	_, err := pipe.Exec(ctx)
+	return err
 }
 
 func (s *RedisStorage) GetAttr(ctx context.Context, key, field string, val any) error {

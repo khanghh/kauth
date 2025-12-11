@@ -21,9 +21,9 @@ type AuthorizeService interface {
 
 type TwoFactorService interface {
 	GetChallenge(ctx context.Context, cid string) (*twofactor.Challenge, error)
-	CreateChallenge(ctx context.Context, sub twofactor.Subject, callbackURL string, expiresIn time.Duration) (*twofactor.Challenge, error)
+	CreateChallenge(ctx context.Context, sub twofactor.Subject, resource string, expiresIn time.Duration) (*twofactor.Challenge, error)
 	ValidateChallenge(ctx context.Context, ch *twofactor.Challenge, sub twofactor.Subject, chType string) error
-	FinalizeChallenge(ctx context.Context, cid string, sub twofactor.Subject, callbackURL string) error
+	FinalizeChallenge(ctx context.Context, cid string, sub twofactor.Subject, token string) error
 	IsTwoFAEnabled(ctx context.Context, uid uint) (bool, error)
 	CalculateHash(inputs ...interface{}) string
 	OTP() *twofactor.OTPChallenger

@@ -25,6 +25,7 @@ const (
 	MsgUserNotFound             = "No account found with that username and email address."
 	MsgTOTPEnrollFailed         = "Verification failed. Please try again."
 	MsgInvalid2FAMethod         = "The selected 2FA method is invalid or not supported."
+	MsgFailedToSendOTP          = "Failed to send OTP. Please try again."
 	MsgInvalidCaptcha           = "Captcha verification failed."
 )
 

@@ -2,7 +2,6 @@ package web
 
 import (
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -40,25 +39,29 @@ func (h *OAuthHandler) handleOAuthLogin(ctx *fiber.Ctx, userOAuth *model.UserOAu
 		return ctx.SendStatus(http.StatusForbidden)
 	}
 
-	sessions.Reset(ctx, sessions.SessionData{
+	session, err := sessions.Reset(ctx, sessions.SessionData{
 		IP:        ctx.IP(),
 		UserID:    user.ID,
 		LoginTime: time.Now(),
 		OAuthID:   userOAuth.ID,
 	})
 
+	if err != nil {
+		return err
+	}
+
 	audit.RecordLoginSuccess(ctx, user, audit.AuthMethodOAuth)
 
-	state := ctx.Query("state")
-	queryParams, err := url.ParseQuery(state)
-	if err != nil {
+	stateBase64 := ctx.Query("state")
+	var state State
+	if err := unmarshalBase64(stateBase64, &state); err != nil {
 		return ctx.SendStatus(http.StatusBadRequest)
 	}
-	serviceURL := queryParams.Get("service")
-	if serviceURL == "" {
-		return ctx.Redirect("/")
+
+	if state.Action == "authorize" {
+		return redirectAuthorize(ctx, session, state.Service, state.State)
 	}
-	return redirect(ctx, "/authorize", "service", serviceURL)
+	return ctx.Redirect("/")
 }
 
 func (h *OAuthHandler) handleOAuthLink(ctx *fiber.Ctx, userID uint, userOAuth *model.UserOAuth) error {

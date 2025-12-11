@@ -1,9 +1,17 @@
 package web
 
 import (
+	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
+	"fmt"
 	"net/mail"
 	"regexp"
+
+	"github.com/khanghh/kauth/internal/common"
+	"github.com/khanghh/kauth/internal/middlewares/sessions"
+	"github.com/khanghh/kauth/params"
 )
 
 var usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_]{3,32}$`)
@@ -39,4 +47,37 @@ func validatePassword(password string) error {
 		return errors.New("Password must be at least 6 characters.")
 	}
 	return nil
+}
+
+func randomNonce(n int) string {
+	b := make([]byte, n)
+	_, err := rand.Read(b)
+	if err != nil {
+		return ""
+	}
+	return hex.EncodeToString(b)
+}
+
+func createNonce(ctx context.Context, session *sessions.Session, data string) (string, error) {
+	nonce := randomNonce(16)
+	nonceHash := common.CalculateHash(session.SecretKey, data, nonce)
+	field := fmt.Sprintf("nonce:%s", nonce)
+	err := session.SetField(ctx, field, nonceHash, params.NonceExpiration)
+	if err != nil {
+		return "", err
+	}
+	return nonce, err
+}
+
+func checkNonce(ctx context.Context, session *sessions.Session, data string, nonce string) (bool, error) {
+	hash := common.CalculateHash(session.SecretKey, data, nonce)
+	field := fmt.Sprintf("nonce:%s", nonce)
+	var expectedHash string
+	err := session.GetField(ctx, field, &expectedHash)
+	return expectedHash == hash, err
+}
+
+func deleteNonce(ctx context.Context, session *sessions.Session, nonce string) error {
+	field := fmt.Sprintf("nonce:%s", nonce)
+	return session.DeleteField(ctx, field)
 }
