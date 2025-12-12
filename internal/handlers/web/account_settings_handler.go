@@ -49,7 +49,6 @@ func (h *AccountSettingsHandler) PostChangePassword(ctx *fiber.Ctx) error {
 		return render.RenderInternalServerErrorPage(ctx)
 	}
 
-	sessions.Destroy(ctx)
 	return render.RenderPasswordUpdatedPage(ctx)
 }
 
