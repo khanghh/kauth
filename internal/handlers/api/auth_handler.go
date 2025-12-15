@@ -44,12 +44,16 @@ func (h *AuthHandler) PostServiceValidate(ctx *fiber.Ctx) error {
 	clientID := ctx.FormValue("client_id")
 	clientSecret := ctx.FormValue("client_secret")
 	if clientID == "" || clientSecret == "" {
-		return ctx.SendStatus(fiber.StatusUnauthorized)
+		return ctx.Status(fiber.StatusUnauthorized).JSON(
+			NewErrorResponse(fiber.StatusUnauthorized, "Unauthorized"),
+		)
 	}
 
 	service, err := h.authorizeService.GetServiceByClientID(ctx.Context(), clientID)
 	if err != nil || service.ClientSecret != clientSecret {
-		return ctx.SendStatus(fiber.StatusUnauthorized)
+		return ctx.Status(fiber.StatusUnauthorized).JSON(
+			NewErrorResponse(fiber.StatusUnauthorized, "Unauthorized"),
+		)
 	}
 
 	if ticketID == "" || serviceNameOrURL == "" {
