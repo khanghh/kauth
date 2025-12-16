@@ -53,14 +53,17 @@ func (h *OAuthHandler) handleOAuthLogin(ctx *fiber.Ctx, userOAuth *model.UserOAu
 	audit.RecordLoginSuccess(ctx, user, audit.AuthMethodOAuth)
 
 	stateBase64 := ctx.Query("state")
-	var state State
-	if err := unmarshalBase64(stateBase64, &state); err != nil {
-		return ctx.SendStatus(http.StatusBadRequest)
+	if stateBase64 != "" {
+		var state State
+		if err := unmarshalBase64(stateBase64, &state); err != nil {
+			return ctx.Redirect("/")
+		}
+
+		if state.Action == "authorize" && state.Service != "" {
+			return redirectAuthorize(ctx, session, state.Service, state.State)
+		}
 	}
 
-	if state.Action == "authorize" {
-		return redirectAuthorize(ctx, session, state.Service, state.State)
-	}
 	return ctx.Redirect("/")
 }
 

@@ -18,6 +18,11 @@ type State struct {
 	State       string
 }
 
+type OAuthLoginState struct {
+	Service string
+	State   string
+}
+
 func init() {
 	gob.Register(State{})
 }
@@ -45,12 +50,12 @@ func encryptState(ctx *fiber.Ctx, state any) string {
 		return ""
 	}
 	cipherBytes := xorBytes(blob, []byte(key))
-	return base64.URLEncoding.EncodeToString([]byte(cipherBytes))
+	return base64.RawURLEncoding.EncodeToString([]byte(cipherBytes))
 }
 
 func decryptState(ctx *fiber.Ctx, encryted string, state any) error {
 	key := getStateEncryptionKey(ctx)
-	cipherBytes, err := base64.URLEncoding.DecodeString(encryted)
+	cipherBytes, err := base64.RawURLEncoding.DecodeString(encryted)
 	if err != nil {
 		return err
 	}
@@ -64,11 +69,11 @@ func marshalBase64(state any) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return base64.URLEncoding.EncodeToString(buf.Bytes()), nil
+	return base64.RawURLEncoding.EncodeToString(buf.Bytes()), nil
 }
 
 func unmarshalBase64(data string, state any) error {
-	blob, err := base64.URLEncoding.DecodeString(data)
+	blob, err := base64.RawURLEncoding.DecodeString(data)
 	if err != nil {
 		return err
 	}

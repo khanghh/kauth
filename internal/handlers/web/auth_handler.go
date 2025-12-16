@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -107,13 +106,18 @@ func (h *AuthHandler) handleLogin2FA(ctx *fiber.Ctx, session *sessions.Session, 
 	return redirect(ctx, "/2fa/challenge", "state", stateBase64, "nonce", nonce)
 }
 
-func (h *AuthHandler) getOAuthLoginURLs(serviceURL string) map[string]string {
-	query := url.Values{
-		"service": {serviceURL},
+func (h *AuthHandler) getOAuthLoginURLs(serviceURL string, serviceState string) map[string]string {
+	var stateBase64 string
+	if serviceURL != "" {
+		stateBase64, _ = marshalBase64(State{
+			Action:  "authorize",
+			Service: serviceURL,
+			State:   serviceState,
+		})
 	}
 	oauthLoginURLs := make(map[string]string)
 	for _, provider := range h.oauthProviders {
-		oauthLoginURLs[provider.Name()] = provider.GetAuthCodeURL(query.Encode())
+		oauthLoginURLs[provider.Name()] = provider.GetAuthCodeURL(stateBase64)
 	}
 	return oauthLoginURLs
 }
@@ -275,15 +279,16 @@ func (h *AuthHandler) GetLogin(ctx *fiber.Ctx) error {
 	serviceNameOrURL := urlutil.RemoveQuery(ctx.Query("service"))
 	serviceState := ctx.Query("state")
 	errorCode := ctx.Query("error")
+	renew := ctx.QueryBool("renew")
 
 	session := sessions.Get(ctx)
-	if session == nil || !session.IsAuthenticated() {
+	if session == nil || !session.IsAuthenticated() || renew {
 		var errMsg string
 		if errorCode != "" {
 			errMsg = mapLoginError(errorCode)
 		}
 		return render.RenderLoginPage(ctx, render.LoginPageData{
-			OAuthLoginURLs: h.getOAuthLoginURLs(serviceNameOrURL),
+			OAuthLoginURLs: h.getOAuthLoginURLs(serviceNameOrURL, serviceState),
 			ErrorMsg:       errMsg,
 		})
 	}
@@ -306,7 +311,7 @@ func (h *AuthHandler) PostLogin(ctx *fiber.Ctx) error {
 	}
 
 	pageData := render.LoginPageData{
-		OAuthLoginURLs: h.getOAuthLoginURLs(serviceNameOrURL),
+		OAuthLoginURLs: h.getOAuthLoginURLs(serviceNameOrURL, serviceState),
 	}
 
 	if err := captcha.Verify(ctx); err != nil {
