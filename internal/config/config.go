@@ -18,8 +18,8 @@ type MySQLConfig struct {
 	TablePrefix     string `mapstructure:"tablePrefix"`
 	MaxIdleConns    int    `mapstructure:"maxIdleConns"`
 	MaxOpenConns    int    `mapstructure:"maxOpenConns"`
-	ConnMaxIdleTime int    `mapstructure:"connMaxIdleTime"`
-	ConnMaxLifetime int    `mapstructure:"connMaxLifetime"`
+	ConnMaxLifetime int    `mapstructure:"connMaxLifetime"` // in seconds
+	ConnMaxIdleTime int    `mapstructure:"connMaxIdleTime"` // in seconds
 }
 
 type SessionConfig struct {
