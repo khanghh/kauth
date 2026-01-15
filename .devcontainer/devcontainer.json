@@ -1,0 +1,37 @@
+{
+  "name": "Vue Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "runArgs": [
+    "--network=bridge",
+    "--name=kauth-dev"
+  ],
+  "forwardPorts": [
+    8080,
+    3000
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Vue.volar",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "golang.go",
+        "tooltitudeteam.tooltitude-pb",
+        "tooltitudeteam.tooltitude"
+      ]
+    }
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workdir,type=bind",
+  "workspaceFolder": "/workdir",
+  "remoteUser": "node",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20",
+      "pnpm": "true",
+      "yarn": "true"
+    }
+  }
+}
