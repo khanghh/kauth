@@ -1,6 +1,10 @@
 # ---- Build stage ----
 FROM golang:1.25.1-alpine AS builder
 
+ARG GIT_COMMIT
+ARG GIT_DATE
+ARG GIT_TAG
+
 WORKDIR /workdir
 
 RUN apk add --no-cache git ca-certificates tzdata && update-ca-certificates
@@ -13,9 +17,9 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -ldflags "\
       -w -s \
-      -X 'main.gitCommit=$(git rev-parse HEAD)' \
-      -X 'main.gitDate=$(git show -s --format=%cI HEAD)' \
-      -X 'main.gitTag=$(git describe --tags --always --dirty)'" \
+      -X 'main.gitCommit=$(GIT_COMMIT)' \
+      -X 'main.gitDate=$(GIT_DATE)' \
+      -X 'main.gitTag=$(GIT_TAG)'" \
     -o kauth .
 
 # ---- Runtime stage ----
