@@ -1,6 +1,6 @@
 # kauth
 
-**kauth** is self-hosted **CAS and OpenID Provider** with social login built with **Go**, **MySQL**, and **Redis**.  
+**kauth** is self-hosted **CAS** with social login built with **Go**, **MySQL**, and **Redis**.  
 It provides a secure, scalable, and easy-to-deploy authentication service for managing user access across multiple applications.
 
 ---
