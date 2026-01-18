@@ -1,11 +1,11 @@
 .DEFAULT_GOAL := kauth
 
 BUILD_DIR=$(CURDIR)/build/bin
-COMMIT=$(shell git rev-parse HEAD)
-DATE=$(shell git show -s --format=%cI HEAD)
-TAG=$(shell git describe --tags --always --dirty)
+GIT_COMMIT=$(shell git rev-parse HEAD)
+GIT_DATE=$(shell git show -s --format=%cI HEAD)
+GIT_TAG=$(shell git describe --tags --always --dirty)
 
-LDFLAGS=-ldflags "-w -s -X 'main.gitCommit=$(COMMIT)' -X 'main.gitDate=$(DATE)' -X 'main.gitTag=$(TAG)'"
+LDFLAGS=-ldflags "-w -s -X 'main.gitCommit=$(GIT_COMMIT)' -X 'main.gitDate=$(GIT_DATE)' -X 'main.gitTag=$(GIT_TAG)'"
 
 kauth:
 	@echo "Building target: $@" 

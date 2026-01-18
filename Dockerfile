@@ -17,9 +17,9 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -ldflags "\
       -w -s \
-      -X 'main.gitCommit=$(GIT_COMMIT)' \
-      -X 'main.gitDate=$(GIT_DATE)' \
-      -X 'main.gitTag=$(GIT_TAG)'" \
+      -X main.gitCommit=$GIT_COMMIT \
+      -X main.gitDate=$GIT_DATE \
+      -X main.gitTag=$GIT_TAG" \
     -o kauth .
 
 # ---- Runtime stage ----
