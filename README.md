@@ -5,7 +5,7 @@ It provides a secure, scalable, and easy-to-deploy authentication service for ma
 
 ---
 
-## 🚀 Features
+## Features
 
 ✅ **Centralized Authentication** – Single sign-on (SSO) for multiple services  
 ✅ **User Registration** – Built-in account registration flow  
@@ -17,7 +17,7 @@ It provides a secure, scalable, and easy-to-deploy authentication service for ma
 
 ---
 
-## 🧩 Getting Started
+## Getting Started
 
 ### 1. Clone and Build the Repository
 ```bash
@@ -37,7 +37,7 @@ Ensure MySQL and Redis are running, then start the server:
 ```bash
 ./build/bin/kauth --config ./config.yaml
 ```
-## ⚙️ Configuration
+## Configuration
 Edit the config.yaml file to define:
 
 ```yaml
@@ -111,7 +111,7 @@ captcha:
 
 ---
 
-## 🛠️ Contributing
+## Contributing
 
 Pull requests are welcome!
 For major changes, please open an issue first to discuss what you’d like to change.
@@ -120,12 +120,12 @@ For major changes, please open an issue first to discuss what you’d like to ch
 
 Please use the issue tracker to report bugs or request new features.
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License.
 See the [LICENSE](LICENSE.txt) file for details.
 
-## ❤️ Acknowledgements
+## Acknowledgements
 
 - [Go](https://golang.org/)
 - [MySQL](https://www.mysql.com/)
