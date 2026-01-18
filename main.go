@@ -17,7 +17,6 @@ import (
 	"github.com/khanghh/kauth/internal/audit"
 	"github.com/khanghh/kauth/internal/auth"
 	"github.com/khanghh/kauth/internal/config"
-	"github.com/khanghh/kauth/internal/handlers"
 	"github.com/khanghh/kauth/internal/handlers/api"
 	"github.com/khanghh/kauth/internal/handlers/web"
 	"github.com/khanghh/kauth/internal/mail"
@@ -210,11 +209,12 @@ type apiDependencies struct {
 
 func setupAPIRoutes(router fiber.Router, deps *apiDependencies) {
 	serviceValidateHandler := api.NewServiceValidateHandler(deps.authorizeService, deps.userService, deps.twoFactorService)
-	router.Post("/p3/serviceValidate", serviceValidateHandler.PostServiceValidate)
+	apiRouter := router.Group("/api")
+	apiRouter.Post("/serviceValidate", serviceValidateHandler.PostServiceValidate)
 }
 
 type webDependencies struct {
-	statisDir        string
+	staticDir        string
 	captchaConfig    config.CaptchaConfig
 	mailSender       mail.MailSender
 	authorizeService *auth.AuthorizeService
@@ -238,7 +238,7 @@ func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 	mustInitCaptchaVerifier(deps.captchaConfig)
 
 	// routes
-	router.Static("/static", deps.statisDir)
+	router.Static("/static", deps.staticDir)
 	router.Get("/", authHandler.GetHome)
 	router.Get("/login", authHandler.GetLogin)
 	router.Post("/login", authHandler.PostLogin)
@@ -253,7 +253,7 @@ func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 	router.Post("/register/oauth", registerHandler.PostRegisterWithOAuth)
 	router.Get("/reset-password", resetPasswordHandler.GetResetPassword)
 	router.Post("/reset-password", resetPasswordHandler.PostResetPassword)
-	router.Get("/forgot-password", resetPasswordHandler.GetForogtPassword)
+	router.Get("/forgot-password", resetPasswordHandler.GetForgotPassword)
 	router.Post("/forgot-password", resetPasswordHandler.PostForgotPassword)
 	router.Get("/2fa/challenge", twofactorHandler.GetChallenge)
 	router.Post("/2fa/challenge", twofactorHandler.PostChallenge)
@@ -313,7 +313,15 @@ func run(ctx *cli.Context) error {
 		IdleTimeout:   params.ServerIdleTimeout,
 		ReadTimeout:   params.ServerReadTimeout,
 		WriteTimeout:  params.ServerWriteTimeout,
-		ErrorHandler:  handlers.ErrorHandler,
+		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
+			if config.APIOnly {
+				return api.ErrorHandler(ctx, err)
+			}
+			if strings.HasPrefix(ctx.Path(), "/api") {
+				return api.ErrorHandler(ctx, err)
+			}
+			return web.ErrorHandler(ctx, err)
+		},
 	})
 
 	router.Use(recover.New())
@@ -336,15 +344,17 @@ func run(ctx *cli.Context) error {
 		twoFactorService: twoFactorService,
 	})
 
-	setupWebRoutes(router, &webDependencies{
-		statisDir:        config.StaticDir,
-		captchaConfig:    config.Captcha,
-		mailSender:       mailSender,
-		authorizeService: authorizeService,
-		userService:      userService,
-		twoFactorService: twoFactorService,
-		oauthProviders:   oauthProviders,
-	})
+	if !config.APIOnly {
+		setupWebRoutes(router, &webDependencies{
+			staticDir:        config.StaticDir,
+			captchaConfig:    config.Captcha,
+			mailSender:       mailSender,
+			authorizeService: authorizeService,
+			userService:      userService,
+			twoFactorService: twoFactorService,
+			oauthProviders:   oauthProviders,
+		})
+	}
 
 	go startHealthCheckServer(params.HealthCheckServerAddr, redisConn, database)
 	return router.Listen(config.ListenAddr)

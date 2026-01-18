@@ -109,7 +109,7 @@ func (h *ResetPasswordHandler) PostResetPassword(ctx *fiber.Ctx) error {
 	return render.RenderPasswordUpdatedPage(ctx)
 }
 
-func (h *ResetPasswordHandler) GetForogtPassword(ctx *fiber.Ctx) error {
+func (h *ResetPasswordHandler) GetForgotPassword(ctx *fiber.Ctx) error {
 	session := sessions.Get(ctx)
 	if session == nil || session.IsLoggedIn() {
 		return ctx.Redirect("/")

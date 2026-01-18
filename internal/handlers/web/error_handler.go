@@ -1,4 +1,4 @@
-package handlers
+package web
 
 import (
 	"log/slog"
@@ -12,6 +12,7 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 	if e, ok := err.(*fiber.Error); ok {
 		code = e.Code
 	}
+
 	switch code {
 	case fiber.StatusBadRequest:
 		return render.RenderBadRequestErrorPage(ctx)

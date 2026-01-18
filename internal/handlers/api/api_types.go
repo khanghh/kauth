@@ -1,15 +1,27 @@
 package api
 
 type APIResponse struct {
-	APIVersion string        `json:"apiVersion"`
-	Data       any           `json:"data,omitempty"`
-	Error      *APIErrorInfo `json:"error,omitempty"`
+	APIVersion string    `json:"apiVersion"`
+	Data       any       `json:"data,omitempty"`
+	Error      *APIError `json:"error,omitempty"`
 }
 
-type APIErrorInfo struct {
+type APIError struct {
 	Code    int              `json:"code"`
 	Message string           `json:"message"`
 	Errors  []APIErrorDetail `json:"errors,omitempty"`
+}
+
+func (e *APIError) Error() string {
+	return e.Message
+}
+
+func NewAPIError(code int, message string, details ...APIErrorDetail) *APIError {
+	return &APIError{
+		Code:    code,
+		Message: message,
+		Errors:  details,
+	}
 }
 
 type APIErrorDetail struct {
@@ -25,14 +37,14 @@ func NewDataResponse(data any) APIResponse {
 	}
 }
 
-func NewErrorResponse(code int, message string, details ...APIErrorDetail) APIResponse {
+func NewErrorResponse(err error) APIResponse {
+	apiErr, ok := err.(*APIError)
+	if !ok {
+		apiErr = ErrInternalServer
+	}
 	return APIResponse{
 		APIVersion: "1.0",
-		Error: &APIErrorInfo{
-			Code:    code,
-			Message: message,
-			Errors:  details,
-		},
+		Error:      apiErr,
 	}
 }
 

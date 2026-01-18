@@ -80,6 +80,7 @@ type Config struct {
 	SiteName      string        `mapstructure:"siteName"`
 	BaseURL       string        `mapstructure:"baseURL"`
 	MasterKey     string        `mapstructure:"masterKey"`
+	APIOnly       bool          `mapstructure:"apiOnly"`
 	ListenAddr    string        `mapstructure:"listenAddr"`
 	StaticDir     string        `mapstructure:"staticDir"`
 	TemplateDir   string        `mapstructure:"templateDir"`

@@ -50,27 +50,19 @@ type serviceValidateRequest struct {
 func (h *ServiceValidateHandler) PostServiceValidate(ctx *fiber.Ctx) error {
 	var req serviceValidateRequest
 	if err := ctx.BodyParser(&req); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(
-			NewErrorResponse(fiber.StatusBadRequest, "Missing required parameters"),
-		)
+		return ErrMissingParameters
 	}
 	if req.ClientID == "" || req.ClientSecret == "" {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(
-			NewErrorResponse(fiber.StatusUnauthorized, "Unauthorized"),
-		)
+		return ErrUnAuthorized
 	}
 
 	service, err := h.authorizeService.GetServiceByClientID(ctx.Context(), req.ClientID)
 	if err != nil || service.ClientSecret != req.ClientSecret {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(
-			NewErrorResponse(fiber.StatusUnauthorized, "Unauthorized"),
-		)
+		return ErrUnAuthorized
 	}
 
 	if req.Ticket == "" || req.Service == "" {
-		return ctx.Status(fiber.StatusBadRequest).JSON(
-			NewErrorResponse(fiber.StatusBadRequest, "Missing required parameters"),
-		)
+		return ErrMissingParameters
 	}
 
 	callbackURL := urlutil.AppendQuery(req.Service, "state", req.State)
@@ -95,9 +87,7 @@ func (h *ServiceValidateHandler) PostServiceValidate(ctx *fiber.Ctx) error {
 			}
 		default:
 			log.Println("Validate service ticket error:", err)
-			return ctx.Status(fiber.StatusInternalServerError).JSON(
-				NewErrorResponse(fiber.StatusInternalServerError, "Internal server error"),
-			)
+			return ErrInternalServer
 		}
 
 		return ctx.Status(fiber.StatusOK).JSON(
@@ -108,9 +98,7 @@ func (h *ServiceValidateHandler) PostServiceValidate(ctx *fiber.Ctx) error {
 	user, err := h.userService.GetUserByID(ctx.Context(), ticket.UserID)
 	if err != nil {
 		log.Printf("Failed to get user %d: %v", ticket.UserID, err)
-		return ctx.Status(fiber.StatusInternalServerError).JSON(
-			NewErrorResponse(fiber.StatusInternalServerError, "Internal server error"),
-		)
+		return ErrInternalServer
 	}
 
 	userInfo := userInfoResponse{

@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/khanghh/kauth/internal/store"
 	"github.com/khanghh/kauth/internal/users"
+	"github.com/khanghh/kauth/model"
 	"github.com/khanghh/kauth/model/query"
 	"github.com/khanghh/kauth/params"
 )
@@ -210,6 +211,14 @@ func (s *TwoFactorService) IsTwoFAEnabled(ctx context.Context, uid uint) (bool, 
 		}
 	}
 	return false, nil
+}
+
+func (s *TwoFactorService) GetAllAuthFactors(ctx context.Context, userID uint) ([]*model.UserFactor, error) {
+	return s.userFactorRepo.Find(ctx, query.UserFactor.UserID.Eq(userID))
+}
+
+func (s *TwoFactorService) GetEnabledAuthFactors(ctx context.Context, userID uint) ([]*model.UserFactor, error) {
+	return s.userFactorRepo.Find(ctx, query.UserFactor.UserID.Eq(userID), query.UserFactor.Enabled.Is(true))
 }
 
 func (s *TwoFactorService) OTP() *OTPChallenger {

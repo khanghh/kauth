@@ -24,7 +24,8 @@ type TwoFactorService interface {
 	CreateChallenge(ctx context.Context, sub twofactor.Subject, callbackURL string, expiresIn time.Duration) (*twofactor.Challenge, error)
 	ValidateChallenge(ctx context.Context, ch *twofactor.Challenge, sub twofactor.Subject, chType string) error
 	FinalizeChallenge(ctx context.Context, cid string, sub twofactor.Subject, callbackURL string) error
-	IsTwoFAEnabled(ctx context.Context, uid uint) (bool, error)
+	GetEnabledAuthFactors(ctx context.Context, userID uint) ([]*model.UserFactor, error)
+	GetAllAuthFactors(ctx context.Context, userID uint) ([]*model.UserFactor, error)
 	OTP() *twofactor.OTPChallenger
 	TOTP() *twofactor.TOTPChallenger
 	JWT() *twofactor.JWTChallenger
@@ -37,6 +38,7 @@ type UserService interface {
 	RegisterUser(ctx context.Context, opts users.CreateUserOptions) (*model.PendingUser, error)
 	ApprovePendingUser(ctx context.Context, email string, token string) (*model.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*model.User, error)
+	GetUserByUsername(ctx context.Context, username string) (*model.User, error)
 	GetUserByUsernameOrEmail(ctx context.Context, identifier string) (*model.User, error)
 	GetUserOAuthByID(ctx context.Context, userOAuthID uint) (*model.UserOAuth, error)
 	GetOrCreateUserOAuth(ctx context.Context, userOAuth *model.UserOAuth) (*model.UserOAuth, error)

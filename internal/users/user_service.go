@@ -53,6 +53,14 @@ func (s *UserService) GetUserByEmail(ctx context.Context, email string) (*model.
 	return user, err
 }
 
+func (s *UserService) GetUserByUsername(ctx context.Context, username string) (*model.User, error) {
+	user, err := s.userRepo.First(ctx, query.User.Username.Eq(username))
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, ErrUserNotFound
+	}
+	return user, err
+}
+
 func (s *UserService) GetUserByUsernameOrEmail(ctx context.Context, identifier string) (*model.User, error) {
 	var (
 		user *model.User
