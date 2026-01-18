@@ -20,5 +20,5 @@ type AuditEvent struct {
 }
 
 func (AuditEvent) TableName() string {
-	return "audit"
+	return "audits"
 }

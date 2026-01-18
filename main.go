@@ -89,8 +89,7 @@ func mustInitLogger(debug bool) {
 func mustInitDatabase(dbConfig config.MySQLConfig) *gorm.DB {
 	db, err := gorm.Open(mysql.Open(dbConfig.Dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
-			TablePrefix:   dbConfig.TablePrefix,
-			SingularTable: true,
+			TablePrefix: dbConfig.TablePrefix,
 		},
 	})
 	if err != nil {
