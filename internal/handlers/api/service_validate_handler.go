@@ -9,7 +9,7 @@ import (
 	"github.com/khanghh/kauth/internal/urlutil"
 )
 
-type AuthHandler struct {
+type ServiceValidateHandler struct {
 	authorizeService AuthorizeService
 	userService      UserService
 	twoFactorService TwoFactorService
@@ -39,33 +39,42 @@ type casValidateResponse struct {
 	Failure *authenticationFailure `json:"authenticationFailure,omitempty"`
 }
 
-func (h *AuthHandler) PostServiceValidate(ctx *fiber.Ctx) error {
-	serviceNameOrURL := ctx.FormValue("service")
-	serviceState := ctx.FormValue("state")
-	ticketID := ctx.FormValue("ticket")
-	clientID := ctx.FormValue("client_id")
-	clientSecret := ctx.FormValue("client_secret")
-	if clientID == "" || clientSecret == "" {
+type serviceValidateRequest struct {
+	Service      string `json:"service" form:"service"`
+	State        string `json:"state" form:"state"`
+	Ticket       string `json:"ticket" form:"ticket"`
+	ClientID     string `json:"clientId" form:"client_id"`
+	ClientSecret string `json:"clientSecret" form:"client_secret"`
+}
+
+func (h *ServiceValidateHandler) PostServiceValidate(ctx *fiber.Ctx) error {
+	var req serviceValidateRequest
+	if err := ctx.BodyParser(&req); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(
+			NewErrorResponse(fiber.StatusBadRequest, "Missing required parameters"),
+		)
+	}
+	if req.ClientID == "" || req.ClientSecret == "" {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(
 			NewErrorResponse(fiber.StatusUnauthorized, "Unauthorized"),
 		)
 	}
 
-	service, err := h.authorizeService.GetServiceByClientID(ctx.Context(), clientID)
-	if err != nil || service.ClientSecret != clientSecret {
+	service, err := h.authorizeService.GetServiceByClientID(ctx.Context(), req.ClientID)
+	if err != nil || service.ClientSecret != req.ClientSecret {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(
 			NewErrorResponse(fiber.StatusUnauthorized, "Unauthorized"),
 		)
 	}
 
-	if ticketID == "" || serviceNameOrURL == "" {
+	if req.Ticket == "" || req.Service == "" {
 		return ctx.Status(fiber.StatusBadRequest).JSON(
 			NewErrorResponse(fiber.StatusBadRequest, "Missing required parameters"),
 		)
 	}
 
-	callbackURL := urlutil.AppendQuery(serviceNameOrURL, "state", serviceState)
-	ticket, err := h.authorizeService.ValidateServiceTicket(ctx.Context(), callbackURL, ticketID)
+	callbackURL := urlutil.AppendQuery(req.Service, "state", req.State)
+	ticket, err := h.authorizeService.ValidateServiceTicket(ctx.Context(), callbackURL, req.Ticket)
 	if err != nil {
 		var failure *authenticationFailure
 		switch err {
@@ -121,8 +130,8 @@ func (h *AuthHandler) PostServiceValidate(ctx *fiber.Ctx) error {
 	)
 }
 
-func NewAuthHandler(authorizeService AuthorizeService, userService UserService, twoFactorService TwoFactorService) *AuthHandler {
-	return &AuthHandler{
+func NewServiceValidateHandler(authorizeService AuthorizeService, userService UserService, twoFactorService TwoFactorService) *ServiceValidateHandler {
+	return &ServiceValidateHandler{
 		authorizeService: authorizeService,
 		userService:      userService,
 		twoFactorService: twoFactorService,

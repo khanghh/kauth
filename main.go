@@ -209,8 +209,8 @@ type apiDependencies struct {
 }
 
 func setupAPIRoutes(router fiber.Router, deps *apiDependencies) {
-	authHandler := api.NewAuthHandler(deps.authorizeService, deps.userService, deps.twoFactorService)
-	router.Post("/p3/serviceValidate", authHandler.PostServiceValidate)
+	serviceValidateHandler := api.NewServiceValidateHandler(deps.authorizeService, deps.userService, deps.twoFactorService)
+	router.Post("/p3/serviceValidate", serviceValidateHandler.PostServiceValidate)
 }
 
 type webDependencies struct {
