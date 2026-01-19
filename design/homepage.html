@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MineViet Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .avatar-initial {
+      font-size: 0;
+      height: 32px;
+      text-transform: uppercase;
+    }
+
+    .avatar-initial:first-letter {
+      font-size: 24px;
+    }
+
+    #dropdown-menu {
+      opacity: 0;
+      transform: translateY(-10px);
+      pointer-events: none;
+      transition: all 0.2s ease;
+    }
+
+    #dropdown-menu.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen font-sans">
+  <!-- Main Container -->
+  <div class="flex min-h-screen">
+
+    <!-- Left Sidebar - Transparent -->
+    <div class="w-64 bg-transparent p-6">
+      <!-- Logo -->
+      <div class="mb-10">
+        <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+          <i class="fas fa-cube mr-2 text-indigo-600"></i>
+          MineViet
+        </h1>
+        <p class="text-gray-500 text-sm mt-1">Account Settings</p>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="space-y-1">
+        <a href="#" class="flex items-center px-4 py-3 rounded-xl bg-indigo-50 text-indigo-600">
+          <i class="fas fa-home mr-3"></i>
+          Home
+        </a>
+        <a href="#"
+          class="flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors">
+          <i class="fas fa-user mr-3"></i>
+          Personal Info
+        </a>
+        <a href="#"
+          class="flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors">
+          <i class="fas fa-key mr-3"></i>
+          Change Password
+        </a>
+        <a href="#"
+          class="flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors">
+          <i class="fas fa-envelope mr-3"></i>
+          Change Email
+        </a>
+        <a href="#"
+          class="flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors">
+          <i class="fas fa-mobile-alt mr-3"></i>
+          Two Factor Authentication
+        </a>
+        <a href="#"
+          class="flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors">
+          <i class="fas fa-server mr-3"></i>
+          Services
+        </a>
+      </nav>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col">
+      <!-- Avatar Dropdown Only (Top Right) -->
+      <div class="p-6 flex justify-end">
+        <div class="relative">
+          <button id="avatar-dropdown" class="flex items-center space-x-3 focus:outline-none group">
+            <div class="text-right hidden md:block">
+              <p class="font-medium text-gray-800">MineViet Official</p>
+              <p class="text-sm text-gray-500">Admin</p>
+            </div>
+            <div
+              class="relative w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg group-hover:shadow-xl transition-shadow">
+              <img
+                src="https://lh3.googleusercontent.com/a/ACg8ocJ3AGOwBK1bdrsn2LDW8lFbNk6tjGnK9d6qk_GUaN2Nzw47Y7qt=s96-c"
+                alt="Profile" class="w-full h-full rounded-full object-cover" onerror="this.style.display='none';">
+              <span class="avatar-initial">M</span>
+            </div>
+            <i class="fas fa-chevron-down text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div id="dropdown-menu"
+            class="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50">
+            <!-- User Info -->
+            <div class="px-4 py-3 border-b border-gray-100">
+              <p class="font-medium text-gray-800">MineViet Official</p>
+              <p class="text-sm text-gray-500 truncate">minevietofficial@gmail.com</p>
+            </div>
+
+            <!-- Menu Items -->
+            <div class="py-2">
+              <a href="#"
+                class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                <i class="fas fa-user mr-3 text-gray-400"></i>
+                My Profile
+              </a>
+              <a href="#"
+                class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                <i class="fas fa-cog mr-3 text-gray-400"></i>
+                Account Settings
+              </a>
+              <a href="#"
+                class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                <i class="fas fa-bell mr-3 text-gray-400"></i>
+                Notifications
+              </a>
+            </div>
+
+            <!-- Divider -->
+            <div class="border-t border-gray-100 my-2"></div>
+
+            <!-- Logout -->
+            <div class="px-4 py-3">
+              <form action="/logout" method="POST">
+                <input type="hidden" name="_csrf" value="token">
+                <button type="submit"
+                  class="flex items-center w-full px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                  <i class="fas fa-sign-out-alt mr-3"></i>
+                  Log out
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content - Home Page -->
+      <main class="flex-1 p-8">
+        <div class="max-w-4xl mx-auto">
+
+          <!-- User Profile Info (No Card) -->
+          <div class="text-center mb-12">
+            <!-- User Avatar -->
+            <div class="relative w-32 h-32 mx-auto mb-6">
+              <div
+                class="w-full h-full rounded-full border-4 border-blue-100 overflow-hidden flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
+                <img
+                  src="https://lh3.googleusercontent.com/a/ACg8ocJ3AGOwBK1bdrsn2LDW8lFbNk6tjGnK9d6qk_GUaN2Nzw47Y7qt=s96-c"
+                  alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';">
+                <span class="avatar-initial text-white text-4xl font-bold">M</span>
+              </div>
+            </div>
+
+            <!-- Display Name -->
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">MineViet Official</h1>
+
+            <!-- Email -->
+            <p class="text-gray-600 text-lg">
+              <i class="fas fa-envelope mr-2"></i>
+              minevietofficial@gmail.com
+            </p>
+          </div>
+
+          <!-- Recent Activity Section -->
+          <div class="mt-12">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold text-gray-800">Recent Activity</h2>
+              <a href="#" class="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                View All
+                <i class="fas fa-arrow-right ml-1"></i>
+              </a>
+            </div>
+
+            <!-- Activity List -->
+            <div class="space-y-4">
+              <!-- Activity Item 1 -->
+              <div
+                class="flex items-center p-4 bg-white rounded-xl border border-gray-200 hover:border-indigo-200 hover:shadow-sm transition-all">
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                  <i class="fas fa-key text-blue-600"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="font-medium text-gray-800">Password Changed</p>
+                  <p class="text-sm text-gray-500">Your account password was updated successfully</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm text-gray-500">Today, 10:30 AM</p>
+                  <p class="text-xs text-blue-600 font-medium">Security</p>
+                </div>
+              </div>
+
+              <!-- Activity Item 2 -->
+              <div
+                class="flex items-center p-4 bg-white rounded-xl border border-gray-200 hover:border-green-200 hover:shadow-sm transition-all">
+                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-4">
+                  <i class="fas fa-mobile-alt text-green-600"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="font-medium text-gray-800">2FA Device Added</p>
+                  <p class="text-sm text-gray-500">A new device was registered for two-factor authentication</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm text-gray-500">Yesterday, 14:20 PM</p>
+                  <p class="text-xs text-green-600 font-medium">Security</p>
+                </div>
+              </div>
+
+              <!-- Activity Item 3 -->
+              <div
+                class="flex items-center p-4 bg-white rounded-xl border border-gray-200 hover:border-purple-200 hover:shadow-sm transition-all">
+                <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-4">
+                  <i class="fas fa-user text-purple-600"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="font-medium text-gray-800">Profile Updated</p>
+                  <p class="text-sm text-gray-500">Your profile information was modified</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm text-gray-500">2 days ago</p>
+                  <p class="text-xs text-purple-600 font-medium">Profile</p>
+                </div>
+              </div>
+
+              <!-- Activity Item 4 -->
+              <div
+                class="flex items-center p-4 bg-white rounded-xl border border-gray-200 hover:border-red-200 hover:shadow-sm transition-all">
+                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mr-4">
+                  <i class="fas fa-sign-out-alt text-red-600"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="font-medium text-gray-800">Session Ended</p>
+                  <p class="text-sm text-gray-500">You logged out from an active session</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm text-gray-500">3 days ago</p>
+                  <p class="text-xs text-red-600 font-medium">Security</p>
+                </div>
+              </div>
+
+              <!-- Activity Item 5 -->
+              <div
+                class="flex items-center p-4 bg-white rounded-xl border border-gray-200 hover:border-yellow-200 hover:shadow-sm transition-all">
+                <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mr-4">
+                  <i class="fas fa-server text-yellow-600"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="font-medium text-gray-800">Service Connected</p>
+                  <p class="text-sm text-gray-500">A new service was linked to your account</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm text-gray-500">1 week ago</p>
+                  <p class="text-xs text-yellow-600 font-medium">Services</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Avatar dropdown toggle
+    const avatarDropdown = document.getElementById('avatar-dropdown');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+
+    avatarDropdown.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle('show');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+      dropdownMenu.classList.remove('show');
+    });
+
+    // Prevent dropdown from closing when clicking inside it
+    dropdownMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  </script>
+</body>
+
+</html>
