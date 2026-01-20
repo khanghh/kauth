@@ -1,7 +1,10 @@
 package api
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+)
 
+// General API errors
 var (
 	ErrInternalServer = &APIError{
 		Code:    fiber.StatusInternalServerError,
@@ -11,16 +14,24 @@ var (
 		Code:    fiber.StatusBadRequest,
 		Message: "Missing required parameters",
 	}
-	ErrUnAuthorized = &APIError{
+	ErrCaptchaVerificationFailed = &APIError{
+		Code:    fiber.StatusBadRequest,
+		Message: "Captcha verification failed",
+	}
+)
+
+// Authentication errors
+var (
+	ErrUnauthorized = &APIError{
 		Code:    fiber.StatusUnauthorized,
 		Message: "Unauthorized",
+	}
+	ErrAlreadyLoggedIn = &APIError{
+		Code:    fiber.StatusConflict,
+		Message: "Already logged in",
 	}
 	ErrIncorrectPassword = &APIError{
 		Code:    fiber.StatusUnauthorized,
 		Message: "Invalid username or password",
-	}
-	ErrCaptchaVerificationFailed = &APIError{
-		Code:    fiber.StatusUnauthorized,
-		Message: "Captcha verification failed",
 	}
 )

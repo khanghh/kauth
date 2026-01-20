@@ -6,7 +6,7 @@ import (
 	"unicode"
 )
 
-func maskEmail(email string) string {
+func MaskEmail(email string) string {
 	parts := strings.Split(email, "@")
 	if len(parts) != 2 {
 		return email
@@ -30,7 +30,7 @@ func maskEmail(email string) string {
 	return maskPart(user) + "@" + maskPart(domain) + "." + tld
 }
 
-func formatPhone(phone string) string {
+func FormatPhone(phone string) string {
 	// strip non-digits
 	re := regexp.MustCompile(`\D`)
 	digits := re.ReplaceAllString(phone, "")
@@ -66,7 +66,7 @@ func formatPhone(phone string) string {
 	return strings.Join(parts, " ")
 }
 
-func maskPhone(formatted string) string {
+func MaskPhone(formatted string) string {
 	var digitsOnly strings.Builder
 	for _, ch := range formatted {
 		if unicode.IsDigit(ch) {

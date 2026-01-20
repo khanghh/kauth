@@ -53,12 +53,12 @@ func (h *ServiceValidateHandler) PostServiceValidate(ctx *fiber.Ctx) error {
 		return ErrMissingParameters
 	}
 	if req.ClientID == "" || req.ClientSecret == "" {
-		return ErrUnAuthorized
+		return ErrUnauthorized
 	}
 
 	service, err := h.authorizeService.GetServiceByClientID(ctx.Context(), req.ClientID)
 	if err != nil || service.ClientSecret != req.ClientSecret {
-		return ErrUnAuthorized
+		return ErrUnauthorized
 	}
 
 	if req.Ticket == "" || req.Service == "" {

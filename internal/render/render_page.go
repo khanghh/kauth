@@ -146,10 +146,10 @@ func RenderProfilePage(ctx *fiber.Ctx, data ProfilePageData) error {
 
 func RenderVerificationRequiredPage(ctx *fiber.Ctx, data VerificationRequiredPageData) error {
 	email := data.Email
-	phone := formatPhone(data.Phone)
+	phone := FormatPhone(data.Phone)
 	if data.IsMasked {
-		email = maskEmail(email)
-		phone = maskPhone(phone)
+		email = MaskEmail(email)
+		phone = MaskPhone(phone)
 	}
 	body, err := RenderHTML("verification-required", fiber.Map{
 		"siteName":     globalVars["siteName"],
@@ -169,10 +169,10 @@ func RenderVerificationRequiredPage(ctx *fiber.Ctx, data VerificationRequiredPag
 
 func RenderVerifyOTPPage(ctx *fiber.Ctx, pageData VerifyOTPPageData) error {
 	email := pageData.Email
-	phone := formatPhone(pageData.Phone)
+	phone := FormatPhone(pageData.Phone)
 	if pageData.IsMasked {
-		email = maskEmail(email)
-		phone = maskPhone(phone)
+		email = MaskEmail(email)
+		phone = MaskPhone(phone)
 	}
 
 	emailOrPhone := email
