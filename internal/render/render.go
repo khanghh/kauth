@@ -89,23 +89,24 @@ func RenderHTML(templateName string, vars map[string]interface{}) (string, error
 		templateName += ".html"
 	}
 
-	// On-demand loading when a template directory is set
 	if templateDir != "" {
-		// Compute absolute file filePath
 		filePath := filepath.Join(templateDir, templateName)
-		// Read and compile the specific template with its full logical name
-		if contents, err := os.ReadFile(filePath); err == nil {
-			if t, err := template.New(templateName).Parse(string(contents)); err == nil {
-				if err := t.ExecuteTemplate(buf, templateName, mergedVars); err == nil {
-					return buf.String(), nil
-				}
-			}
+		contents, err := os.ReadFile(filePath)
+		if err != nil {
+			return "", fmt.Errorf("could not read template %s: %w", filePath, err)
 		}
+		t, err := template.New(templateName).Parse(string(contents))
+		if err != nil {
+			return "", fmt.Errorf("could not parse template %s: %w", filePath, err)
+		}
+		if err := t.ExecuteTemplate(buf, templateName, mergedVars); err != nil {
+			return "", fmt.Errorf("could not execute template %s: %w", filePath, err)
+		}
+		return buf.String(), nil
 	}
 
-	// fallback to embedded templates
 	if err := embedTemplate.ExecuteTemplate(buf, templateName, mergedVars); err != nil {
-		return "", err
+		return "", fmt.Errorf("could not execute built-in template %s: %w", templateName, err)
 	}
 	return buf.String(), nil
 }

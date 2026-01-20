@@ -125,13 +125,14 @@ func RenderAccessGrantedPage(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).SendString(body)
 }
 
-func RenderProfilePage(ctx *fiber.Ctx, data ProfilePageData) error {
+func RenderAccountHomePage(ctx *fiber.Ctx, data AccountHomePageData) error {
 	displayName := data.FullName
 	if displayName == "" {
 		displayName = data.Username
 	}
-	body, err := RenderHTML("profile", fiber.Map{
+	body, err := RenderHTML("index", fiber.Map{
 		"siteName":     globalVars["siteName"],
+		"username":     data.Username,
 		"displayName":  displayName,
 		"email":        data.Email,
 		"picture":      data.Picture,
@@ -144,17 +145,17 @@ func RenderProfilePage(ctx *fiber.Ctx, data ProfilePageData) error {
 	return ctx.Status(fiber.StatusOK).SendString(body)
 }
 
-func RenderVerificationRequiredPage(ctx *fiber.Ctx, data VerificationRequiredPageData) error {
+func RenderTwoFAChallengePage(ctx *fiber.Ctx, data TwoFAChallengePageData) error {
 	email := data.Email
 	phone := FormatPhone(data.Phone)
 	if data.IsMasked {
 		email = MaskEmail(email)
 		phone = MaskPhone(phone)
 	}
-	body, err := RenderHTML("verification-required", fiber.Map{
+	body, err := RenderHTML("2fa/challenge", fiber.Map{
 		"siteName":     globalVars["siteName"],
 		"emailEnabled": data.EmailEnabled,
-		"smsEnabled":   data.SMSEnableled,
+		"smsEnabled":   data.SMSEnabled,
 		"totpEnabled":  data.TOTPEnabled,
 		"email":        email,
 		"phone":        phone,

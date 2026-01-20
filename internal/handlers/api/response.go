@@ -15,6 +15,6 @@ type twoFactorMethod struct {
 
 type loginResponse struct {
 	User          userInfo          `json:"user"`
-	TwoFARequired bool              `json:"twoFaRequired"`
-	TwoFAMethods  []twoFactorMethod `json:"twoFaMethods,omitempty"`
+	TwoFARequired bool              `json:"twoFARequired"`
+	TwoFAMethods  []twoFactorMethod `json:"twoFAMethods,omitempty"`
 }
