@@ -45,5 +45,6 @@ const user = ref({
 const avatarMainOk = ref(true)
 definePageMeta({
   layout: 'dashboard',
+  middleware: 'auth'
 })
 </script>
