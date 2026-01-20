@@ -13,7 +13,7 @@
         {{ errorMsg }}
       </div>
 
-      <form class="space-y-6" @submit.prevent="handleLogin">
+      <form class="space-y-6" method="POST">
         <div>
           <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập hoặc email</label>
           <div class="relative">
@@ -33,6 +33,10 @@
 
         <div>
           <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
+          <div class="flex justify-end mb-1">
+            <NuxtLink to="/forgot-password" class="text-sm text-blue-600 hover:text-blue-500">Quên mật khẩu?
+            </NuxtLink>
+          </div>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
               <Icon name="fa7-solid:lock" />
@@ -48,10 +52,18 @@
               class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
               placeholder="Nhập mật khẩu của bạn">
           </div>
-          <div class="flex justify-end mt-1">
-            <NuxtLink to="/forgot-password" class="text-sm text-blue-600 hover:text-blue-500">Quên mật khẩu?
-            </NuxtLink>
-          </div>
+        </div>
+
+        <div class="flex items-center">
+          <input
+            id="remember_me"
+            name="remember_me"
+            type="checkbox"
+            v-model="rememberMe"
+            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+          <label for="remember_me" class="ml-2 block text-sm text-gray-900">
+            Ghi nhớ đăng nhập
+          </label>
         </div>
 
         <input type="hidden" name="_csrf" :value="csrfToken">
@@ -116,23 +128,19 @@
 
 <script setup lang="ts">
 
-const errorMsg = ref('')
 const identifier = ref('')
 const password = ref('')
-const turnstileSiteKey = ref('')
+const rememberMe = ref(false)
 const csrfToken = ref('')
 
-// Initialize with example values for UI demonstration or fetch from config/API
-const googleOAuthURL = ref('#')
-const facebookOAuthURL = ref('#')
-const discordOAuthURL = ref('#')
-const microsoftOAuthURL = ref('#')
-const appleOAuthURL = ref('#')
-
-const handleLogin = () => {
-  // TODO: Implement login logic
-  console.log('Login attempt', identifier.value)
-}
+// Initialize server variables
+const turnstileSiteKey = useServerVar('turnstileSiteKey')
+const googleOAuthURL = useServerVar('googleOAuthURL')
+const facebookOAuthURL = useServerVar('facebookOAuthURL')
+const discordOAuthURL = useServerVar('discordOAuthURL')
+const microsoftOAuthURL = useServerVar('microsoftOAuthURL')
+const appleOAuthURL = useServerVar('appleOAuthURL')
+const errorMsg = useServerVar('errorMsg')
 
 useHead({
   title: useSiteTitle('Đăng nhập'),

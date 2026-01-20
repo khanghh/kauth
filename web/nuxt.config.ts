@@ -1,11 +1,11 @@
 import Aura from '@primeuix/themes/aura';
+import path from 'path'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   modules: [
-    '@primevue/nuxt-module',
     '@nuxtjs/tailwindcss',
     '@vueuse/nuxt',
     '@pinia/nuxt',
@@ -18,12 +18,35 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
-    app: {
-      backendUrl: "http://localhost:3001/api"
-    },
     public: {
-      siteName: "MineViet"
+      siteName: "{{.siteName}}"
     }
+  },
+  nitro: {
+    prerender: {
+      crawlLinks: true,
+      failOnError: false,
+    },
+    hooks: {
+      'prerender:generate'(route) {
+        if (route.skip) return
+        if (!route.fileName || !route.contents) return
+        const fileName = route.fileName
+        console.log(`Processing: ${route.route}`)
+        if (path.basename(fileName) === 'index.html' && path.dirname(fileName) !== '.') {
+          const newDir = path.dirname(fileName)
+          if (newDir !== '/') {
+            const newBase = path.basename(newDir) + '.html'
+            const newFileName = path.join(newDir, '..', newBase)
+            route.fileName = newFileName
+            console.log(`Renamed: ${fileName} → ${newFileName}`)
+          }
+        }
+      },
+    }
+  },
+  experimental: {
+    payloadExtraction: false
   },
   imports: {
     autoImport: true,
@@ -38,13 +61,6 @@ export default defineNuxtConfig({
     config: {
       stylistic: true,
     },
-  },
-  primevue: {
-    options: {
-      theme: {
-        preset: Aura
-      }
-    }
   },
   icon: {
     localApiEndpoint: '/icons',

@@ -23,28 +23,23 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const props = defineProps({
-  error: {
-    type: Object,
-    default: null,
-  },
-})
+const statusCode = useServerVar("statusCode")
+const statusMessage = useServerVar("statusMessage")
 
 const errorConfig = computed(() => {
-  const status = props.error?.statusCode
-  if (status === 404) {
+  if (statusCode.value === '404') {
     return {
       code: '404',
       title: 'Page Not Found',
       message: 'Sorry, the page you’re looking for doesn’t exist.',
     }
-  } else if (status === 403) {
+  } else if (statusCode.value === '403') {
     return {
       code: '403',
       title: 'Forbidden',
       message: 'You don’t have permission to access this page.',
     }
-  } else if (status === 500) {
+  } else if (statusCode.value === '500') {
     return {
       code: '500',
       title: 'Internal Server Error',
@@ -52,8 +47,8 @@ const errorConfig = computed(() => {
     }
   } else {
     return {
-      code: props.error?.statusCode || 'Error',
-      title: props.error?.statusMessage || 'An Error Occurred',
+      code: statusCode || 'Error',
+      title: statusMessage || 'An Error Occurred',
       message: 'Something went wrong. Please try again.',
     }
   }

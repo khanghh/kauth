@@ -1,65 +1,3 @@
-<script setup lang="ts">
-const route = useRoute()
-
-// State
-const errorMsg = ref('')
-const isLoading = ref(false)
-
-// Data from query/props
-const cid = computed(() => route.query.cid as string || '')
-const email = computed(() => route.query.email as string || '')
-const phone = computed(() => route.query.phone as string || '')
-const csrfToken = computed(() => route.query._csrf as string || '')
-
-// Mock enabled factors
-const enabledFactors = ref([
-  { type: 'email', target: 'm***@example.com', cooldown: 30 },
-  { type: 'sms', target: '+84 *** *** 123', cooldown: 0 },
-  { type: 'totp', target: '', cooldown: 0 }
-])
-
-const emailFactor = computed(() => enabledFactors.value.find(f => f.type === 'email'))
-const smsFactor = computed(() => enabledFactors.value.find(f => f.type === 'sms'))
-const totpFactor = computed(() => enabledFactors.value.find(f => f.type === 'totp'))
-
-const selectMethod = async (method: string) => {
-  errorMsg.value = ''
-  isLoading.value = true
-
-  try {
-    await $fetch('', {
-      method: 'POST',
-      body: {
-        cid: cid.value,
-        _csrf: csrfToken.value,
-        method: method
-      }
-    })
-
-    // Navigate to verify page
-    await navigateTo({
-      path: `/2fa/verify/${method}`,
-      query: {
-        ...route.query
-      }
-    })
-  } catch (err: any) {
-    console.error(err)
-    errorMsg.value = err.data?.message || err.message || 'Đã xảy ra lỗi khi gửi mã.'
-  } finally {
-    isLoading.value = false
-  }
-}
-
-// Layout
-useHead({
-  title: 'Xác minh danh tính',
-  bodyAttrs: {
-    class: 'bg-gray-50'
-  }
-})
-</script>
-
 <template>
   <div>
     <div class="p-8">
@@ -135,3 +73,65 @@ useHead({
     </footer>
   </div>
 </template>
+
+<script setup lang="ts">
+const route = useRoute()
+
+// State
+const errorMsg = ref('')
+const isLoading = ref(false)
+
+// Data from query/props
+const cid = computed(() => route.query.cid as string || '')
+const email = computed(() => route.query.email as string || '')
+const phone = computed(() => route.query.phone as string || '')
+const csrfToken = computed(() => route.query._csrf as string || '')
+
+// Mock enabled factors
+const enabledFactors = ref([
+  { type: 'email', target: 'm***@example.com', cooldown: 30 },
+  { type: 'sms', target: '+84 *** *** 123', cooldown: 0 },
+  { type: 'totp', target: '', cooldown: 0 }
+])
+
+const emailFactor = computed(() => enabledFactors.value.find(f => f.type === 'email'))
+const smsFactor = computed(() => enabledFactors.value.find(f => f.type === 'sms'))
+const totpFactor = computed(() => enabledFactors.value.find(f => f.type === 'totp'))
+
+const selectMethod = async (method: string) => {
+  errorMsg.value = ''
+  isLoading.value = true
+
+  try {
+    await $fetch('', {
+      method: 'POST',
+      body: {
+        cid: cid.value,
+        _csrf: csrfToken.value,
+        method: method
+      }
+    })
+
+    // Navigate to verify page
+    await navigateTo({
+      path: `/2fa/verify/${method}`,
+      query: {
+        ...route.query
+      }
+    })
+  } catch (err: any) {
+    console.error(err)
+    errorMsg.value = err.data?.message || err.message || 'Đã xảy ra lỗi khi gửi mã.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Layout
+useHead({
+  title: 'Xác minh danh tính',
+  bodyAttrs: {
+    class: 'bg-gray-50'
+  }
+})
+</script>

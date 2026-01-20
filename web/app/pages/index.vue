@@ -6,7 +6,7 @@
           class="w-full h-full rounded-full border-4 border-blue-100 overflow-hidden flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
           <img
             v-if="avatarMainOk"
-            :src="user.avatarUrl"
+            :src="avatarUrl"
             alt="Profile"
             class="w-full h-full object-cover"
             @error="avatarMainOk = false">
@@ -14,11 +14,11 @@
         </div>
       </div>
 
-      <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ user.displayName }}</h1>
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ displayName }}</h1>
 
       <p class="text-gray-600 text-lg inline-flex items-center justify-center">
         <Icon name="fa7-solid:envelope" class="mr-2" />
-        {{ user.email }}
+        {{ email }}
       </p>
     </div>
 
@@ -31,20 +31,24 @@
 <script setup>
 import { computed, ref } from 'vue'
 
-const userInitial = computed(() => (user.displayName?.trim()?.[0] ?? 'U').toUpperCase())
-
-// Sidebar nav items are rendered directly inside the SidebarNav component
-
-const user = ref({
-  displayName: 'MineViet Official',
-  role: 'Admin',
-  email: 'minevietofficial@gmail.com',
-  avatarUrl: 'https://lh3.googleusercontent.com/a/ACg8ocJ3AGOwBK1bdrsn2LDW8lFbNk6tjGnK9d6qk_GUaN2Nzw47Y7qt=s96-c',
-})
-
-const avatarMainOk = ref(true)
 definePageMeta({
   layout: 'dashboard',
-  middleware: 'auth'
 })
+
+
+// Sidebar nav items are rendered directly inside the SidebarNav component
+const username = useServerVar("username")
+const displayName = useServerVar("displayName")
+const email = useServerVar("email")
+const avatarUrl = useServerVar("picture")
+const userInitial = computed(() => (username.value?.trim()?.[0] ?? 'U').toUpperCase())
+
+const userStore = useUserStore()
+if (!userStore.isLoggedIn) {
+  await userStore.fetchUser()
+}
+console.log("user after fetch:", userStore.user)
+
+const avatarMainOk = ref(true)
+
 </script>

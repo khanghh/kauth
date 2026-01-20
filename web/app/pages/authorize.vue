@@ -99,9 +99,9 @@ useHead({
         </p>
         <p class="mt-4 text-xs text-gray-400 text-center">
           Bằng việc cho phép, bạn đồng ý với
-          <a href="/terms" class="text-blue-500 hover:underline">Điều khoản dịch vụ</a>
+          <a href="#" class="text-blue-500 hover:underline">Điều khoản dịch vụ</a>
           và
-          <a href="/privacy" class="text-blue-500 hover:underline">Chính sách bảo mật</a>
+          <a href="#" class="text-blue-500 hover:underline">Chính sách bảo mật</a>
         </p>
       </div>
     </div>

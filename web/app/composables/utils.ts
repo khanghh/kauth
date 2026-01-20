@@ -5,3 +5,8 @@ export function useSiteTitle(...subTitles: string[]) {
     .filter(Boolean)
     .join(' - ')
 }
+
+export function useServerVar(varName: string): Ref<string | undefined> {
+  const { data } = useAsyncData<string>(varName, async () => `{{.${varName}}}`,)
+  return data
+}

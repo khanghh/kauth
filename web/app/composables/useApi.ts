@@ -1,7 +1,8 @@
+import { body } from '@primeuix/themes/aura/card'
 import { useHttpGet } from './http'
 
 export interface User {
-  userId: string
+  id: string
   username: string
   fullName: string
   email: string
@@ -10,7 +11,7 @@ export interface User {
 
 export const useApi = () => {
   return {
-    getCurrentUser: () => useHttpGet<User>('/api/me')
+    getCurrentUser: () => useHttpGet<User>('/api/account'),
   }
 }
 
