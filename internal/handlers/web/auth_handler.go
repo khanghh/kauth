@@ -100,7 +100,7 @@ func (h *AuthHandler) handleLogin2FA(ctx *fiber.Ctx, session *sessions.Session, 
 		RedirectURL: redirectURL,
 	})
 
-	nonce, err := createNonce(ctx.Context(), session, stateBase64)
+	nonce, err := common.CreateNonce(ctx.Context(), session, stateBase64)
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,7 @@ func (h *AuthHandler) handleAuthorizeServiceAccess(ctx *fiber.Ctx, session *sess
 
 	callbackURL = urlutil.AppendQuery(callbackURL, "ticket", ticket.TicketID)
 	audit.RecordServiceAuthorized(ctx, user, service, callbackURL)
-	deleteNonce(ctx.Context(), session, nonce)
+	common.DeleteNonce(ctx.Context(), session, nonce)
 	h.setAuthorizedTime(ctx, service.CallbackURL, time.Now())
 	if service.IsServerCallback {
 		return doServerCallback(ctx, callbackURL)
@@ -162,7 +162,7 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 		Service: serviceNameOrURL,
 		State:   serviceState,
 	})
-	if ok, err := checkNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
+	if ok, err := common.CheckNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
 
@@ -216,12 +216,12 @@ func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
 		Service: serviceNameOrURL,
 		State:   serviceState,
 	})
-	if ok, err := checkNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
+	if ok, err := common.CheckNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
 
 	if confirm != "true" {
-		deleteNonce(ctx.Context(), session, nonce)
+		common.DeleteNonce(ctx.Context(), session, nonce)
 		return ctx.Redirect("/")
 	}
 

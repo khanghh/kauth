@@ -2,6 +2,7 @@ package web
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/khanghh/kauth/internal/common/validation"
 	"github.com/khanghh/kauth/internal/locale"
 	"github.com/khanghh/kauth/internal/mail"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
@@ -42,7 +43,7 @@ func (h *AccountSettingsHandler) PostChangePassword(ctx *fiber.Ctx) error {
 		return render.RenderChangePasswordPage(ctx, locale.MsgIncorrectPassword)
 	}
 
-	if err := validatePassword(newPassword); err != nil {
+	if err := validation.ValidatePassword(newPassword); err != nil {
 		return render.RenderChangePasswordPage(ctx, err.Error())
 	}
 

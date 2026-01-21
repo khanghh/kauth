@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/khanghh/kauth/internal/common/validation"
 	"github.com/khanghh/kauth/internal/locale"
 	"github.com/khanghh/kauth/internal/mail"
 	"github.com/khanghh/kauth/internal/middlewares/captcha"
@@ -41,15 +42,15 @@ func NewRegisterHandler(userService UserService, mailSender mail.MailSender) *Re
 
 func validateRegisterForm(username string, password string, email string) map[string]string {
 	formErrors := make(map[string]string)
-	if err := validateUsername(username); err != nil {
+	if err := validation.ValidateUsername(username); err != nil {
 		formErrors["username"] = err.Error()
 	}
 
-	if err := validatePassword(password); err != nil {
+	if err := validation.ValidatePassword(password); err != nil {
 		formErrors["password"] = err.Error()
 	}
 
-	if err := validateEmail(email); err != nil {
+	if err := validation.ValidateEmail(email); err != nil {
 		formErrors["email"] = err.Error()
 	}
 	return formErrors

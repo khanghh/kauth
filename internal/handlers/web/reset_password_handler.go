@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/common"
+	"github.com/khanghh/kauth/internal/common/validation"
 	"github.com/khanghh/kauth/internal/locale"
 	"github.com/khanghh/kauth/internal/mail"
 	"github.com/khanghh/kauth/internal/middlewares/captcha"
@@ -98,7 +99,7 @@ func (h *ResetPasswordHandler) PostResetPassword(ctx *fiber.Ctx) error {
 		return render.RenderSetNewPasswordPage(ctx, locale.MsgInvalidCaptcha)
 	}
 
-	if err := validatePassword(newPassword); err != nil {
+	if err := validation.ValidatePassword(newPassword); err != nil {
 		return render.RenderSetNewPasswordPage(ctx, err.Error())
 	}
 
@@ -130,7 +131,7 @@ func (h *ResetPasswordHandler) PostForgotPassword(ctx *fiber.Ctx) error {
 	email := ctx.FormValue("email")
 
 	pageData := render.ForgotPasswordPageData{}
-	if err := validateEmail(email); err != nil {
+	if err := validation.ValidateEmail(email); err != nil {
 		pageData.ErrorMsg = err.Error()
 		return render.RenderForgotPasswordPage(ctx, pageData)
 	}

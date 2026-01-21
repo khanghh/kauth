@@ -57,7 +57,7 @@ func redirectAuthorize(ctx *fiber.Ctx, session *sessions.Session, serviceNameOrU
 		State:   serviceState,
 	})
 
-	nonce, err := createNonce(ctx.Context(), session, stateBase64)
+	nonce, err := common.CreateNonce(ctx.Context(), session, stateBase64)
 	if err != nil {
 		return err
 	}

@@ -110,7 +110,7 @@ func (h *TwoFactorHandler) GetChallenge(ctx *fiber.Ctx) error {
 		return redirect(ctx, "/login")
 	}
 
-	if ok, err := checkNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
+	if ok, err := common.CheckNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
 
@@ -151,7 +151,7 @@ func (h *TwoFactorHandler) PostChallenge(ctx *fiber.Ctx) error {
 		return redirect(ctx, "/login")
 	}
 
-	if ok, err := checkNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
+	if ok, err := common.CheckNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
 
@@ -231,7 +231,7 @@ func (h *TwoFactorHandler) GetVerifyOTP(ctx *fiber.Ctx) error {
 	if err := common.UnmarshalBase64(stateBase64, &state); err != nil {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
-	if ok, err := checkNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
+	if ok, err := common.CheckNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
 
@@ -269,7 +269,7 @@ func (h *TwoFactorHandler) PostVerifyOTP(ctx *fiber.Ctx) error {
 	if err := common.UnmarshalBase64(stateBase64, &state); err != nil {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
-	if ok, err := checkNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
+	if ok, err := common.CheckNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
 
@@ -434,7 +434,7 @@ func (h *TwoFactorHandler) GetVerifyTOTP(ctx *fiber.Ctx) error {
 	if err := common.UnmarshalBase64(stateBase64, &state); err != nil {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
-	if ok, err := checkNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
+	if ok, err := common.CheckNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
 
@@ -471,7 +471,7 @@ func (h *TwoFactorHandler) PostVerifyTOTP(ctx *fiber.Ctx) error {
 	if err := common.UnmarshalBase64(stateBase64, &state); err != nil {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
-	if ok, err := checkNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
+	if ok, err := common.CheckNonce(ctx.Context(), session, stateBase64, nonce); err != nil || !ok {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
 
