@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/audit"
+	"github.com/khanghh/kauth/internal/common"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/oauth"
 	"github.com/khanghh/kauth/internal/render"
@@ -54,8 +55,8 @@ func (h *OAuthHandler) handleOAuthLogin(ctx *fiber.Ctx, userOAuth *model.UserOAu
 
 	stateBase64 := ctx.Query("state")
 	if stateBase64 != "" {
-		var state State
-		if err := unmarshalBase64(stateBase64, &state); err != nil {
+		var state common.State
+		if err := common.UnmarshalBase64(stateBase64, &state); err != nil {
 			return ctx.Redirect("/")
 		}
 

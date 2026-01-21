@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/khanghh/kauth/internal/common"
 	"github.com/khanghh/kauth/internal/mail"
 	"github.com/khanghh/kauth/internal/middlewares/captcha"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
@@ -56,7 +57,7 @@ func (h *ResetPasswordHandler) GetResetPassword(ctx *fiber.Ctx) error {
 
 	if state != "" {
 		var claims ResetPasswordClaims
-		if err := decryptState(ctx, state, &claims); err != nil {
+		if err := common.DecryptState(ctx, state, &claims); err != nil {
 			return render.RenderNotFoundErrorPage(ctx)
 		}
 		return render.RenderSetNewPasswordPage(ctx, "")
@@ -68,7 +69,7 @@ func (h *ResetPasswordHandler) GetResetPassword(ctx *fiber.Ctx) error {
 			return render.RenderNotFoundErrorPage(ctx)
 		}
 		// session.SetExpiry(15 * time.Minute)
-		return redirect(ctx, "/reset-password", "state", encryptState(ctx, claims))
+		return redirect(ctx, "/reset-password", "state", common.EncryptState(ctx, claims))
 	}
 
 	return render.RenderNotFoundErrorPage(ctx)
@@ -88,7 +89,7 @@ func (h *ResetPasswordHandler) PostResetPassword(ctx *fiber.Ctx) error {
 	}
 
 	var claims ResetPasswordClaims
-	if err := decryptState(ctx, encryptedState, &claims); err != nil {
+	if err := common.DecryptState(ctx, encryptedState, &claims); err != nil {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
 

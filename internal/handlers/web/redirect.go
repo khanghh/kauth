@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/khanghh/kauth/internal/common"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 )
 
@@ -50,7 +51,7 @@ func forceLogout(ctx *fiber.Ctx, errCode string) error {
 }
 
 func redirectAuthorize(ctx *fiber.Ctx, session *sessions.Session, serviceNameOrURL, serviceState string) error {
-	stateBase64, _ := marshalBase64(State{
+	stateBase64, _ := common.MarshalBase64(common.State{
 		Action:  "authorize",
 		Service: serviceNameOrURL,
 		State:   serviceState,

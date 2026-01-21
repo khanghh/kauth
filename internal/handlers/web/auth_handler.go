@@ -94,7 +94,7 @@ func (h *AuthHandler) handleLogin2FA(ctx *fiber.Ctx, session *sessions.Session, 
 	if serviceNameOrURL != "" {
 		redirectURL = urlutil.AppendQuery("/login", "service", serviceNameOrURL, "state", serviceState)
 	}
-	stateBase64, _ := marshalBase64(State{
+	stateBase64, _ := common.MarshalBase64(common.State{
 		Action:      "login",
 		RedirectURL: redirectURL,
 	})
@@ -109,7 +109,7 @@ func (h *AuthHandler) handleLogin2FA(ctx *fiber.Ctx, session *sessions.Session, 
 func (h *AuthHandler) getOAuthLoginURLs(serviceURL string, serviceState string) map[string]string {
 	var stateBase64 string
 	if serviceURL != "" {
-		stateBase64, _ = marshalBase64(State{
+		stateBase64, _ = common.MarshalBase64(common.State{
 			Action:  "authorize",
 			Service: serviceURL,
 			State:   serviceState,
@@ -156,7 +156,7 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 		return redirect(ctx, "/login", "service", serviceNameOrURL, "state", serviceState)
 	}
 
-	stateBase64, _ := marshalBase64(State{
+	stateBase64, _ := common.MarshalBase64(common.State{
 		Action:  "authorize",
 		Service: serviceNameOrURL,
 		State:   serviceState,
@@ -210,7 +210,7 @@ func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
 		return redirect(ctx, "/login", "service", serviceNameOrURL, "state", serviceState)
 	}
 
-	stateBase64, _ := marshalBase64(State{
+	stateBase64, _ := common.MarshalBase64(common.State{
 		Action:  "authorize",
 		Service: serviceNameOrURL,
 		State:   serviceState,

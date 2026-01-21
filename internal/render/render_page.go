@@ -5,7 +5,7 @@ import (
 )
 
 func RenderInternalServerErrorPage(ctx *fiber.Ctx) error {
-	body, err := RenderHTML("error-internal", nil)
+	body, err := RenderHTML("error", fiber.Map{"statusCode": 500})
 	if err != nil {
 		return err
 	}
@@ -14,7 +14,7 @@ func RenderInternalServerErrorPage(ctx *fiber.Ctx) error {
 }
 
 func RenderNotFoundErrorPage(ctx *fiber.Ctx) error {
-	body, err := RenderHTML("error-not-found", nil)
+	body, err := RenderHTML("error", fiber.Map{"statusCode": 404})
 	if err != nil {
 		return err
 	}
@@ -23,7 +23,7 @@ func RenderNotFoundErrorPage(ctx *fiber.Ctx) error {
 }
 
 func RenderForbiddenErrorPage(ctx *fiber.Ctx) error {
-	body, err := RenderHTML("error-forbidden", nil)
+	body, err := RenderHTML("error", fiber.Map{"statusCode": 403})
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func RenderForbiddenErrorPage(ctx *fiber.Ctx) error {
 }
 
 func RenderBadRequestErrorPage(ctx *fiber.Ctx) error {
-	body, err := RenderHTML("error-bad-request", nil)
+	body, err := RenderHTML("error", fiber.Map{"statusCode": 400})
 	if err != nil {
 		return err
 	}

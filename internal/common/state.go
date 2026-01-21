@@ -1,4 +1,4 @@
-package web
+package common
 
 import (
 	"bytes"
@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/khanghh/kauth/internal/common"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 )
 
@@ -30,7 +29,7 @@ func init() {
 func getStateEncryptionKey(ctx *fiber.Ctx) string {
 	session := sessions.Get(ctx)
 	if session.SecretKey == "" {
-		session.SecretKey, _ = common.GenerateSecret(32)
+		session.SecretKey, _ = GenerateSecret(32)
 	}
 	return session.SecretKey
 }
@@ -43,7 +42,7 @@ func xorBytes(data, key []byte) []byte {
 	return out
 }
 
-func encryptState(ctx *fiber.Ctx, state any) string {
+func EncryptState(ctx *fiber.Ctx, state any) string {
 	key := getStateEncryptionKey(ctx)
 	blob, err := json.Marshal(state)
 	if err != nil {
@@ -53,7 +52,7 @@ func encryptState(ctx *fiber.Ctx, state any) string {
 	return base64.RawURLEncoding.EncodeToString([]byte(cipherBytes))
 }
 
-func decryptState(ctx *fiber.Ctx, encryted string, state any) error {
+func DecryptState(ctx *fiber.Ctx, encryted string, state any) error {
 	key := getStateEncryptionKey(ctx)
 	cipherBytes, err := base64.RawURLEncoding.DecodeString(encryted)
 	if err != nil {
@@ -63,7 +62,7 @@ func decryptState(ctx *fiber.Ctx, encryted string, state any) error {
 	return json.Unmarshal(blob, state)
 }
 
-func marshalBase64(state any) (string, error) {
+func MarshalBase64(state any) (string, error) {
 	buf := new(bytes.Buffer)
 	err := gob.NewEncoder(buf).Encode(state)
 	if err != nil {
@@ -72,7 +71,7 @@ func marshalBase64(state any) (string, error) {
 	return base64.RawURLEncoding.EncodeToString(buf.Bytes()), nil
 }
 
-func unmarshalBase64(data string, state any) error {
+func UnmarshalBase64(data string, state any) error {
 	blob, err := base64.RawURLEncoding.DecodeString(data)
 	if err != nil {
 		return err
