@@ -80,12 +80,12 @@ const route = useRoute()
 // State
 const isLoading = ref(false)
 
-const email = useServerVar('emailEnabled')
-const emailEnabled = useServerVar('emailEnabled')
-const phone = useServerVar('phone')
-const smsEnabled = useServerVar('smsEnabled')
-const totpEnabled = useServerVar('totpEnabled')
-const errorMsg = useServerVar('errorMsg')
+const email = useServerVar<string>('emailEnabled', '')
+const emailEnabled = useServerVar<boolean>('emailEnabled', false)
+const phone = useServerVar<string>('phone', '')
+const smsEnabled = useServerVar<boolean>('smsEnabled', false)
+const totpEnabled = useServerVar<boolean>('totpEnabled', false)
+const errorMsg = useServerVar<string>('errorMsg', '')
 
 const csrfToken = computed(() => route.query._csrf as string || '')
 

@@ -28,7 +28,7 @@
 
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue'
 
 definePageMeta({
@@ -37,10 +37,10 @@ definePageMeta({
 
 
 // Sidebar nav items are rendered directly inside the SidebarNav component
-const username = useServerVar("username")
-const displayName = useServerVar("displayName")
-const email = useServerVar("email")
-const avatarUrl = useServerVar("picture")
+const username = useServerVar<string>("username")
+const displayName = useServerVar<string>("displayName")
+const email = useServerVar<string>("email")
+const avatarUrl = useServerVar<string>("picture")
 const userInitial = computed(() => (username.value?.trim()?.[0] ?? 'U').toUpperCase())
 
 const userStore = useUserStore()

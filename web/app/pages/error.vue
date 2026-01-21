@@ -21,8 +21,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const statusCode = useServerVar("statusCode")
-const statusMessage = useServerVar("statusMessage")
+const statusCode = useServerVar<string>("statusCode")
+const statusMessage = useServerVar<string>("statusMessage")
 
 const errorConfig = computed(() => {
   if (statusCode.value === '404') {

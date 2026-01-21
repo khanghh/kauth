@@ -134,13 +134,13 @@ const rememberMe = ref(false)
 const csrfToken = ref('')
 
 // Initialize server variables
-const turnstileSiteKey = useServerVar('turnstileSiteKey')
-const googleOAuthURL = useServerVar('googleOAuthURL')
-const facebookOAuthURL = useServerVar('facebookOAuthURL')
-const discordOAuthURL = useServerVar('discordOAuthURL')
-const microsoftOAuthURL = useServerVar('microsoftOAuthURL')
-const appleOAuthURL = useServerVar('appleOAuthURL')
-const errorMsg = useServerVar('errorMsg')
+const turnstileSiteKey = useServerVar<string>('turnstileSiteKey')
+const googleOAuthURL = useServerVar<string>('googleOAuthURL')
+const facebookOAuthURL = useServerVar<string>('facebookOAuthURL')
+const discordOAuthURL = useServerVar<string>('discordOAuthURL')
+const microsoftOAuthURL = useServerVar<string>('microsoftOAuthURL')
+const appleOAuthURL = useServerVar<string>('appleOAuthURL')
+const errorMsg = useServerVar<string>('errorMsg')
 
 useHead({
   title: useSiteTitle('Đăng nhập'),
