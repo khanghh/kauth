@@ -5,7 +5,9 @@ import (
 )
 
 func RenderInternalServerErrorPage(ctx *fiber.Ctx) error {
-	body, err := RenderHTML("error-internal", nil)
+	body, err := RenderHTML("error", fiber.Map{
+		"statusCode": fiber.StatusInternalServerError,
+	})
 	if err != nil {
 		return err
 	}
@@ -14,7 +16,9 @@ func RenderInternalServerErrorPage(ctx *fiber.Ctx) error {
 }
 
 func RenderNotFoundErrorPage(ctx *fiber.Ctx) error {
-	body, err := RenderHTML("error-not-found", nil)
+	body, err := RenderHTML("error", fiber.Map{
+		"statusCode": fiber.StatusNotFound,
+	})
 	if err != nil {
 		return err
 	}
@@ -23,7 +27,9 @@ func RenderNotFoundErrorPage(ctx *fiber.Ctx) error {
 }
 
 func RenderForbiddenErrorPage(ctx *fiber.Ctx) error {
-	body, err := RenderHTML("error-forbidden", nil)
+	body, err := RenderHTML("error", fiber.Map{
+		"statusCode": fiber.StatusForbidden,
+	})
 	if err != nil {
 		return err
 	}
@@ -32,7 +38,9 @@ func RenderForbiddenErrorPage(ctx *fiber.Ctx) error {
 }
 
 func RenderBadRequestErrorPage(ctx *fiber.Ctx) error {
-	body, err := RenderHTML("error-bad-request", nil)
+	body, err := RenderHTML("error", fiber.Map{
+		"statusCode": fiber.StatusBadRequest,
+	})
 	if err != nil {
 		return err
 	}
@@ -144,14 +152,14 @@ func RenderProfilePage(ctx *fiber.Ctx, data ProfilePageData) error {
 	return ctx.Status(fiber.StatusOK).SendString(body)
 }
 
-func RenderVerificationRequiredPage(ctx *fiber.Ctx, data VerificationRequiredPageData) error {
+func RenderTwoFactorChallengePage(ctx *fiber.Ctx, data TwoFactorChallengePageData) error {
 	email := data.Email
 	phone := formatPhone(data.Phone)
 	if data.IsMasked {
 		email = maskEmail(email)
 		phone = maskPhone(phone)
 	}
-	body, err := RenderHTML("verification-required", fiber.Map{
+	body, err := RenderHTML("2fa/challenge", fiber.Map{
 		"siteName":     globalVars["siteName"],
 		"emailEnabled": data.EmailEnabled,
 		"smsEnabled":   data.SMSEnableled,
@@ -179,7 +187,7 @@ func RenderVerifyOTPPage(ctx *fiber.Ctx, pageData VerifyOTPPageData) error {
 	if email == "" {
 		emailOrPhone = phone
 	}
-	body, err := RenderHTML("verify-otp", fiber.Map{
+	body, err := RenderHTML("2fa/otp/verify", fiber.Map{
 		"siteName":     globalVars["siteName"],
 		"emailOrPhone": emailOrPhone,
 		"errorMsg":     pageData.ErrorMsg,
@@ -335,7 +343,7 @@ func Render2FASettingsPage(ctx *fiber.Ctx, data TwoFASettingsPageData) error {
 }
 
 func RenderVerifyTOTPPage(ctx *fiber.Ctx, errorMsg string) error {
-	body, err := RenderHTML("verify-totp", fiber.Map{
+	body, err := RenderHTML("/2fa/totp/verify", fiber.Map{
 		"siteName": globalVars["siteName"],
 		"errorMsg": errorMsg,
 	})

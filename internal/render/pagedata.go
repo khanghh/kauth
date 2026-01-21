@@ -16,7 +16,7 @@ type RegisterPageData struct {
 	ErrorMsg      string
 }
 
-type VerificationRequiredPageData struct {
+type TwoFactorChallengePageData struct {
 	Email        string
 	Phone        string
 	IsMasked     bool

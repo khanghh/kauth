@@ -188,19 +188,8 @@ func mustInitRedisClient(redisCfg config.RedisConfig) redis.UniversalClient {
 	return db
 }
 
-func mustInitRenderTemplate(templateDir string, config *config.Config) {
-	globalVars := fiber.Map{
-		"siteName":           config.SiteName,
-		"baseURL":            config.BaseURL,
-		"turnstileSiteKey":   config.Captcha.Turnstile.SiteKey,
-		"turnstileSecretKey": config.Captcha.Turnstile.SecretKey,
-	}
-	if err := render.Initialize(globalVars, templateDir); err != nil {
-		log.Fatalf("Failed to initialize render templates: %v", err)
-	}
-}
-
 type apiDependencies struct {
+	globalVars       fiber.Map
 	authorizeService *auth.AuthorizeService
 	userService      *users.UserService
 	twoFactorService *twofactor.TwoFactorService
@@ -213,7 +202,9 @@ func setupAPIRoutes(router fiber.Router, deps *apiDependencies) {
 }
 
 type webDependencies struct {
+	globalVars       fiber.Map
 	staticDir        string
+	templateDir      string
 	captchaConfig    config.CaptchaConfig
 	mailSender       mail.MailSender
 	authorizeService *auth.AuthorizeService
@@ -235,9 +226,10 @@ func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 
 	// middlewares
 	mustInitCaptchaVerifier(deps.captchaConfig)
-
+	if err := render.Initialize(deps.globalVars, deps.templateDir); err != nil {
+		log.Fatalf("Failed to initialize render templates: %v", err)
+	}
 	// routes
-	router.Static("/static", deps.staticDir)
 	router.Get("/", authHandler.GetHome)
 	router.Get("/login", authHandler.GetLogin)
 	router.Post("/login", authHandler.PostLogin)
@@ -267,6 +259,7 @@ func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 	router.Get("/account/change-password", accountSettingsHandler.GetChangePassword)
 	router.Post("/account/change-password", accountSettingsHandler.PostChangePassword)
 	router.Get("/oauth/:provider/callback", oauthHandler.GetOAuthCallback)
+	router.Static("/", deps.staticDir)
 }
 
 func run(ctx *cli.Context) error {
@@ -278,7 +271,13 @@ func run(ctx *cli.Context) error {
 
 	mustInitLogger(config.Debug || ctx.IsSet(debugFlag.Name))
 
-	mustInitRenderTemplate(config.TemplateDir, config)
+	globalVars := fiber.Map{
+		"siteName":           config.SiteName,
+		"baseURL":            config.BaseURL,
+		"turnstileSiteKey":   config.Captcha.Turnstile.SiteKey,
+		"turnstileSecretKey": config.Captcha.Turnstile.SecretKey,
+	}
+
 	mailSender := mustInitMailSender(config.Mail)
 	database := mustInitDatabase(config.MySQL)
 	redisConn := mustInitRedisClient(config.Redis)
@@ -338,6 +337,7 @@ func run(ctx *cli.Context) error {
 	}))
 
 	setupAPIRoutes(router, &apiDependencies{
+		globalVars:       globalVars,
 		authorizeService: authorizeService,
 		userService:      userService,
 		twoFactorService: twoFactorService,
@@ -345,7 +345,9 @@ func run(ctx *cli.Context) error {
 
 	if !config.APIOnly {
 		setupWebRoutes(router, &webDependencies{
+			globalVars:       globalVars,
 			staticDir:        config.StaticDir,
+			templateDir:      config.TemplateDir,
 			captchaConfig:    config.Captcha,
 			mailSender:       mailSender,
 			authorizeService: authorizeService,

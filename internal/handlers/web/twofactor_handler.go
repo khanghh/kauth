@@ -131,13 +131,13 @@ func (h *TwoFactorHandler) GetChallenge(ctx *fiber.Ctx) error {
 		}
 	}
 
-	pageData := render.VerificationRequiredPageData{
+	pageData := render.TwoFactorChallengePageData{
 		Email:        user.Email,
 		EmailEnabled: !anyFactorEnabled || isFactorEnabled(authFactors, string(users.AuthFactorEmail)),
 		TOTPEnabled:  isFactorEnabled(authFactors, string(users.AuthFactorTOTP)),
 		IsMasked:     true,
 	}
-	return render.RenderVerificationRequiredPage(ctx, pageData)
+	return render.RenderTwoFactorChallengePage(ctx, pageData)
 }
 
 func (h *TwoFactorHandler) PostChallenge(ctx *fiber.Ctx) error {
@@ -164,7 +164,7 @@ func (h *TwoFactorHandler) PostChallenge(ctx *fiber.Ctx) error {
 		return render.RenderNotFoundErrorPage(ctx)
 	}
 
-	pageData := render.VerificationRequiredPageData{
+	pageData := render.TwoFactorChallengePageData{
 		EmailEnabled: true,
 		Email:        user.Email,
 		IsMasked:     true,
@@ -180,7 +180,7 @@ func (h *TwoFactorHandler) PostChallenge(ctx *fiber.Ctx) error {
 	if err != nil {
 		if errMsg, ok := mapTwoFactorError(err); ok {
 			pageData.ErrorMsg = errMsg
-			return render.RenderVerificationRequiredPage(ctx, pageData)
+			return render.RenderTwoFactorChallengePage(ctx, pageData)
 		}
 		return err
 	}
@@ -198,7 +198,7 @@ func (h *TwoFactorHandler) PostChallenge(ctx *fiber.Ctx) error {
 	case "totp":
 		if !isFactorEnabled(userFactors, string(users.AuthFactorTOTP)) {
 			pageData.ErrorMsg = MsgInvalid2FAMethod
-			return render.RenderVerificationRequiredPage(ctx, pageData)
+			return render.RenderTwoFactorChallengePage(ctx, pageData)
 		}
 		if _, err = h.twoFactorService.TOTP().Generate(ctx.Context(), ch, sub); err == nil {
 			audit.Record2FAChallengeCreated(ctx, user, ch.ID, ch.Type, stateBase64)
@@ -206,12 +206,12 @@ func (h *TwoFactorHandler) PostChallenge(ctx *fiber.Ctx) error {
 		}
 	default:
 		pageData.ErrorMsg = MsgInvalid2FAMethod
-		return render.RenderVerificationRequiredPage(ctx, pageData)
+		return render.RenderTwoFactorChallengePage(ctx, pageData)
 	}
 
 	if msg, ok := mapTwoFactorError(err); ok {
 		pageData.ErrorMsg = msg
-		return render.RenderVerificationRequiredPage(ctx, pageData)
+		return render.RenderTwoFactorChallengePage(ctx, pageData)
 	}
 	return err
 }
