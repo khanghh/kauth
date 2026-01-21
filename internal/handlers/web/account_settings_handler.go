@@ -2,6 +2,7 @@ package web
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/khanghh/kauth/internal/locale"
 	"github.com/khanghh/kauth/internal/mail"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/render"
@@ -38,7 +39,7 @@ func (h *AccountSettingsHandler) PostChangePassword(ctx *fiber.Ctx) error {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(currentPassword)); err != nil {
-		return render.RenderChangePasswordPage(ctx, ErrIncorrectPassword)
+		return render.RenderChangePasswordPage(ctx, locale.MsgIncorrectPassword)
 	}
 
 	if err := validatePassword(newPassword); err != nil {

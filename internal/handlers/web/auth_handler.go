@@ -10,6 +10,7 @@ import (
 	"github.com/khanghh/kauth/internal/audit"
 	"github.com/khanghh/kauth/internal/auth"
 	"github.com/khanghh/kauth/internal/common"
+	"github.com/khanghh/kauth/internal/locale"
 	"github.com/khanghh/kauth/internal/middlewares/captcha"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/oauth"
@@ -45,15 +46,15 @@ func (h *AuthHandler) setAuthorizedTime(ctx *fiber.Ctx, serviceURL string, authT
 func mapLoginError(errorCode string) string {
 	switch errorCode {
 	case "email_conflict":
-		return MsgLoginEmailConflict
+		return locale.MsgLoginEmailConflict
 	case "unsupported_provider":
-		return MsgLoginUnsupportedOAuth
+		return locale.MsgLoginUnsupportedOAuth
 	case "tfa_failed":
-		return MsgTwoFactorChallengeFailed
+		return locale.MsgTwoFactorChallengeFailed
 	case "login_locked":
-		return MsgTooManyFailedLogin
+		return locale.MsgTooManyFailedLoginAttempts
 	case "unknown_service":
-		return MsgUnknownService
+		return locale.MsgUnknownService
 	default:
 		return ""
 	}
@@ -307,18 +308,18 @@ func (h *AuthHandler) PostLogin(ctx *fiber.Ctx) error {
 	}
 
 	if err := captcha.Verify(ctx); err != nil {
-		pageData.ErrorMsg = MsgInvalidCaptcha
+		pageData.ErrorMsg = locale.MsgInvalidCaptcha
 		return render.RenderLoginPage(ctx, pageData)
 	}
 
 	user, err := h.userService.GetUserByUsernameOrEmail(ctx.Context(), username)
 	if err != nil {
-		pageData.ErrorMsg = MsgLoginWrongCredentials
+		pageData.ErrorMsg = locale.MsgLoginWrongCredentials
 		return render.RenderLoginPage(ctx, pageData)
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		pageData.ErrorMsg = MsgLoginWrongCredentials
+		pageData.ErrorMsg = locale.MsgLoginWrongCredentials
 		audit.RecordLoginFailure(ctx, user, audit.AuthMethodPassword, "")
 		return render.RenderLoginPage(ctx, pageData)
 	}

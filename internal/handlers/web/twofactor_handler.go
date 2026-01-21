@@ -10,6 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/audit"
 	"github.com/khanghh/kauth/internal/common"
+	"github.com/khanghh/kauth/internal/locale"
 	"github.com/khanghh/kauth/internal/mail"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/render"
@@ -45,17 +46,17 @@ func (h *TwoFactorHandler) renderVerifyOTP(ctx *fiber.Ctx, email string, errorMs
 
 func mapTwoFactorError(err error) (string, bool) {
 	if errors.Is(err, twofactor.ErrTooManyFailedAttempts) {
-		return MsgTooManyFailedAttempts, true
+		return locale.MsgTooManyFailedAttempts, true
 	}
 	if errors.Is(err, twofactor.ErrOTPRequestLimitReached) {
-		return MsgTooManyOTPRequested, true
+		return locale.MsgTooManyOTPRequested, true
 	}
 	if errors.Is(err, twofactor.ErrOTPRequestRateLimited) {
-		return MsgOTPRequestRateLimited, true
+		return locale.MsgOTPRequestRateLimited, true
 	}
 	var verifyErr *twofactor.AttemptFailError
 	if errors.As(err, &verifyErr) {
-		return fmt.Sprintf(MsgInvalidOTP, verifyErr.AttemptsLeft), true
+		return fmt.Sprintf(locale.MsgInvalidOTP, verifyErr.AttemptsLeft), true
 	}
 	return "", false
 }
@@ -197,7 +198,7 @@ func (h *TwoFactorHandler) PostChallenge(ctx *fiber.Ctx) error {
 		}
 	case "totp":
 		if !isFactorEnabled(userFactors, string(users.AuthFactorTOTP)) {
-			pageData.ErrorMsg = MsgInvalid2FAMethod
+			pageData.ErrorMsg = locale.MsgInvalid2FAMethod
 			return render.RenderTwoFAChallengePage(ctx, pageData)
 		}
 		if _, err = h.twoFactorService.TOTP().Generate(ctx.Context(), ch, sub); err == nil {
@@ -205,7 +206,7 @@ func (h *TwoFactorHandler) PostChallenge(ctx *fiber.Ctx) error {
 			return redirect(ctx, "/2fa/totp/verify", "state", stateBase64, "nonce", nonce, "cid", ch.ID)
 		}
 	default:
-		pageData.ErrorMsg = MsgInvalid2FAMethod
+		pageData.ErrorMsg = locale.MsgInvalid2FAMethod
 		return render.RenderTwoFAChallengePage(ctx, pageData)
 	}
 
@@ -278,7 +279,7 @@ func (h *TwoFactorHandler) PostVerifyOTP(ctx *fiber.Ctx) error {
 	}
 
 	if !resend && code == "" {
-		return h.renderVerifyOTP(ctx, user.Email, MsgOTPCodeEmpty)
+		return h.renderVerifyOTP(ctx, user.Email, locale.MsgOTPCodeEmpty)
 	}
 
 	ch, err := h.twoFactorService.GetChallenge(ctx.Context(), cid)
@@ -399,7 +400,7 @@ func (h *TwoFactorHandler) PostTOTPEnroll(ctx *fiber.Ctx) error {
 	err = h.twoFactorService.TOTP().Enroll(ctx.Context(), session.UserID, secret, code)
 	if err != nil {
 		if errors.Is(err, twofactor.ErrTOTPVerifyFailed) {
-			errMsg := MsgTOTPEnrollFailed
+			errMsg := locale.MsgTOTPEnrollFailed
 			issuer, _ := render.GetValue("siteName").(string)
 			enrollmentURL, err := h.generateTOTPEnrollmentURL(issuer, user.Username, secret)
 			if err != nil {
@@ -475,7 +476,7 @@ func (h *TwoFactorHandler) PostVerifyTOTP(ctx *fiber.Ctx) error {
 	}
 
 	if code == "" {
-		return render.RenderVerifyTOTPPage(ctx, MsgOTPCodeEmpty)
+		return render.RenderVerifyTOTPPage(ctx, locale.MsgOTPCodeEmpty)
 	}
 
 	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)

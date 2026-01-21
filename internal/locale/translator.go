@@ -12,7 +12,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-//go:embed lang/vi.yaml
+// go:embed lang/vi.yaml
+//
 //go:embed lang/en.yaml
 var localeFS embed.FS
 

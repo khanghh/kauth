@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/khanghh/kauth/internal/locale"
 	"github.com/khanghh/kauth/internal/mail"
 	"github.com/khanghh/kauth/internal/middlewares/captcha"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
@@ -86,7 +87,7 @@ func (h *RegisterHandler) PostRegister(ctx *fiber.Ctx) error {
 	}
 
 	if err := captcha.Verify(ctx); err != nil {
-		pageData.ErrorMsg = MsgInvalidCaptcha
+		pageData.ErrorMsg = locale.MsgInvalidCaptcha
 		return render.RenderRegisterPage(ctx, pageData)
 	}
 
@@ -165,7 +166,7 @@ func (h *RegisterHandler) PostRegisterWithOAuth(ctx *fiber.Ctx) error {
 	}
 
 	if err := captcha.Verify(ctx); err != nil {
-		pageData.ErrorMsg = MsgInvalidCaptcha
+		pageData.ErrorMsg = locale.MsgInvalidCaptcha
 		return render.RenderOAuthRegisterPage(ctx, pageData)
 	}
 

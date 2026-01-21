@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/common"
+	"github.com/khanghh/kauth/internal/locale"
 	"github.com/khanghh/kauth/internal/mail"
 	"github.com/khanghh/kauth/internal/middlewares/captcha"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
@@ -94,7 +95,7 @@ func (h *ResetPasswordHandler) PostResetPassword(ctx *fiber.Ctx) error {
 	}
 
 	if err := captcha.Verify(ctx); err != nil {
-		return render.RenderSetNewPasswordPage(ctx, MsgInvalidCaptcha)
+		return render.RenderSetNewPasswordPage(ctx, locale.MsgInvalidCaptcha)
 	}
 
 	if err := validatePassword(newPassword); err != nil {
@@ -135,13 +136,13 @@ func (h *ResetPasswordHandler) PostForgotPassword(ctx *fiber.Ctx) error {
 	}
 
 	if err := captcha.Verify(ctx); err != nil {
-		pageData.ErrorMsg = MsgInvalidCaptcha
+		pageData.ErrorMsg = locale.MsgInvalidCaptcha
 		return render.RenderForgotPasswordPage(ctx, pageData)
 	}
 
 	user, err := h.userService.GetUserByEmail(ctx.Context(), email)
 	if errors.Is(err, users.ErrUserNotFound) {
-		pageData.ErrorMsg = MsgUserNotFound
+		pageData.ErrorMsg = locale.MsgUserNotFound
 		return render.RenderForgotPasswordPage(ctx, pageData)
 	}
 	if err != nil {
@@ -149,7 +150,7 @@ func (h *ResetPasswordHandler) PostForgotPassword(ctx *fiber.Ctx) error {
 	}
 
 	if user.Username != username {
-		pageData.ErrorMsg = MsgUserNotFound
+		pageData.ErrorMsg = locale.MsgUserNotFound
 		return render.RenderForgotPasswordPage(ctx, pageData)
 	}
 
