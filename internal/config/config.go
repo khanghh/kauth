@@ -79,6 +79,7 @@ type Config struct {
 	Debug         bool          `mapstructure:"debug"`
 	SiteName      string        `mapstructure:"siteName"`
 	BaseURL       string        `mapstructure:"baseURL"`
+	Lang          string        `mapstructure:"lang"`
 	MasterKey     string        `mapstructure:"masterKey"`
 	APIOnly       bool          `mapstructure:"apiOnly"`
 	ListenAddr    string        `mapstructure:"listenAddr"`
