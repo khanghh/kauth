@@ -64,5 +64,5 @@
 </template>
 
 <script setup lang="ts">
-const statusCode = useServerVar<number>('statusCode', 404)
+const statusCode = useServerVar<number>('statusCode', 400)
 </script>

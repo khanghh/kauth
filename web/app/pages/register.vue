@@ -2,6 +2,7 @@
   <div class="bg-white shadow-lg rounded-2xl overflow-hidden">
     <div class="px-6 sm:px-10 py-10">
       <div class="text-center mb-8">
+        <img src="/images/logo.png" alt="Logo" class="h-16 mx-auto mb-4 object-contain">
         <h1 class="text-3xl font-bold text-gray-800 mb-3 text-center">Create your account</h1>
         <p class="text-gray-600 mt-2">Fill out the form to create your account</p>
       </div>
@@ -11,7 +12,7 @@
         {{ errorMsg }}
       </div>
 
-      <form id="registerForm" class="space-y-6" method="POST" novalidate>
+      <form ref="formEl" class="space-y-6" method="POST" novalidate @submit="onSubmit">
         <div>
           <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Choose a username</label>
           <div class="relative">
@@ -20,9 +21,9 @@
             </span>
             <input type="text" id="username" name="username" autocomplete="username" required
               class="form-input w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
-              placeholder="Enter your username" :value="username">
+              placeholder="Enter your username" v-model="username">
           </div>
-          <p id="usernameError" :class="['mt-1 text-sm text-red-600', { hidden: !usernameError }]">{{ usernameError }}
+          <p :class="['mt-1 text-sm text-red-600', { hidden: !usernameError }]">{{ usernameError }}
           </p>
         </div>
 
@@ -34,9 +35,9 @@
             </span>
             <input type="text" id="email" name="email" required
               class="form-input w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
-              placeholder="Enter your email address" :value="email">
+              placeholder="Enter your email address" v-model="email">
           </div>
-          <p id="emailError" :class="['mt-1 text-sm text-red-600', { hidden: !emailError }]">{{ emailError }}</p>
+          <p :class="['mt-1 text-sm text-red-600', { hidden: !emailError }]">{{ emailError }}</p>
         </div>
 
         <div>
@@ -45,21 +46,24 @@
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
               <Icon name="fa-solid:lock" class="text-gray-400" />
             </span>
-            <input type="password" id="password" name="password" autocomplete="new-password" required
+            <input :type="showPassword ? 'text' : 'password'" id="password" name="password" autocomplete="new-password"
+              required
               class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
-              placeholder="Create a secure password">
-            <span class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
-              <Icon name="fa-solid:eye" />
-            </span>
+              placeholder="Create a secure password" v-model="password">
+            <button class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
+              type="button"
+              @click="showPassword = !showPassword" aria-label="Toggle password visibility">
+              <Icon :name="showPassword ? 'fa-solid:eye-slash' : 'fa-solid:eye'" />
+            </button>
           </div>
 
-          <div class="mt-2 hidden" id="passwordStrengthContainer">
+          <div class="mt-2" :class="{ hidden: !showStrength }">
             <div class="flex bg-gray-200 rounded-full overflow-hidden h-1.5">
-              <div id="passwordStrength" class="strength-bar strength-weak"></div>
+              <div class="strength-bar" :class="strengthBarClass"></div>
             </div>
-            <p id="passwordStrengthText" class="text-xs mt-1 text-gray-500">Password strength: Weak</p>
+            <p class="text-xs mt-1" :class="strengthTextClass">{{ strengthText }}</p>
           </div>
-          <p id="passwordError" :class="['mt-1 text-sm text-red-600', { hidden: !passwordError }]">{{ passwordError }}
+          <p :class="['mt-1 text-sm text-red-600', { hidden: !passwordError }]">{{ passwordError }}
           </p>
         </div>
 
@@ -69,26 +73,30 @@
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
               <Icon name="fa-solid:lock" class="text-gray-400" />
             </span>
-            <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required
+            <input :type="showConfirmPassword ? 'text' : 'password'" id="confirm_password" name="confirm_password"
+              autocomplete="new-password" required
               class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
-              placeholder="Confirm your password">
-            <span class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
-              <Icon name="fa-solid:eye" />
-            </span>
+              placeholder="Confirm your password" v-model="confirmPassword">
+            <button class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
+              type="button"
+              @click="showConfirmPassword = !showConfirmPassword" aria-label="Toggle confirm password visibility">
+              <Icon :name="showConfirmPassword ? 'fa-solid:eye-slash' : 'fa-solid:eye'" />
+            </button>
           </div>
-          <p id="confirmPasswordError" class="mt-1 text-sm text-red-600 hidden"></p>
+          <p :class="['mt-1 text-sm text-red-600', { hidden: !confirmPasswordError }]">{{ confirmPasswordError
+          }}</p>
         </div>
 
         <div class="flex items-start">
           <div class="flex items-center h-5">
             <input id="terms" name="terms" type="checkbox" required
-              class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+              class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded" v-model="termsAccepted">
           </div>
           <div class="ml-3 text-sm">
             <label for="terms" class="font-medium text-gray-700">I agree to the <a href="/terms"
                 class="text-blue-600 hover:text-blue-500">Terms of Service</a> and <a href="/privacy"
                 class="text-blue-600 hover:text-blue-500">Privacy Policy</a></label>
-            <p id="termsError" class="mt-1 text-red-600 hidden">You must agree to the terms to continue.</p>
+            <p :class="['mt-1 text-red-600', { hidden: !termsError }]">{{ termsError }}</p>
           </div>
         </div>
 
@@ -111,169 +119,125 @@
       </p>
     </div>
   </div>
-
-  <script v-pre>
-    document.addEventListener('DOMContentLoaded', function () {
-      const form = document.getElementById('registerForm');
-      const passwordInput = document.getElementById('password');
-      const confirmPasswordInput = document.getElementById('confirm_password');
-      const passwordStrength = document.getElementById('passwordStrength');
-      const passwordStrengthText = document.getElementById('passwordStrengthText');
-      const passwordStrengthContainer = document.getElementById('passwordStrengthContainer');
-      const termsCheckbox = document.getElementById('terms');
-      const usernameError = document.getElementById('usernameError')
-      const emailError = document.getElementById('emailError')
-      const passwordError = document.getElementById('passwordError')
-      const confirmPasswordError = document.getElementById('confirmPasswordError')
-      const termsError = document.getElementById('termsError');
-
-      // Password visibility toggle
-      document.querySelectorAll('.password-toggle').forEach(toggle => {
-        toggle.addEventListener('click', function () {
-          const input = this.parentElement.querySelector('input');
-          const icon = this.querySelector('i');
-
-          if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-          } else {
-            input.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-          }
-        });
-      });
-
-      // Password strength indicator
-      passwordInput.addEventListener('input', function () {
-        const password = this.value;
-        let strength = 0;
-        let message = 'Password strength: ';
-        passwordError.classList.add('hidden')
-        confirmPasswordError.classList.add('hidden')
-
-        // Check password length
-        if (password.length >= 8) strength++;
-
-        // Check for lowercase letters
-        if (/[a-z]/.test(password)) strength++;
-
-        // Check for uppercase letters
-        if (/[A-Z]/.test(password)) strength++;
-
-        // Check for numbers
-        if (/[0-9]/.test(password)) strength++;
-
-        // Check for special characters
-        if (/[^A-Za-z0-9]/.test(password)) strength++;
-
-        // Update strength indicator
-        if (password.length > 0) {
-          passwordStrengthContainer.classList.remove('hidden');
-        } else {
-          passwordStrengthContainer.classList.add('hidden');
-        }
-        if (password.length === 0) {
-          passwordStrength.className = 'strength-bar';
-          passwordStrengthText.textContent = 'Enter a password';
-        } else if (strength <= 2) {
-          passwordStrength.className = 'strength-bar strength-weak';
-          passwordStrengthText.textContent = message + 'Weak';
-          passwordStrengthText.className = 'text-xs mt-1 text-red-500';
-        } else if (strength <= 4) {
-          passwordStrength.className = 'strength-bar strength-medium';
-          passwordStrengthText.textContent = message + 'Medium';
-          passwordStrengthText.className = 'text-xs mt-1 text-yellow-500';
-        } else {
-          passwordStrength.className = 'strength-bar strength-strong';
-          passwordStrengthText.textContent = message + 'Strong';
-          passwordStrengthText.className = 'text-xs mt-1 text-green-500';
-        }
-      });
-
-      // Form validation
-      form.addEventListener('submit', function (e) {
-        let valid = true;
-
-        // Clear old errors
-        usernameError.classList.add('hidden');
-        emailError.classList.add('hidden');
-        passwordError.classList.add('hidden');
-        confirmPasswordError.classList.add('hidden');
-        termsError.classList.add('hidden');
-
-        // Username check
-        const username = document.getElementById('username').value.trim();
-        if (!username) {
-          usernameError.textContent = 'Username is required.';
-          usernameError.classList.remove('hidden');
-          valid = false;
-        } else if (!/^[A-Za-z]/.test(username)) {
-          usernameError.textContent = 'Username must start with a letter.';
-          usernameError.classList.remove('hidden');
-          valid = false;
-        } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-          usernameError.textContent = 'Username can only contain letters, numbers, and underscores.';
-          usernameError.classList.remove('hidden');
-          valid = false;
-        }
-
-        // Email check
-        const email = document.getElementById('email').value.trim();
-        if (!email) {
-          emailError.textContent = 'Email address is required.';
-          emailError.classList.remove('hidden');
-          valid = false;
-        } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
-          emailError.textContent = 'Invalid email address.';
-          emailError.classList.remove('hidden');
-          valid = false;
-        }
-
-        // Password check
-        const password = document.getElementById('password').value;
-        if (password.length < 6) {
-          passwordError.textContent = 'Password must be at least 6 characters.';
-          passwordError.classList.remove('hidden');
-          passwordStrengthContainer.classList.add('hidden');
-          valid = false;
-        }
-
-        // Confirm password check
-        const confirmPassword = document.getElementById('confirm_password').value;
-        if (password !== confirmPassword) {
-          confirmPasswordError.textContent = 'Passwords do not match.';
-          confirmPasswordError.classList.remove('hidden');
-          valid = false;
-        }
-
-        // Terms of service check
-        if (!termsCheckbox.checked) {
-          termsError.textContent = 'You must agree to the terms to continue.';
-          termsError.classList.remove('hidden');
-          valid = false;
-        }
-
-        // If invalid, stop form submission
-        if (!valid) e.preventDefault();
-      });
-    });
-
-  </script>
 </template>
 
 <script setup lang="ts">
 const errorMsg = useServerVar<string>('errorMsg', '')
+
+const csrfToken = useServerVar<string>('csrfToken', '')
+const turnstileSiteKey = useServerVar<string>('turnstileSiteKey', '')
+
+const formEl = ref<HTMLFormElement | null>(null)
+
 const username = useServerVar<string>('username', '')
 const email = useServerVar<string>('email', '')
+const password = ref('')
+const confirmPassword = ref('')
+const termsAccepted = ref(false)
 
 const usernameError = useServerVar<string>('usernameError', '')
 const emailError = useServerVar<string>('emailError', '')
 const passwordError = useServerVar<string>('passwordError', '')
+const confirmPasswordError = ref('')
+const termsError = ref('')
 
-const csrfToken = useServerVar<string>('csrfToken', '')
-const turnstileSiteKey = useServerVar<string>('turnstileSiteKey', '')
+const clearClientErrors = () => {
+  usernameError.value = ''
+  emailError.value = ''
+  passwordError.value = ''
+  confirmPasswordError.value = ''
+  termsError.value = ''
+}
+
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
+
+const strengthScore = computed(() => {
+  const pwd = password.value
+  let score = 0
+  if (pwd.length >= 8) score++
+  if (/[a-z]/.test(pwd)) score++
+  if (/[A-Z]/.test(pwd)) score++
+  if (/[0-9]/.test(pwd)) score++
+  if (/[^A-Za-z0-9]/.test(pwd)) score++
+  return score
+})
+
+const showStrength = computed(() => password.value.length > 0 && passwordError.value === '')
+
+const strengthText = computed(() => {
+  if (password.value.length === 0) return 'Enter a password'
+  const base = 'Password strength: '
+  if (strengthScore.value <= 2) return base + 'Weak'
+  if (strengthScore.value <= 4) return base + 'Medium'
+  return base + 'Strong'
+})
+
+const strengthBarClass = computed(() => {
+  if (password.value.length === 0) return ''
+  if (strengthScore.value <= 2) return 'strength-weak'
+  if (strengthScore.value <= 4) return 'strength-medium'
+  return 'strength-strong'
+})
+
+const strengthTextClass = computed(() => {
+  if (password.value.length === 0) return 'text-gray-500'
+  if (strengthScore.value <= 2) return 'text-red-500'
+  if (strengthScore.value <= 4) return 'text-yellow-500'
+  return 'text-green-500'
+})
+
+const validate = () => {
+  clearClientErrors()
+  let valid = true
+
+  const u = username.value.trim()
+  if (!u) {
+    usernameError.value = 'Username is required.'
+    valid = false
+  } else if (!/^[A-Za-z]/.test(u)) {
+    usernameError.value = 'Username must start with a letter.'
+    valid = false
+  } else if (!/^[a-zA-Z0-9_]+$/.test(u)) {
+    usernameError.value = 'Username can only contain letters, numbers, and underscores.'
+    valid = false
+  }
+
+  const e = email.value.trim()
+  if (!e) {
+    emailError.value = 'Email address is required.'
+    valid = false
+  } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(e)) {
+    emailError.value = 'Invalid email address.'
+    valid = false
+  }
+
+  if (password.value.length < 6) {
+    passwordError.value = 'Password must be at least 6 characters.'
+    valid = false
+  }
+
+  if (password.value !== confirmPassword.value) {
+    confirmPasswordError.value = 'Passwords do not match.'
+    valid = false
+  }
+
+  if (!termsAccepted.value) {
+    termsError.value = 'You must agree to the terms to continue.'
+    valid = false
+  }
+
+  return valid
+}
+
+const onSubmit = (e: Event) => {
+  if (!validate()) {
+    e.preventDefault()
+    return
+  }
+
+  formEl.value?.submit()
+}
 </script>
 
 <style scoped>

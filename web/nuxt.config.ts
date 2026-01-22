@@ -15,6 +15,11 @@ export default defineNuxtConfig({
   app: {
     head: {}
   },
+  vite: {
+    build: {
+      minify: false, // Disables JS/CSS minification
+    },
+  },
   runtimeConfig: {
     public: {
       siteName: "{{.siteName}}"
@@ -22,8 +27,14 @@ export default defineNuxtConfig({
   },
   nitro: {
     prerender: {
-      crawlLinks: true,
+      crawlLinks: false,
       failOnError: false,
+      routes: [
+        "/",
+        "/login",
+        "/register",
+        "/error",
+      ]
     },
     hooks: {
       'prerender:generate'(route) {

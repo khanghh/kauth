@@ -6,7 +6,7 @@ export function useSiteTitle(...subTitles: string[]) {
     .join(' - ')
 }
 
-export function useServerVar<T>(key: string, defaultValue: T): ComputedRef<T> {
+export function useServerVar<T>(key: string, defaultValue: T): Ref<T> {
   const nuxtApp = useNuxtApp()
 
   // inject template variable value
