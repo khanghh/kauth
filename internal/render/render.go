@@ -94,16 +94,20 @@ func RenderHTML(templateName string, vars map[string]interface{}) (string, error
 		// Compute absolute file filePath
 		filePath := filepath.Join(templateDir, templateName)
 		// Read and compile the specific template with its full logical name
-		if contents, err := os.ReadFile(filePath); err == nil {
-			if t, err := template.New(templateName).Parse(string(contents)); err == nil {
-				if err := t.ExecuteTemplate(buf, templateName, mergedVars); err == nil {
-					return buf.String(), nil
-				}
-			}
+		contents, err := os.ReadFile(filePath)
+		if err != nil {
+			return "", err
 		}
+		t, err := template.New(templateName).Parse(string(contents))
+		if err != nil {
+			return "", err
+		}
+		if err := t.ExecuteTemplate(buf, templateName, mergedVars); err != nil {
+			return "", err
+		}
+		return buf.String(), nil
 	}
 
-	// fallback to embedded templates
 	if err := embedTemplate.ExecuteTemplate(buf, templateName, mergedVars); err != nil {
 		return "", err
 	}
