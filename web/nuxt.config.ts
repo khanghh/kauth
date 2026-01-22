@@ -31,9 +31,13 @@ export default defineNuxtConfig({
       failOnError: false,
       routes: [
         "/",
+        "/change-password",
+        "/2fa/challenge",
+        "/2fa/otp/verify",
+        "/2fa/totp/verify",
+        "/error",
         "/login",
         "/register",
-        "/error",
       ]
     },
     hooks: {

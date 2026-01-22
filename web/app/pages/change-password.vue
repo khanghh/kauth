@@ -1,279 +1,294 @@
 <template>
-  <div class="bg-white shadow-lg rounded-2xl overflow-hidden">
-    <div class="px-6 sm:px-10 py-10 ">
-      <div class="text-center mb-8">
-        <div class="w-24 h-24 mx-auto bg-blue-100 flex items-center justify-center rounded-full mb-4">
-          <Icon name="fa-solid:lock" class="text-blue-500 text-5xl" aria-hidden="true" />
-        </div>
-        <h1 class="text-3xl font-bold text-gray-800 mb-4">Change Password</h1>
-        <p class="text-gray-600 mt-2 mb-6">
-          Update your account password. Make sure your new password is strong and secure.
-        </p>
-      </div>
+  <div class="max-w-4xl mx-auto">
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold text-gray-800 mb-2">Change Password</h1>
+      <p class="text-gray-600">Update your password to keep your account secure</p>
+    </div>
 
-      <div v-if="errorMsg" class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-        <Icon name="fa-solid:exclamation-circle" class="mr-2" />
-        {{ errorMsg }}
-      </div>
-
-      <form id="changePasswordForm" method="POST" class="space-y-4 text-left">
-        <div>
-          <label for="current_password" class="block text-sm font-medium text-gray-700 mb-1">Current password</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-              <Icon name="fa-solid:lock" />
-            </span>
-            <input type="password" id="currentPassword" name="currentPassword" autocomplete="current-password" required
-              class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
-              placeholder="Enter your current password">
-            <span class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
-              <Icon name="fa-solid:eye" />
-            </span>
-          </div>
-          <p id="currentPasswordError" class="mt-1 text-sm text-red-600"></p>
-        </div>
-
-        <div>
-          <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">New password</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-              <Icon name="fa-solid:lock" />
-            </span>
-            <input type="password" id="newPassword" name="newPassword" autocomplete="new-password" required
-              class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
-              placeholder="Create a secure password">
-            <span class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
-              <Icon name="fa-solid:eye" />
-            </span>
-          </div>
-
-          <div class="mt-2 hidden" id="passwordStrengthContainer">
-            <div class="flex bg-gray-200 rounded-full overflow-hidden h-1.5">
-              <div id="passwordStrength" class="strength-bar strength-weak"></div>
-            </div>
-            <p id="passwordStrengthText" class="text-xs mt-1 text-gray-500">Password strength: Weak</p>
-          </div>
-          <p id="passwordError" class="mt-1 text-sm text-red-600">{{ passwordError }}</p>
-        </div>
-
-        <div>
-          <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">Confirm new
-            password</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-              <Icon name="fa-solid:lock" />
-            </span>
-            <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required
-              class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
-              placeholder="Confirm your new password">
-            <span class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
-              <Icon name="fa-solid:eye" />
-            </span>
-          </div>
-          <p id="confirmPasswordError" class="mt-1 text-sm text-red-600 hidden"></p>
-        </div>
-
-        <div class="pt-2">
-          <button type="submit"
-            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
-            Update Password
-          </button>
-        </div>
-      </form>
-
-      <div class="mt-6 text-center">
-        <a href="/profile" class="text-blue-600 hover:underline font-medium">
-          <Icon name="fa7-solid:arrow-left" class="mr-1" />
-          Back to Profile
-        </a>
+    <div v-if="successMsg" class="mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-green-800">
+      <div class="flex items-center">
+        <Icon name="fa-solid:check-circle" class="mr-2" />
+        <span>{{ successMsg }}</span>
       </div>
     </div>
 
-    <footer class="bg-gray-50 px-6 py-4 text-center border-t border-gray-100">
-      <p class="text-gray-500 text-xs sm:text-sm">
-        Need help? <a href="#" class="text-blue-600 hover:underline font-medium">Contact Support</a>
-      </p>
-    </footer>
+    <div v-if="errorMsg" class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-800">
+      <div class="flex items-center">
+        <Icon name="fa-solid:exclamation-circle" class="mr-2" />
+        <span>{{ errorMsg }}</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+      <form class="space-y-6" method="POST" @submit="onSubmit">
+        <input type="hidden" name="_csrf" :value="csrfToken" />
+
+        <div>
+          <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+          <div class="relative">
+            <input
+              :type="showCurrentPassword ? 'text' : 'password'"
+              id="currentPassword"
+              name="currentPassword"
+              v-model="currentPassword"
+              autocomplete="current-password"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl transition pr-10 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              placeholder="Enter your current password" />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-indigo-600"
+              @click="showCurrentPassword = !showCurrentPassword"
+              aria-label="Toggle current password visibility">
+              <Icon :name="showCurrentPassword ? 'fa-solid:eye-slash' : 'fa-solid:eye'" />
+            </button>
+          </div>
+          <p v-if="currentPasswordError" class="mt-2 text-sm text-red-600">{{ currentPasswordError }}</p>
+          <div class="mt-2">
+            <NuxtLink to="/forgot-password" class="text-sm text-indigo-600 hover:text-indigo-800">
+              Forgot your password?
+            </NuxtLink>
+          </div>
+        </div>
+
+        <div>
+          <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+          <div class="relative">
+            <input
+              :type="showNewPassword ? 'text' : 'password'"
+              id="newPassword"
+              name="newPassword"
+              v-model="newPassword"
+              autocomplete="new-password"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl transition pr-10 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              placeholder="Enter your new password" />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-indigo-600"
+              @click="showNewPassword = !showNewPassword"
+              aria-label="Toggle new password visibility">
+              <Icon :name="showNewPassword ? 'fa-solid:eye-slash' : 'fa-solid:eye'" />
+            </button>
+          </div>
+
+          <div class="mt-3">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Password strength</span>
+              <span class="font-medium" :class="strengthLabelClass">{{ strengthLabel }}</span>
+            </div>
+            <div class="h-2 rounded-full bg-gray-200 overflow-hidden">
+              <div
+                class="h-full transition-all duration-300"
+                :class="strengthBarColorClass"
+                :style="{ width: strengthMeterWidth }" />
+            </div>
+          </div>
+
+          <p v-if="passwordError" class="mt-2 text-sm text-red-600">{{ passwordError }}</p>
+        </div>
+
+        <div>
+          <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+          <div class="relative">
+            <input
+              :type="showConfirmPassword ? 'text' : 'password'"
+              id="confirmPassword"
+              name="confirmPassword"
+              v-model="confirmPassword"
+              autocomplete="new-password"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl transition pr-10 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              placeholder="Re-enter your new password" />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-indigo-600"
+              @click="showConfirmPassword = !showConfirmPassword"
+              aria-label="Toggle confirm password visibility">
+              <Icon :name="showConfirmPassword ? 'fa-solid:eye-slash' : 'fa-solid:eye'" />
+            </button>
+          </div>
+
+          <div v-if="confirmPassword.length > 0" class="mt-2 text-sm">
+            <span v-if="passwordsMatch" class="text-green-600 inline-flex items-center">
+              <Icon name="fa-solid:check" class="mr-1" />
+              Passwords match
+            </span>
+            <span v-else class="text-red-600 inline-flex items-center">
+              <Icon name="fa-solid:xmark" class="mr-1" />
+              Passwords do not match
+            </span>
+          </div>
+
+          <p v-if="confirmPasswordError" class="mt-2 text-sm text-red-600">{{ confirmPasswordError }}</p>
+        </div>
+
+        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div class="flex items-start">
+            <Icon name="fa-solid:shield-halved" class="text-blue-500 mt-1 mr-3" />
+            <div>
+              <h3 class="font-medium text-blue-800 mb-2">Password Security Tips</h3>
+              <ul class="text-sm text-blue-700 space-y-1">
+                <li class="flex items-start">
+                  <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+                  <span>Use a unique password that you don't use for other accounts</span>
+                </li>
+                <li class="flex items-start">
+                  <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+                  <span>Consider using a password manager to generate and store secure passwords</span>
+                </li>
+                <li class="flex items-start">
+                  <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+                  <span>Avoid using personal information like your name, birthdate, or common words</span>
+                </li>
+                <li class="flex items-start">
+                  <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+                  <span>Change your password regularly for better security</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+          <div v-if="lastPasswordChange" class="text-sm text-gray-500">Last password change: {{ lastPasswordChange }}
+          </div>
+          <div v-else class="text-sm text-gray-500">&nbsp;</div>
+
+          <div class="flex space-x-3">
+            <NuxtLink
+              to="/"
+              class="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition">
+              Cancel
+            </NuxtLink>
+            <button
+              type="submit"
+              class="px-5 py-2 rounded-xl font-medium transition"
+              :class="canSubmit ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-gray-200 text-gray-500 cursor-not-allowed'"
+              :disabled="!canSubmit">
+              Change Password
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
-
-  <script v-pre>
-  document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('changePasswordForm');
-    const currentPasswordInput = document.getElementById('currentPassword');
-    const newPasswordInput = document.getElementById('newPassword');
-    const confirmPasswordInput = document.getElementById('confirm_password');
-    const passwordStrength = document.getElementById('passwordStrength');
-    const passwordStrengthText = document.getElementById('passwordStrengthText');
-    const passwordStrengthContainer = document.getElementById('passwordStrengthContainer');
-    const passwordError = document.getElementById('passwordError')
-    const currentPasswordError = document.getElementById('currentPasswordError')
-    const confirmPasswordError = document.getElementById('confirmPasswordError')
-
-    // Password visibility toggle
-    document.querySelectorAll('.password-toggle').forEach(toggle => {
-      toggle.addEventListener('click', function () {
-        const input = this.parentElement.querySelector('input');
-        const icon = this.querySelector('i');
-
-        if (input.type === 'password') {
-          input.type = 'text';
-          icon.classList.remove('fa-eye');
-          icon.classList.add('fa-eye-slash');
-        } else {
-          input.type = 'password';
-          icon.classList.remove('fa-eye-slash');
-          icon.classList.add('fa-eye');
-        }
-      });
-    });
-
-    // Password strength indicator
-    newPasswordInput.addEventListener('input', function () {
-      const password = this.value;
-      let strength = 0;
-      let message = 'Password strength: ';
-      passwordError.classList.add('hidden')
-      confirmPasswordError.classList.add('hidden')
-
-      // Check password length
-      if (password.length >= 8) strength++;
-
-      // Check for lowercase letters
-      if (/[a-z]/.test(password)) strength++;
-
-      // Check for uppercase letters
-      if (/[A-Z]/.test(password)) strength++;
-
-      // Check for numbers
-      if (/[0-9]/.test(password)) strength++;
-
-      // Check for special characters
-      if (/[^A-Za-z0-9]/.test(password)) strength++;
-
-      // Update strength indicator
-      if (password.length > 0) {
-        passwordStrengthContainer.classList.remove('hidden');
-      } else {
-        passwordStrengthContainer.classList.add('hidden');
-      }
-      if (password.length === 0) {
-        passwordStrength.className = 'strength-bar';
-        passwordStrengthText.textContent = 'Enter a password';
-      } else if (strength <= 2) {
-        passwordStrength.className = 'strength-bar strength-weak';
-        passwordStrengthText.textContent = message + 'Weak';
-        passwordStrengthText.className = 'text-xs mt-1 text-red-500';
-      } else if (strength <= 4) {
-        passwordStrength.className = 'strength-bar strength-medium';
-        passwordStrengthText.textContent = message + 'Medium';
-        passwordStrengthText.className = 'text-xs mt-1 text-yellow-500';
-      } else {
-        passwordStrength.className = 'strength-bar strength-strong';
-        passwordStrengthText.textContent = message + 'Strong';
-        passwordStrengthText.className = 'text-xs mt-1 text-green-500';
-      }
-
-    });
-
-    confirmPasswordInput.addEventListener('input', function () {
-      const password = newPasswordInput.value
-      const confirmPassword = this.value
-      if (password !== confirmPassword) {
-        confirmPasswordError.textContent = 'Passwords do not match.';
-        confirmPasswordError.classList.remove('hidden');
-      } else {
-        confirmPasswordError.classList.add('hidden');
-      }
-    })
-
-    // Form validation
-    form.addEventListener('submit', function (e) {
-      let valid = true;
-
-      // Clear old errors
-      currentPasswordError.classList.add('hidden');
-      passwordError.classList.add('hidden');
-      confirmPasswordError.classList.add('hidden');
-
-      // Current password check
-      const currentPassword = currentPasswordInput.value;
-      if (currentPassword.length === 0) {
-        currentPasswordError.textContent = 'Current password is required.';
-        currentPasswordError.classList.remove('hidden');
-        valid = false;
-      }
-
-      // New password check
-      const newPassword = newPasswordInput.value;
-      if (newPassword.length < 6) {
-        passwordError.textContent = 'Password must be at least 6 characters.';
-        passwordError.classList.remove('hidden');
-        passwordStrengthContainer.classList.add('hidden');
-        valid = false;
-      }
-
-      // Confirm password check
-      const confirmPassword = confirmPasswordInput.value;
-      if (newPassword !== confirmPassword) {
-        confirmPasswordError.textContent = 'Passwords do not match.';
-        confirmPasswordError.classList.remove('hidden');
-        valid = false;
-      }
-
-      // If invalid, stop form submission
-      if (!valid) e.preventDefault();
-    });
-  });
-
-  </script>
 </template>
 
-<style scoped>
-.avatar {
-  transition: all 0.3s ease;
-}
-
-.avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.form-input:focus {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-}
-
-.password-toggle {
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.password-toggle:hover {
-  color: #3b82f6;
-}
-
-.strength-bar {
-  height: 5px;
-  border-radius: 3px;
-  transition: width 0.3s, background-color 0.3s;
-}
-
-.strength-weak {
-  background-color: #ef4444;
-  width: 33%;
-}
-
-.strength-medium {
-  background-color: #f59e0b;
-  width: 66%;
-}
-
-.strength-strong {
-  background-color: #10b981;
-  width: 100%;
-}
-</style>
+<style scoped></style>
 
 <script setup lang="ts">
+definePageMeta({
+  layout: 'dashboard',
+})
+
+useHead({
+  title: useSiteTitle('Change password'),
+})
+
 const errorMsg = useServerVar<string>('errorMsg', '')
-const passwordError = useServerVar<string>('passwordError', '') 
+const successMsg = useServerVar<string>('successMsg', '')
+const csrfToken = useServerVar<string>('csrfToken', '')
+const lastPasswordChange = useServerVar<string>('lastPasswordChange', '')
+
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+
+const passwordError = ref('')
+const currentPasswordError = ref('')
+const confirmPasswordError = ref('')
+
+const showCurrentPassword = ref(false)
+const showNewPassword = ref(false)
+const showConfirmPassword = ref(false)
+
+const strengthScore = computed(() => {
+  const pwd = newPassword.value
+  let score = 0
+  if (pwd.length >= 8) score++
+  if (/[a-z]/.test(pwd)) score++
+  if (/[A-Z]/.test(pwd)) score++
+  if (/[0-9]/.test(pwd)) score++
+  if (/[^A-Za-z0-9]/.test(pwd)) score++
+  return score
+})
+
+const strengthLabel = computed(() => {
+  if (newPassword.value.length === 0) return 'None'
+  if (strengthScore.value <= 2) return 'Weak'
+  if (strengthScore.value <= 4) return 'Medium'
+  return 'Strong'
+})
+
+const strengthLabelClass = computed(() => {
+  if (newPassword.value.length === 0) return 'text-gray-500'
+  if (strengthScore.value <= 2) return 'text-red-600'
+  if (strengthScore.value <= 4) return 'text-yellow-600'
+  return 'text-green-600'
+})
+
+const strengthMeterWidth = computed(() => {
+  if (newPassword.value.length === 0) return '0%'
+  if (strengthScore.value <= 2) return '33%'
+  if (strengthScore.value <= 4) return '66%'
+  return '100%'
+})
+
+const strengthBarColorClass = computed(() => {
+  if (newPassword.value.length === 0) return 'bg-gray-300'
+  if (strengthScore.value <= 2) return 'bg-red-500'
+  if (strengthScore.value <= 4) return 'bg-yellow-500'
+  return 'bg-green-500'
+})
+
+const passwordsMatch = computed(() => {
+  if (!newPassword.value || !confirmPassword.value) return false
+  return newPassword.value === confirmPassword.value
+})
+
+const canSubmit = computed(() => {
+  return Boolean(currentPassword.value) && newPassword.value.length >= 6 && passwordsMatch.value
+})
+
+watch(newPassword, () => {
+  passwordError.value = ''
+  confirmPasswordError.value = ''
+})
+
+watch(confirmPassword, () => {
+  confirmPasswordError.value = ''
+})
+
+const validate = () => {
+  currentPasswordError.value = ''
+  confirmPasswordError.value = ''
+  passwordError.value = ''
+
+  let valid = true
+
+  if (!currentPassword.value) {
+    currentPasswordError.value = 'Current password is required.'
+    valid = false
+  }
+
+  if (newPassword.value.length < 6) {
+    passwordError.value = 'Password must be at least 6 characters.'
+    valid = false
+  }
+
+  if (newPassword.value !== confirmPassword.value) {
+    confirmPasswordError.value = 'Passwords do not match.'
+    valid = false
+  }
+
+  return valid
+}
+
+const onSubmit = (e: Event) => {
+  if (!validate()) {
+    e.preventDefault()
+    return
+  }
+}
 </script>
