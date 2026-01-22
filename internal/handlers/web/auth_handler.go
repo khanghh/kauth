@@ -243,38 +243,6 @@ func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
 	return h.handleAuthorizeServiceAccess(ctx, session, user, service, serviceState, nonce)
 }
 
-func (h *AuthHandler) GetHome(ctx *fiber.Ctx) error {
-	session := sessions.Get(ctx)
-	if session.IsAuthenticated() {
-		return redirect(ctx, "/profile")
-	}
-	return redirect(ctx, "/login")
-}
-
-func (h *AuthHandler) GetProfile(ctx *fiber.Ctx) error {
-	session := sessions.Get(ctx)
-	if !session.IsAuthenticated() {
-		return redirect(ctx, "/login")
-	}
-
-	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
-	if err != nil {
-		return forceLogout(ctx, "")
-	}
-	isTwoFAEnabled, err := h.twoFactorService.IsTwoFAEnabled(ctx.Context(), user.ID)
-	if err != nil {
-		return err
-	}
-
-	return render.RenderProfilePage(ctx, render.ProfilePageData{
-		Username:     user.Username,
-		FullName:     user.FullName,
-		Email:        user.Email,
-		Picture:      user.Picture,
-		TwoFAEnabled: isTwoFAEnabled,
-	})
-}
-
 func (h *AuthHandler) GetLogin(ctx *fiber.Ctx) error {
 	serviceNameOrURL := urlutil.RemoveQuery(ctx.Query("service"))
 	serviceState := ctx.Query("state")

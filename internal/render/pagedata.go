@@ -47,20 +47,20 @@ type ForgotPasswordPageData struct {
 	ErrorMsg  string
 }
 
-type TOTPEnrollmentPageData struct {
+type AccountTOTPEnrollmentPageData struct {
 	EnrollmentURL string
 	SecretKey     string
 	ErrorMsg      string
 }
 
-type TwoFASettingsPageData struct {
+type AccountTwoFASettingsPageData struct {
 	Email        string
 	EmailEnabled bool
 	TOTPEnabled  bool
 	ErrorMsg     string
 }
 
-type ProfilePageData struct {
+type AccountHomePageData struct {
 	Username     string
 	FullName     string
 	Email        string

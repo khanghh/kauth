@@ -370,11 +370,11 @@ func (h *TwoFactorHandler) GetTOTPEnroll(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	pageData := render.TOTPEnrollmentPageData{
+	pageData := render.AccountTOTPEnrollmentPageData{
 		SecretKey:     secret,
 		EnrollmentURL: enrollmentURL,
 	}
-	return render.RenderTOTPEnrollmentPage(ctx, pageData)
+	return render.RenderAccountTOTPEnrollmentPage(ctx, pageData)
 }
 
 func (h *TwoFactorHandler) PostTOTPEnroll(ctx *fiber.Ctx) error {
@@ -405,12 +405,12 @@ func (h *TwoFactorHandler) PostTOTPEnroll(ctx *fiber.Ctx) error {
 			if err != nil {
 				return err
 			}
-			pageData := render.TOTPEnrollmentPageData{
+			pageData := render.AccountTOTPEnrollmentPageData{
 				SecretKey:     secret,
 				EnrollmentURL: enrollmentURL,
 				ErrorMsg:      errMsg,
 			}
-			return render.RenderTOTPEnrollmentPage(ctx, pageData)
+			return render.RenderAccountTOTPEnrollmentPage(ctx, pageData)
 		}
 		return err
 	}
@@ -537,12 +537,12 @@ func (h *TwoFactorHandler) GetTwoFASettings(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	pageData := render.TwoFASettingsPageData{
+	pageData := render.AccountTwoFASettingsPageData{
 		Email:        user.Email,
 		EmailEnabled: isFactorEnabled(authFactors, string(users.AuthFactorEmail)),
 		TOTPEnabled:  isFactorEnabled(authFactors, string(users.AuthFactorTOTP)),
 	}
-	return render.Render2FASettingsPage(ctx, pageData)
+	return render.RenderAccount2FASettingsPage(ctx, pageData)
 }
 
 func (h *TwoFactorHandler) PostTwoFASettings(ctx *fiber.Ctx) error {

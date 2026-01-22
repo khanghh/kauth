@@ -20,7 +20,7 @@ func (h *AccountSettingsHandler) GetChangePassword(ctx *fiber.Ctx) error {
 		return redirect(ctx, "/login")
 	}
 
-	return render.RenderChangePasswordPage(ctx, "")
+	return render.RenderAccountChangePasswordPage(ctx, "")
 }
 
 func (h *AccountSettingsHandler) PostChangePassword(ctx *fiber.Ctx) error {
@@ -38,11 +38,11 @@ func (h *AccountSettingsHandler) PostChangePassword(ctx *fiber.Ctx) error {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(currentPassword)); err != nil {
-		return render.RenderChangePasswordPage(ctx, ErrIncorrectPassword)
+		return render.RenderAccountChangePasswordPage(ctx, ErrIncorrectPassword)
 	}
 
 	if err := validatePassword(newPassword); err != nil {
-		return render.RenderChangePasswordPage(ctx, err.Error())
+		return render.RenderAccountChangePasswordPage(ctx, err.Error())
 	}
 
 	if err = h.userService.UpdatePassword(ctx.Context(), user.Email, newPassword); err != nil {

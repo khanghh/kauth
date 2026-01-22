@@ -17,7 +17,7 @@ func RenderInternalServerErrorPage(ctx *fiber.Ctx) error {
 
 func RenderNotFoundErrorPage(ctx *fiber.Ctx) error {
 	body, err := RenderHTML("error", fiber.Map{
-		"statusCode": fiber.StatusNotFound,
+		"statusCode": fiber.StatusBadRequest,
 	})
 	if err != nil {
 		return err
@@ -133,13 +133,34 @@ func RenderAccessGrantedPage(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).SendString(body)
 }
 
-func RenderProfilePage(ctx *fiber.Ctx, data ProfilePageData) error {
+func RenderAccountHomePage(ctx *fiber.Ctx, data AccountHomePageData) error {
 	displayName := data.FullName
 	if displayName == "" {
 		displayName = data.Username
 	}
-	body, err := RenderHTML("profile", fiber.Map{
+	body, err := RenderHTML("index", fiber.Map{
 		"siteName":     globalVars["siteName"],
+		"username":     data.Username,
+		"displayName":  displayName,
+		"email":        data.Email,
+		"picture":      data.Picture,
+		"twoFAEnabled": data.TwoFAEnabled,
+	})
+	if err != nil {
+		return err
+	}
+	ctx.Set("Content-Type", "text/html; charset=utf-8")
+	return ctx.Status(fiber.StatusOK).SendString(body)
+}
+
+func RenderPersonalInfoPage(ctx *fiber.Ctx, data AccountHomePageData) error {
+	displayName := data.FullName
+	if displayName == "" {
+		displayName = data.Username
+	}
+	body, err := RenderHTML("personal-info", fiber.Map{
+		"siteName":     globalVars["siteName"],
+		"username":     data.Username,
 		"displayName":  displayName,
 		"email":        data.Email,
 		"picture":      data.Picture,
@@ -289,8 +310,8 @@ func RenderPasswordUpdatedPage(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).SendString(body)
 }
 
-func RenderChangePasswordPage(ctx *fiber.Ctx, errorMsg string) error {
-	body, err := RenderHTML("change-password", fiber.Map{
+func RenderAccountChangePasswordPage(ctx *fiber.Ctx, errorMsg string) error {
+	body, err := RenderHTML("account/change-password", fiber.Map{
 		"siteName":         globalVars["siteName"],
 		"turnstileSiteKey": globalVars["turnstileSiteKey"],
 		"errorMsg":         errorMsg,
@@ -302,8 +323,8 @@ func RenderChangePasswordPage(ctx *fiber.Ctx, errorMsg string) error {
 	return ctx.Status(fiber.StatusOK).SendString(body)
 }
 
-func RenderTOTPEnrollmentPage(ctx *fiber.Ctx, data TOTPEnrollmentPageData) error {
-	body, err := RenderHTML("totp-enrollment", fiber.Map{
+func RenderAccountTOTPEnrollmentPage(ctx *fiber.Ctx, data AccountTOTPEnrollmentPageData) error {
+	body, err := RenderHTML("account/totp-enrollment", fiber.Map{
 		"siteName":      globalVars["siteName"],
 		"secretKey":     data.SecretKey,
 		"enrollmentURL": data.EnrollmentURL,
@@ -327,8 +348,8 @@ func RenderTOTPEnrollSuccessPage(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).SendString(body)
 }
 
-func Render2FASettingsPage(ctx *fiber.Ctx, data TwoFASettingsPageData) error {
-	body, err := RenderHTML("twofactor-settings", fiber.Map{
+func RenderAccount2FASettingsPage(ctx *fiber.Ctx, data AccountTwoFASettingsPageData) error {
+	body, err := RenderHTML("account/twofactor-settings", fiber.Map{
 		"siteName":     globalVars["siteName"],
 		"email":        data.Email,
 		"emailEnabled": data.EmailEnabled,
