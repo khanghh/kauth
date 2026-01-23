@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/base32"
 	"errors"
 	"fmt"
@@ -9,7 +10,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/audit"
-	"github.com/khanghh/kauth/internal/common"
 	"github.com/khanghh/kauth/internal/mail"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/render"
@@ -342,6 +342,21 @@ func (h *TwoFactorHandler) generateTOTPEnrollmentURL(issuer string, username str
 	return key.String(), nil
 }
 
+// GenerateBase32TOTPSecret generates a RFC-compatible TOTP secret.
+// - 20 bytes raw (160 bits)
+// - 32 Base32 characters
+// - No padding (Authenticator-friendly)
+func generateTOTPSecret() string {
+	raw := make([]byte, 20) // 160-bit secret (RFC 4226 / 6238)
+	rand.Read(raw)
+
+	secret := base32.StdEncoding.
+		WithPadding(base32.NoPadding).
+		EncodeToString(raw)
+
+	return secret
+}
+
 func (h *TwoFactorHandler) GetTOTPEnroll(ctx *fiber.Ctx) error {
 	renew := ctx.Query("renew")
 	session := sessions.Get(ctx)
@@ -357,7 +372,7 @@ func (h *TwoFactorHandler) GetTOTPEnroll(ctx *fiber.Ctx) error {
 	var secret string
 	err = session.GetField(ctx.Context(), totpEnrollSecretSessionKey, &secret)
 	if err != nil || renew == "true" {
-		secret, _ = common.GenerateSecret(32)
+		secret = generateTOTPSecret()
 		err := session.SetField(ctx.Context(), totpEnrollSecretSessionKey, secret)
 		if err != nil {
 			return err
