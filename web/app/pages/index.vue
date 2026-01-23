@@ -6,7 +6,7 @@
           class="w-full h-full rounded-full border-4 border-blue-100 overflow-hidden flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
           <img
             v-if="avatarMainOk"
-            :src="avatarUrl"
+            :src="currentUser.picture"
             alt="Profile"
             class="w-full h-full object-cover"
             @error="avatarMainOk = false">
@@ -14,11 +14,11 @@
         </div>
       </div>
 
-      <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ displayName }}</h1>
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ currentUser.fullName }}</h1>
 
       <p class="text-gray-600 text-lg inline-flex items-center justify-center">
         <Icon name="fa7-solid:envelope" class="mr-2" />
-        {{ email }}
+        {{ currentUser.email }}
       </p>
     </div>
 
@@ -30,23 +30,29 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import auth from '~/middlewares/auth'
 
 definePageMeta({
   layout: 'dashboard',
+  middleware: auth,
 })
 
-interface User {
-  username: string
-  displayName: string
-  email: string
-  picture: string
-}
+const userStore = useUserStore()
 
-const username = useServerVar<string>('username', '{{.username}}')
-const displayName = useServerVar<string>('displayName', '{{.displayName}}')
-const email = useServerVar<string>('email', '{{.email}}')
-const avatarUrl = useServerVar<string>('picture', '{{.picture}}')
-const userInitial = computed(() => (username.value?.trim()?.[0] ?? 'U').toUpperCase())
+const currentUser = computed<User>(() => {
+  if (!userStore.user) {
+    return {
+      id: '',
+      username: '',
+      fullName: '',
+      email: '',
+      picture: ''
+    }
+  }
+  return userStore.user
+})
+
+const userInitial = computed(() => (currentUser.value?.username?.trim()?.[0] ?? 'U').toUpperCase())
 
 const avatarMainOk = ref(true)
 

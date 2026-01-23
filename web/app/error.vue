@@ -53,11 +53,11 @@
         </div>
 
         <div class="flex justify-center space-x-4 mt-4">
-          <a href="/"
+          <button @click="goHome"
             class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200">
             <Icon name="fa-solid:sign-in-alt" class="mr-2" />
             Return to Home
-          </a>
+          </button>
           <a href="/contact"
             class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-3 px-4 rounded-lg transition duration-200 border border-gray-300">
             Contact Support
@@ -73,16 +73,6 @@
 import type { NuxtError } from '#app'
 
 const props = defineProps<{ error: NuxtError }>()
-
-const statusCode = computed(() => {
-  const code = (props.error as any)?.statusCode
-  return typeof code === 'number' ? code : Number(code) || 404
-})
-
-const statusMessage = computed(() => {
-  const msg = props.error?.statusMessage
-  return typeof msg === 'string' ? msg : ''
-})
 
 const goHome = () => {
   clearError({ redirect: '/' })

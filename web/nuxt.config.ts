@@ -22,6 +22,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
+      baseUrl: '',
       siteName: "{{.siteName}}"
     }
   },
@@ -31,6 +32,7 @@ export default defineNuxtConfig({
       failOnError: false,
       routes: [
         "/",
+        "/personal-info",
         "/change-password",
         "/2fa/challenge",
         "/2fa/otp/verify",
