@@ -41,7 +41,7 @@ type UserService interface {
 	GetUserByUsernameOrEmail(ctx context.Context, identifier string) (*model.User, error)
 	GetUserOAuthByID(ctx context.Context, userOAuthID uint) (*model.UserOAuth, error)
 	GetOrCreateUserOAuth(ctx context.Context, userOAuth *model.UserOAuth) (*model.UserOAuth, error)
-	UpdatePassword(ctx context.Context, email string, newPassword string) error
+	UpdatePassword(ctx context.Context, userID uint, newPassword string) error
 	GetAuthFactors(ctx context.Context, userID uint) ([]*model.UserFactor, error)
 	SetAuthFactorEnabled(ctx context.Context, userID uint, factorType users.AuthFactor, enabled bool) error
 }

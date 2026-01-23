@@ -14,6 +14,9 @@ type User struct {
 	Email       string       `gorm:"uniqueIndex;size:256;not null"`
 	Password    string       `gorm:"size:64;not null"`
 	Picture     string       `gorm:"size:256;not null"`
+	BirthDay    time.Time    `gorm:"type:date"`
+	PhoneNumber string       `gorm:"size:32"`
+	Country     string       `gorm:"type:CHAR(2)"` // ISO 3166-1 alpha-2 country code
 	Disabled    bool         `gorm:"default:false;not null"`
 	OAuths      []UserOAuth  `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	AuthFactors []UserFactor `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`

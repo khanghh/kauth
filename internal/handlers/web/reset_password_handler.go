@@ -22,13 +22,18 @@ type ResetPasswordHandler struct {
 }
 
 type ResetPasswordClaims struct {
+	UserID    uint   `json:"userId"`
 	Email     string `json:"email"`
 	Timestamp int64  `json:"timestamp"`
 }
 
-func (h *ResetPasswordHandler) generateResetPasswordToken(ctx *fiber.Ctx, email string) (string, error) {
+func (h *ResetPasswordHandler) generateResetPasswordToken(ctx *fiber.Ctx, userID uint, email string) (string, error) {
 	sub := twofactor.Subject{IPAddress: ctx.IP()}
-	claims := ResetPasswordClaims{Email: email, Timestamp: time.Now().Unix()}
+	claims := ResetPasswordClaims{
+		UserID:    userID,
+		Email:     email,
+		Timestamp: time.Now().Unix(),
+	}
 	token, _, err := h.twoFactorService.Token().Create(ctx.Context(), sub, "", claims, 5*time.Minute)
 	if err != nil {
 		return "", err
@@ -100,7 +105,7 @@ func (h *ResetPasswordHandler) PostResetPassword(ctx *fiber.Ctx) error {
 		return render.RenderSetNewPasswordPage(ctx, err.Error())
 	}
 
-	err := h.userService.UpdatePassword(ctx.Context(), claims.Email, newPassword)
+	err := h.userService.UpdatePassword(ctx.Context(), claims.UserID, newPassword)
 	if err != nil {
 		return err
 	}
@@ -152,7 +157,7 @@ func (h *ResetPasswordHandler) PostForgotPassword(ctx *fiber.Ctx) error {
 		return render.RenderForgotPasswordPage(ctx, pageData)
 	}
 
-	token, err := h.generateResetPasswordToken(ctx, email)
+	token, err := h.generateResetPasswordToken(ctx, user.ID, email)
 	if err != nil {
 		if errorMsg, ok := mapTwoFactorError(err); ok {
 			pageData.ErrorMsg = errorMsg

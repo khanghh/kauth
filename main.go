@@ -202,6 +202,7 @@ func setupAPIRoutes(router fiber.Router, deps *apiDependencies) {
 	apiRouter.Post("/serviceValidate", serviceValidateHandler.PostServiceValidate)
 	apiRouter.Get("/account", accountHandler.GetAccountInfo)
 	apiRouter.Get("/account/profile", accountHandler.GetProfile)
+	apiRouter.Post("/account/change-password", accountHandler.PostChangePassword)
 }
 
 type webDependencies struct {

@@ -45,7 +45,7 @@ func (h *AccountSettingsHandler) PostChangePassword(ctx *fiber.Ctx) error {
 		return render.RenderAccountChangePasswordPage(ctx, err.Error())
 	}
 
-	if err = h.userService.UpdatePassword(ctx.Context(), user.Email, newPassword); err != nil {
+	if err = h.userService.UpdatePassword(ctx.Context(), user.ID, newPassword); err != nil {
 		return render.RenderInternalServerErrorPage(ctx)
 	}
 
