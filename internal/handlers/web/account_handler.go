@@ -11,7 +11,7 @@ type AccountHandler struct {
 	twoFactorService TwoFactorService
 }
 
-func (h *AccountHandler) GetHomePage(ctx *fiber.Ctx) error {
+func (h *AccountHandler) GetAccountHomePage(ctx *fiber.Ctx) error {
 	session := sessions.Get(ctx)
 	if !session.IsAuthenticated() {
 		return redirect(ctx, "/login")

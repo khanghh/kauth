@@ -197,8 +197,11 @@ type apiDependencies struct {
 
 func setupAPIRoutes(router fiber.Router, deps *apiDependencies) {
 	serviceValidateHandler := api.NewServiceValidateHandler(deps.authorizeService, deps.userService, deps.twoFactorService)
+	accountHandler := api.NewAccountHandler(deps.userService, deps.twoFactorService)
 	apiRouter := router.Group("/api")
 	apiRouter.Post("/serviceValidate", serviceValidateHandler.PostServiceValidate)
+	apiRouter.Get("/account", accountHandler.GetAccountInfo)
+	apiRouter.Get("/account/profile", accountHandler.GetProfile)
 }
 
 type webDependencies struct {
@@ -231,7 +234,7 @@ func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 		log.Fatalf("Failed to initialize render templates: %v", err)
 	}
 	// routes
-	router.Get("/", accountHandler.GetHomePage)
+	router.Get("/", accountHandler.GetAccountHomePage)
 	router.Get("/personal-info", accountHandler.GetPersonalInfo)
 	router.Get("/2fa/settings", twofactorHandler.GetTwoFASettings)
 	router.Post("/2fa/settings", twofactorHandler.PostTwoFASettings)

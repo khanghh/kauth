@@ -17,7 +17,7 @@ func RenderInternalServerErrorPage(ctx *fiber.Ctx) error {
 
 func RenderNotFoundErrorPage(ctx *fiber.Ctx) error {
 	body, err := RenderHTML("error", fiber.Map{
-		"statusCode": fiber.StatusBadRequest,
+		"statusCode": fiber.StatusNotFound,
 	})
 	if err != nil {
 		return err
@@ -311,7 +311,7 @@ func RenderPasswordUpdatedPage(ctx *fiber.Ctx) error {
 }
 
 func RenderAccountChangePasswordPage(ctx *fiber.Ctx, errorMsg string) error {
-	body, err := RenderHTML("account/change-password", fiber.Map{
+	body, err := RenderHTML("change-password", fiber.Map{
 		"siteName":         globalVars["siteName"],
 		"turnstileSiteKey": globalVars["turnstileSiteKey"],
 		"errorMsg":         errorMsg,

@@ -15,14 +15,6 @@ type ServiceValidateHandler struct {
 	twoFactorService TwoFactorService
 }
 
-type userInfoResponse struct {
-	UserID   string `json:"userId"`
-	Username string `json:"username"`
-	FullName string `json:"fullName"`
-	Email    string `json:"email"`
-	Picture  string `json:"picture,omitempty"`
-}
-
 type authenticationSuccess struct {
 	User         userInfoResponse `json:"user"`
 	AccessToken  string           `json:"accessToken,omitempty"`
@@ -102,7 +94,7 @@ func (h *ServiceValidateHandler) PostServiceValidate(ctx *fiber.Ctx) error {
 	}
 
 	userInfo := userInfoResponse{
-		UserID:   strconv.FormatUint(uint64(user.ID), 10),
+		ID:       strconv.FormatUint(uint64(user.ID), 10),
 		Username: user.Username,
 		FullName: user.FullName,
 		Email:    user.Email,

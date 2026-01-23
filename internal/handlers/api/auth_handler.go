@@ -12,8 +12,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var ()
-
 type AuthHandler struct {
 	authorizeService AuthorizeService
 	userService      UserService

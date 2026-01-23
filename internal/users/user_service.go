@@ -35,7 +35,11 @@ type UserService struct {
 }
 
 func (s *UserService) GetUserByID(ctx context.Context, userID uint) (*model.User, error) {
-	return s.userRepo.First(ctx, query.User.ID.Eq(userID))
+	user, err := s.userRepo.First(ctx, query.User.ID.Eq(userID))
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, ErrUserNotFound
+	}
+	return user, err
 }
 
 func (s *UserService) GetAuthFactors(ctx context.Context, userID uint) ([]*model.UserFactor, error) {
