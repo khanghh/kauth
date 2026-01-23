@@ -39,7 +39,7 @@ definePageMeta({
 
 const userStore = useUserStore()
 
-const currentUser = computed<User>(() => {
+const currentUser = computed<UserInfo>(() => {
   if (!userStore.user) {
     return {
       id: '',

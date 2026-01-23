@@ -11,7 +11,7 @@
             class="relative w-10 h-10 rounded-full bg-transparent flex items-center justify-center text-gray-700 font-bold">
             <img
               v-if="avatarOk"
-              :src="avatarUrl"
+              :src="user.picture"
               alt="Profile"
               class="w-full h-full rounded-full object-cover"
               @error="avatarOk = false">
@@ -27,8 +27,8 @@
         aria-label="User menu"
         @click.stop>
         <div class="px-4 py-3 border-b border-gray-100">
-          <p class="font-medium text-gray-800">{{ displayName }}</p>
-          <p class="text-sm text-gray-500 truncate">{{ email }}</p>
+          <p class="font-medium text-gray-800">{{ user.fullName }}</p>
+          <p class="text-sm text-gray-500 truncate">{{ user.email }}</p>
         </div>
 
         <div class="py-2">
@@ -39,7 +39,7 @@
           </a>
         </div>
 
-        <div class="border-t border-gray-100 my-2" />
+        <div class="border-t border-gray-100 my-2"></div>
 
         <div class="px-4 py-3">
           <form :action="logoutAction" method="POST">
@@ -57,7 +57,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { onClickOutside } from '@vueuse/core'
+
+const userStore = useUserStore()
+
+const user = computed(() => {
+  if (userStore.user) {
+    return userStore.user
+  }
+  return {} as UserInfo
+})
 
 const props = defineProps({
   logoutAction: {
@@ -70,11 +79,7 @@ const props = defineProps({
   },
 })
 
-const username = useServerVar<string>('username', '{{.username}}')
-const displayName = useServerVar<string>('displayName', '{{.displayName}}')
-const email = useServerVar<string>('email', '{{.email}}')
-const avatarUrl = useServerVar<string>('picture', '{{.picture}}')
-const userInitial = computed(() => (username.value?.trim()?.[0] ?? 'U').toUpperCase())
+const userInitial = computed(() => (user.value.username?.trim()?.[0] ?? 'U').toUpperCase())
 
 const isOpen = ref(false)
 const dropdownRoot = ref(null)
@@ -89,19 +94,5 @@ function closeDropdown() {
   isOpen.value = false
 }
 
-function onDocumentClick(event) {
-  const root = dropdownRoot.value
-  if (!root) return
-  const target = event.target
-  if (target && root.contains(target)) return
-  closeDropdown()
-}
-
-onMounted(() => {
-  document.addEventListener('click', onDocumentClick)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', onDocumentClick)
-})
+onClickOutside(dropdownRoot, closeDropdown)
 </script>

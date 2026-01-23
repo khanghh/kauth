@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 
 export const useUserStore = defineStore('user', () => {
   const api = useApi()
-  const user = ref<User | null>(null)
+  const user = ref<UserInfo | null>(null)
 
   const isFetching = ref(false)
 
