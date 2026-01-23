@@ -21,8 +21,6 @@
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
       <form class="space-y-6" method="POST" @submit="onSubmit">
-        <input type="hidden" name="_csrf" :value="csrfToken" />
-
         <div>
           <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
           <div class="relative">
@@ -44,11 +42,6 @@
             </button>
           </div>
           <p v-if="currentPasswordError" class="mt-2 text-sm text-red-600">{{ currentPasswordError }}</p>
-          <div class="mt-2">
-            <NuxtLink to="/forgot-password" class="text-sm text-indigo-600 hover:text-indigo-800">
-              Forgot your password?
-            </NuxtLink>
-          </div>
         </div>
 
         <div>
@@ -81,7 +74,8 @@
               <div
                 class="h-full transition-all duration-300"
                 :class="strengthBarColorClass"
-                :style="{ width: strengthMeterWidth }" />
+                :style="{ width: strengthMeterWidth }">
+              </div>
             </div>
           </div>
 
@@ -125,7 +119,7 @@
 
         <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <div class="flex items-start">
-            <Icon name="fa-solid:shield-halved" class="text-blue-500 mt-1 mr-3" />
+            <Icon name="fa7-solid:shield-halved" class="text-blue-500 mt-1 mr-3" />
             <div>
               <h3 class="font-medium text-blue-800 mb-2">Password Security Tips</h3>
               <ul class="text-sm text-blue-700 space-y-1">
@@ -178,18 +172,22 @@
 <style scoped></style>
 
 <script setup lang="ts">
+import auth from '~/middlewares/auth'
+
+const api = useApi()
+
 definePageMeta({
   layout: 'dashboard',
+  middleware: auth
 })
 
 useHead({
   title: useSiteTitle('Change password'),
 })
 
-const errorMsg = useServerVar<string>('errorMsg', '')
-const successMsg = useServerVar<string>('successMsg', '')
-const csrfToken = useServerVar<string>('csrfToken', '')
-const lastPasswordChange = useServerVar<string>('lastPasswordChange', '')
+const errorMsg = ref('')
+const successMsg = ref('')
+const lastPasswordChange = ref('')
 
 const currentPassword = ref('')
 const newPassword = ref('')
@@ -198,6 +196,16 @@ const confirmPassword = ref('')
 const passwordError = ref('')
 const currentPasswordError = ref('')
 const confirmPasswordError = ref('')
+
+const showSuccess = (msg: string) => {
+  successMsg.value = msg
+  errorMsg.value = ''
+}
+
+const showError = (msg: string) => {
+  errorMsg.value = msg
+  successMsg.value = ''
+}
 
 const showCurrentPassword = ref(false)
 const showNewPassword = ref(false)
@@ -285,10 +293,21 @@ const validate = () => {
   return valid
 }
 
-const onSubmit = (e: Event) => {
+const onSubmit = async (e: Event) => {
+  e.preventDefault()
+
   if (!validate()) {
-    e.preventDefault()
     return
+  }
+
+  try {
+    await api.changePassword(currentPassword.value, newPassword.value)
+    showSuccess('Password changed successfully!')
+    currentPassword.value = ''
+    newPassword.value = ''
+    confirmPassword.value = ''
+  } catch (err: any) {
+    showError(err?.message ?? 'Failed to change password')
   }
 }
 </script>

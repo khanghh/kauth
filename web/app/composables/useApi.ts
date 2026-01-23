@@ -9,7 +9,7 @@ export interface UserInfo {
 }
 
 export interface UserProfile extends UserInfo {
-  birthDate?: number
+  birthDay: number
   phoneNumber?: string
   country?: string
   timeZone?: string
@@ -25,6 +25,13 @@ export interface Challenge {
 export const useApi = () => {
   return {
     getCurrentUser: () => useHttpGet<UserInfo>('/api/account'),
-    getUserProfile: () => useHttpGet<UserProfile>('/api/account/profile')
+    getUserProfile: () => useHttpGet<UserProfile>('/api/account/profile'),
+    changePassword: (currentPassword: string, newPassword: string) => {
+      return useHttpPost("/api/account/change-password", {
+        body: {
+          currentPassword, newPassword
+        }
+      })
+    }
   }
 }
