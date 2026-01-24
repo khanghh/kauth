@@ -8,30 +8,30 @@
       </div>
 
       <div v-if="errorMsg" class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-        <Icon name="fa7-solid:exclamation-circle" class="mr-2" />
+        <Icon name="fa-solid:exclamation-circle" class="mr-2" />
         {{ errorMsg }}
       </div>
 
       <form class="space-y-6" method="POST">
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Username or email</label>
+          <label lass="block text-sm font-medium text-gray-700 mb-1">Username or email</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-              <Icon name="fa7-solid:user" />
+              <Icon name="fa-solid:user" />
             </span>
-            <input tabindex="1" type="text" name="username" required
+            <input tabindex="1" type="text" name="username" autocomplete="username" required
               class="form-input w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
               placeholder="Your username or email address" :value="identifier">
           </div>
         </div>
 
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-              <Icon name="fa7-solid:lock" />
+              <Icon name="fa-solid:lock" />
             </span>
-            <input tabindex="2" type="password" id="password" name="password" autocomplete="new-password" required
+            <input tabindex="2" type="password" name="password" autocomplete="current-password" required
               class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
               placeholder="Enter your password">
           </div>
@@ -102,11 +102,11 @@ const errorMsg = useServerVar<string>('errorMsg', '')
 const identifier = useServerVar<string>('identifier', '')
 const turnstileSiteKey = useServerVar<string>('turnstileSiteKey', '{{.turnstileSiteKey}}')
 
-const googleOAuthURL = useServerVar<string>('googleOAuthURL', '{{.googleOAuthURL}}')
-const facebookOAuthURL = useServerVar<string>('facebookOAuthURL', '{{.facebookOAuthURL}}')
-const discordOAuthURL = useServerVar<string>('discordOAuthURL', '{{.discordOAuthURL}}')
-const microsoftOAuthURL = useServerVar<string>('microsoftOAuthURL', '{{.microsoftOAuthURL}}')
-const appleOAuthURL = useServerVar<string>('appleOAuthURL', '{{.appleOAuthURL}}')
+const googleOAuthURL = useServerVar<string>('googleOAuthURL', '')
+const facebookOAuthURL = useServerVar<string>('facebookOAuthURL', '')
+const discordOAuthURL = useServerVar<string>('discordOAuthURL', '')
+const microsoftOAuthURL = useServerVar<string>('microsoftOAuthURL', '')
+const appleOAuthURL = useServerVar<string>('appleOAuthURL', '')
 
 useHead({
   title: useSiteTitle('Đăng nhập'),
