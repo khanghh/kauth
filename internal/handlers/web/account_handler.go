@@ -59,6 +59,15 @@ func (h *AccountHandler) GetPersonalInfo(ctx *fiber.Ctx) error {
 	})
 }
 
+func (h *AccountHandler) GetChangePassword(ctx *fiber.Ctx) error {
+	session := sessions.Get(ctx)
+	if session == nil || !session.IsAuthenticated() {
+		return redirect(ctx, "/login")
+	}
+
+	return render.RenderAccountChangePasswordPage(ctx, "")
+}
+
 func NewAccountHandler(userService UserService, twoFactorService TwoFactorService) *AccountHandler {
 	return &AccountHandler{
 		userService:      userService,

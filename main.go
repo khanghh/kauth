@@ -220,13 +220,12 @@ type webDependencies struct {
 func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 	// handlers
 	var (
-		authHandler            = web.NewAuthHandler(deps.authorizeService, deps.userService, deps.twoFactorService, deps.oauthProviders)
-		accountHandler         = web.NewAccountHandler(deps.userService, deps.twoFactorService)
-		registerHandler        = web.NewRegisterHandler(deps.userService, deps.mailSender)
-		oauthHandler           = web.NewOAuthHandler(deps.userService, deps.oauthProviders)
-		twofactorHandler       = web.NewTwoFactorHandler(deps.twoFactorService, deps.userService, deps.mailSender)
-		resetPasswordHandler   = web.NewResetPasswordHandler(deps.userService, deps.twoFactorService, deps.mailSender)
-		accountSettingsHandler = web.NewAccountSettingsHandler(deps.userService, deps.twoFactorService, deps.mailSender)
+		authHandler          = web.NewAuthHandler(deps.authorizeService, deps.userService, deps.twoFactorService, deps.oauthProviders)
+		accountHandler       = web.NewAccountHandler(deps.userService, deps.twoFactorService)
+		registerHandler      = web.NewRegisterHandler(deps.userService, deps.mailSender)
+		oauthHandler         = web.NewOAuthHandler(deps.userService, deps.oauthProviders)
+		twofactorHandler     = web.NewTwoFactorHandler(deps.twoFactorService, deps.userService, deps.mailSender)
+		resetPasswordHandler = web.NewResetPasswordHandler(deps.userService, deps.twoFactorService, deps.mailSender)
 	)
 
 	// middlewares
@@ -237,12 +236,11 @@ func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 	// routes
 	router.Get("/", accountHandler.GetAccountHomePage)
 	router.Get("/personal-info", accountHandler.GetPersonalInfo)
+	router.Get("/change-password", accountHandler.GetChangePassword)
 	router.Get("/2fa/settings", twofactorHandler.GetTwoFASettings)
 	router.Post("/2fa/settings", twofactorHandler.PostTwoFASettings)
 	router.Get("/2fa/totp/enroll", twofactorHandler.GetTOTPEnroll)
 	router.Post("/2fa/totp/enroll", twofactorHandler.PostTOTPEnroll)
-	router.Get("/change-password", accountSettingsHandler.GetChangePassword)
-	router.Post("/change-password", accountSettingsHandler.PostChangePassword)
 	router.Get("/login", authHandler.GetLogin)
 	router.Post("/login", authHandler.PostLogin)
 	router.Post("/logout", authHandler.PostLogout)
