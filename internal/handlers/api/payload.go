@@ -14,7 +14,7 @@ type userProfileResponse struct {
 	FullName    string `json:"fullName"`
 	Email       string `json:"email"`
 	Picture     string `json:"picture,omitempty"`
-	BirthDay    int64  `json:"birthDay,omitempty"`
+	Birthday    int64  `json:"birthday,omitempty"`
 	PhoneNumber string `json:"phoneNumber,omitempty"`
 	Country     string `json:"country,omitempty"`
 	TimeZone    string `json:"timeZone,omitempty"`

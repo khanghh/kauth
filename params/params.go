@@ -26,4 +26,5 @@ const (
 	ServiceClientSecretLength     = 32               // length of service client secret
 	HealthCheckServerAddr         = ":3001"          // health check server address
 	NonceExpiration               = 5 * time.Minute  // every login has a nonce valid for 5 minutes
+	FullNameMaxLength             = 64               // maximum length for full name
 )

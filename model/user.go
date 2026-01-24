@@ -14,7 +14,8 @@ type User struct {
 	Email       string       `gorm:"uniqueIndex;size:256;not null"`
 	Password    string       `gorm:"size:64;not null"`
 	Picture     string       `gorm:"size:256;not null"`
-	BirthDay    time.Time    `gorm:"type:date"`
+	Birthday    *time.Time   `gorm:"type:timestamp"`
+	Gender      string       `gorm:"size:16"`
 	PhoneNumber string       `gorm:"size:32"`
 	Country     string       `gorm:"type:CHAR(2)"` // ISO 3166-1 alpha-2 country code
 	Disabled    bool         `gorm:"default:false;not null"`

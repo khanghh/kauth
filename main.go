@@ -201,7 +201,8 @@ func setupAPIRoutes(router fiber.Router, deps *apiDependencies) {
 	apiRouter := router.Group("/api")
 	apiRouter.Post("/serviceValidate", serviceValidateHandler.PostServiceValidate)
 	apiRouter.Get("/account", accountHandler.GetAccountInfo)
-	apiRouter.Get("/account/profile", accountHandler.GetProfile)
+	apiRouter.Get("/account/personal-info", accountHandler.GetPersonalInfo)
+	apiRouter.Patch("/account/personal-info", accountHandler.PatchPersonalInfo)
 	apiRouter.Post("/account/change-password", accountHandler.PostChangePassword)
 }
 

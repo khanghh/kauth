@@ -253,6 +253,27 @@ func (s *UserService) UpdatePassword(ctx context.Context, userID uint, newPasswo
 	return err
 }
 
+func (s *UserService) UpdatePersonalInfo(ctx context.Context, userID uint, params PersonalInfoUpdate) error {
+	updates := map[string]interface{}{}
+	if params.FullName != nil {
+		updates[query.ColUserFullName] = *params.FullName
+	}
+	if params.Gender != nil {
+		updates[query.ColUserGender] = *params.Gender
+	}
+	if params.Birthday != nil {
+		updates[query.ColUserBirthday] = *params.Birthday
+	}
+	if params.PhoneNumber != nil {
+		updates[query.ColUserPhoneNumber] = *params.PhoneNumber
+	}
+	if params.Country != nil {
+		updates[query.ColUserCountry] = *params.Country
+	}
+	_, err := s.userRepo.Updates(ctx, updates, query.User.ID.Eq(userID))
+	return err
+}
+
 func (s *UserService) SetAuthFactorEnabled(ctx context.Context, userID uint, factorType AuthFactor, enabled bool) error {
 	if factorType == AuthFactorEmail {
 		emailFactor := model.UserFactor{
