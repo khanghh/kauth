@@ -123,7 +123,7 @@ func (h *AccountHandler) generateTOTPEnrollmentURL(issuer string, username strin
 	return key.String(), nil
 }
 
-func (h *AccountHandler) GetTOTPEnroll(ctx *fiber.Ctx) error {
+func (h *AccountHandler) GetTwoFactorTOTPEnroll(ctx *fiber.Ctx) error {
 	renew := ctx.Query("renew")
 	session := sessions.Get(ctx)
 	if session == nil || !session.IsAuthenticated() {

@@ -1,15 +1,24 @@
 package api
 
 import (
+	"context"
+	"crypto/rand"
+	"encoding/base32"
 	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
+	"github.com/khanghh/kauth/internal/render"
 	"github.com/khanghh/kauth/internal/twofactor"
 	"github.com/khanghh/kauth/internal/users"
 	"github.com/khanghh/kauth/internal/validation"
+	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/bcrypt"
+)
+
+const (
+	totpEnrollSecretSessionKey = "_totp_enroll_secret"
 )
 
 type AccountHandler struct {
@@ -240,7 +249,7 @@ func (h *AccountHandler) GetTwoFactorMethods(ctx *fiber.Ctx) error {
 	return ctx.JSON(NewDataResponse(methods))
 }
 
-func (h *AccountHandler) PostTwoFactorMethods(ctx *fiber.Ctx) error {
+func (h *AccountHandler) PatchTwoFactorMethod(ctx *fiber.Ctx) error {
 	method := ctx.Params("method")
 
 	session := sessions.Get(ctx)
@@ -271,5 +280,110 @@ func (h *AccountHandler) PostTwoFactorMethods(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	return ctx.SendStatus(fiber.StatusOK)
+}
+
+// GenerateBase32TOTPSecret generates a RFC-compatible TOTP secret.
+// - 20 bytes raw (160 bits)
+// - 32 Base32 characters
+// - No padding (Authenticator-friendly)
+func generateTOTPSecret() string {
+	raw := make([]byte, 20) // 160-bit secret (RFC 4226 / 6238)
+	rand.Read(raw)
+
+	secret := base32.StdEncoding.
+		WithPadding(base32.NoPadding).
+		EncodeToString(raw)
+
+	return secret
+}
+
+func (h *AccountHandler) generateTOTPEnrollmentURL(issuer string, username string, secret string) (string, error) {
+	base32Secret, err := base32.StdEncoding.DecodeString(secret)
+	if err != nil {
+		return "", err
+	}
+
+	key, err := totp.Generate(totp.GenerateOpts{
+		Issuer:      issuer,
+		AccountName: username,
+		Period:      30,
+		Secret:      base32Secret,
+	})
+
+	if err != nil {
+		return "", err
+	}
+	return key.String(), nil
+}
+
+type enrollTOTPResponse struct {
+	EnrollmentURL string `json:"enrollmentUrl"`
+	Secret        string `json:"secret"`
+}
+
+func (h *AccountHandler) GetTwoFactorTOTPEnroll(ctx *fiber.Ctx) error {
+	session := sessions.Get(ctx)
+	if session == nil || !session.IsAuthenticated() {
+		return ErrUnauthorized
+	}
+
+	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
+	if err != nil {
+		return ErrUnauthorized
+	}
+
+	secret := generateTOTPSecret()
+	err = session.SetField(ctx.Context(), totpEnrollSecretSessionKey, secret, 15*time.Minute)
+	if err != nil {
+		return err
+	}
+
+	issuer, _ := render.GetValue("siteName").(string)
+	enrollmentURL, err := h.generateTOTPEnrollmentURL(issuer, user.Username, secret)
+	if err != nil {
+		return err
+	}
+
+	return ctx.JSON(NewDataResponse(enrollTOTPResponse{
+		EnrollmentURL: enrollmentURL,
+		Secret:        secret,
+	}))
+}
+
+func (h *AccountHandler) PostTwoFactorTOTPEnroll(ctx *fiber.Ctx) error {
+	var req struct {
+		Code string `json:"code"`
+	}
+
+	if err := ctx.BodyParser(&req); err != nil || req.Code == "" {
+		return ErrMissingParameters
+	}
+
+	session := sessions.Get(ctx)
+	if session == nil || !session.IsAuthenticated() {
+		return ErrUnauthorized
+	}
+
+	_, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
+	if err != nil {
+		return ErrUnauthorized
+	}
+
+	var secret string
+	err = session.GetField(context.Background(), totpEnrollSecretSessionKey, &secret)
+	if err != nil || secret == "" {
+		return ErrUnauthorized
+	}
+
+	err = h.twofactorService.TOTP().Enroll(ctx.Context(), session.UserID, secret, req.Code)
+	if err != nil {
+		if err == twofactor.ErrTOTPVerifyFailed {
+			return Err2FATOTPVerifyFailed
+		}
+		return err
+	}
+
+	session.DeleteField(ctx.Context(), totpEnrollSecretSessionKey)
 	return ctx.SendStatus(fiber.StatusOK)
 }
