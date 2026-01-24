@@ -3,7 +3,7 @@
     <div class="p-8">
       <div class="flex justify-center mb-6">
         <div class="p-4 bg-blue-50 rounded-full">
-          <Icon name="fa-solid:user-shield" class="text-blue-600 text-4xl" />
+          <Icon name="fa7-solid:user-shield" class="text-blue-600 text-4xl" />
         </div>
       </div>
 
@@ -16,7 +16,7 @@
       <div class="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-200">
         <div class="flex items-center mb-3">
           <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-            <Icon name="fa-solid:globe" class="text-blue-600" />
+            <Icon name="fa7-solid:globe" class="text-blue-600" />
           </div>
           <div>
             <p class="font-medium text-gray-800">{{ serviceName }}</p>
@@ -27,11 +27,11 @@
           <p>This application is requesting permission to:</p>
           <ul class="mt-2 space-y-1">
             <li class="flex items-start">
-              <Icon name="fa-solid:check" class="text-green-500 mt-0.5 mr-2" />
+              <Icon name="fa7-solid:check" class="text-green-500 mt-0.5 mr-2" />
               <span>Access your basic profile information</span>
             </li>
             <li class="flex items-start">
-              <Icon name="fa-solid:check" class="text-green-500 mt-0.5 mr-2" />
+              <Icon name="fa7-solid:check" class="text-green-500 mt-0.5 mr-2" />
               <span>View your email address</span>
             </li>
           </ul>
@@ -42,12 +42,12 @@
         <div class="flex flex-col sm:flex-row gap-3">
           <a href="/"
             class="flex-1 px-5 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition flex items-center justify-center gap-2">
-            <Icon name="fa-solid:xmark" />
+            <Icon name="fa7-solid:xmark" />
             Cancel
           </a>
           <button type="submit" name="confirm" value="true"
             class="flex-1 px-5 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 shadow-sm">
-            <Icon name="fa-solid:check" />
+            <Icon name="fa7-solid:check" />
             Confirm
           </button>
         </div>

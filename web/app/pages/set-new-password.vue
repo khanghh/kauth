@@ -3,7 +3,7 @@
     <div class="px-6 sm:px-10 py-10 ">
       <div class="text-center mb-8">
         <div class="w-24 h-24 mx-auto bg-blue-100 flex items-center justify-center rounded-full mb-4">
-          <Icon name="fa-solid:lock" class="text-blue-500 text-5xl" aria-hidden="true" />
+          <Icon name="fa7-solid:lock" class="text-blue-500 text-5xl" aria-hidden="true" />
         </div>
         <h1 class="text-3xl font-bold text-gray-800 mb-4">Set New Password</h1>
         <p class="text-gray-600 mt-2 mb-6">
@@ -12,7 +12,7 @@
       </div>
 
       <div v-if="errorMsg" class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-        <Icon name="fa-solid:exclamation-circle" class="mr-2" />
+        <Icon name="fa7-solid:exclamation-circle" class="mr-2" />
         {{ errorMsg }}
       </div>
 
@@ -21,13 +21,13 @@
           <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Create password</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-              <Icon name="fa-solid:lock" />
+              <Icon name="fa7-solid:lock" />
             </span>
             <input type="password" id="newPassword" name="newPassword" autocomplete="new-password" required
               class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
               placeholder="Create a secure password">
             <span class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
-              <Icon name="fa-solid:eye" />
+              <Icon name="fa7-solid:eye" />
             </span>
           </div>
 
@@ -45,13 +45,13 @@
           <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-              <Icon name="fa-solid:lock" />
+              <Icon name="fa7-solid:lock" />
             </span>
             <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required
               class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
               placeholder="Confirm your password">
             <span class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
-              <Icon name="fa-solid:eye" />
+              <Icon name="fa7-solid:eye" />
             </span>
           </div>
           <p id="confirmPasswordError" class="mt-1 text-sm text-red-600 hidden"></p>
@@ -69,7 +69,7 @@
 
       <div class="mt-6 text-center">
         <a href="/login" class="text-blue-600 hover:underline font-medium">
-          <Icon name="fa-solid:arrow-left" class="mr-1" />
+          <Icon name="fa7-solid:arrow-left" class="mr-1" />
           Back to Login
         </a>
       </div>

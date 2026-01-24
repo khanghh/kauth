@@ -52,7 +52,7 @@
     <div class="flex justify-center space-x-4 mt-4">
       <a href="/"
         class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200">
-        <Icon name="fa-solid:sign-in-alt" class="mr-2" />
+        <Icon name="fa7-solid:sign-in-alt" class="mr-2" />
         Return to Home
       </a>
       <a href="/contact"

@@ -21,13 +21,13 @@
       <div v-if="successMsg"
         class="mb-6 rounded-xl border px-4 py-3 border-green-200 bg-green-50 text-green-800">
         <div class="flex items-center">
-          <Icon name="fa-solid:check-circle" class="mr-2 w-5 h-5" />
+          <Icon name="fa7-solid:check-circle" class="mr-2 w-5 h-5" />
           <span>{{ successMsg }}</span>
         </div>
       </div>
       <div v-else-if="errorMsg" class="mb-6 rounded-xl border px-4 py-3 border-red-200 bg-red-50 text-red-800">
         <div class="flex items-center">
-          <Icon name="fa-solid:exclamation-circle" class="mr-2 w-5 h-5" />
+          <Icon name="fa7-solid:exclamation-circle" class="mr-2 w-5 h-5" />
           <span>{{ errorMsg }}</span>
         </div>
       </div>
@@ -188,8 +188,8 @@
                 type="submit"
                 :disabled="isSubmitting"
                 class="flex items-center px-6 py-3 text-white rounded-xl font-medium bg-indigo-600 hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                <Icon v-if="isSubmitting" name="fa-solid:spinner" class="animate-spin mr-2 w-5 h-5" />
-                <Icon v-else name="fa-solid:save" class="mr-2 w-5 h-5" />
+                <Icon v-if="isSubmitting" name="fa7-solid:spinner" class="animate-spin mr-2 w-5 h-5" />
+                <Icon v-else name="fa7-solid:save" class="mr-2 w-5 h-5" />
                 {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
               </button>
             </div>

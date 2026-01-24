@@ -32,7 +32,7 @@
         <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
           <div class="flex">
             <div class="flex-shrink-0">
-              <Icon name="fa-solid:exclamation-triangle" class="text-yellow-500" />
+              <Icon name="fa7-solid:exclamation-triangle" class="text-yellow-500" />
             </div>
             <div class="ml-3">
               <h3 class="text-sm font-medium text-yellow-800">Trouble with your code?</h3>
@@ -45,7 +45,7 @@
 
 
         <div v-if="errorMsg" class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-          <Icon name="fa-solid:exclamation-circle" class="mr-2" />
+          <Icon name="fa7-solid:exclamation-circle" class="mr-2" />
           {{ errorMsg }}
         </div>
 

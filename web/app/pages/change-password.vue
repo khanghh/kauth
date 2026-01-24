@@ -19,14 +19,14 @@
 
     <div v-if="successMsg" class="mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-green-800">
       <div class="flex items-center">
-        <Icon name="fa-solid:check-circle" class="mr-2" />
+        <Icon name="fa7-solid:check-circle" class="mr-2" />
         <span>{{ successMsg }}</span>
       </div>
     </div>
 
     <div v-if="errorMsg" class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-800">
       <div class="flex items-center">
-        <Icon name="fa-solid:exclamation-circle" class="mr-2" />
+        <Icon name="fa7-solid:exclamation-circle" class="mr-2" />
         <span>{{ errorMsg }}</span>
       </div>
     </div>
@@ -54,7 +54,7 @@
               class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-indigo-600"
               @click="showCurrentPassword = !showCurrentPassword"
               aria-label="Toggle current password visibility">
-              <Icon :name="showCurrentPassword ? 'fa-solid:eye-slash' : 'fa-solid:eye'" />
+              <Icon :name="showCurrentPassword ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" />
             </button>
           </div>
           <p v-if="currentPasswordError" class="mt-2 text-sm text-red-600">{{ currentPasswordError }}</p>
@@ -77,7 +77,7 @@
               class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-indigo-600"
               @click="showNewPassword = !showNewPassword"
               aria-label="Toggle new password visibility">
-              <Icon :name="showNewPassword ? 'fa-solid:eye-slash' : 'fa-solid:eye'" />
+              <Icon :name="showNewPassword ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" />
             </button>
           </div>
 
@@ -115,17 +115,17 @@
               class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-indigo-600"
               @click="showConfirmPassword = !showConfirmPassword"
               aria-label="Toggle confirm password visibility">
-              <Icon :name="showConfirmPassword ? 'fa-solid:eye-slash' : 'fa-solid:eye'" />
+              <Icon :name="showConfirmPassword ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" />
             </button>
           </div>
 
           <div v-if="confirmPassword.length > 0" class="mt-2 text-sm">
             <span v-if="passwordsMatch" class="text-green-600 inline-flex items-center">
-              <Icon name="fa-solid:check" class="mr-1" />
+              <Icon name="fa7-solid:check" class="mr-1" />
               Passwords match
             </span>
             <span v-else class="text-red-600 inline-flex items-center">
-              <Icon name="fa-solid:xmark" class="mr-1" />
+              <Icon name="fa7-solid:xmark" class="mr-1" />
               Passwords do not match
             </span>
           </div>
@@ -165,19 +165,19 @@
           <h3 class="font-medium text-blue-800 mb-2">Password Security Tips</h3>
           <ul class="text-sm text-blue-700 space-y-1">
             <li class="flex items-start">
-              <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
               <span>Use a unique password that you don't use for other accounts</span>
             </li>
             <li class="flex items-start">
-              <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
               <span>Consider using a password manager to generate and store secure passwords</span>
             </li>
             <li class="flex items-start">
-              <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
               <span>Avoid using personal information like your name, birthdate, or common words</span>
             </li>
             <li class="flex items-start">
-              <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
               <span>Change your password regularly for better security</span>
             </li>
           </ul>

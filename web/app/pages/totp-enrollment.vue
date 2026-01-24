@@ -5,7 +5,7 @@
       <div id="enrollmentFlow">
         <div class="text-center mb-8">
           <div class="w-24 h-24 mx-auto bg-blue-100 flex items-center justify-center rounded-full mb-4">
-            <Icon name="fa-solid:shield-alt" class="text-blue-500 text-5xl" aria-hidden="true" />
+            <Icon name="fa7-solid:shield-alt" class="text-blue-500 text-5xl" aria-hidden="true" />
           </div>
           <h1 class="text-3xl font-bold text-gray-800 mb-4">Setup Authenticator App</h1>
           <p class="text-gray-600 mt-2 mb-6">
@@ -29,7 +29,7 @@
         </div>
 
         <div v-if="errorMsg" class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-          <Icon name="fa-solid:exclamation-circle" class="mr-2" />
+          <Icon name="fa7-solid:exclamation-circle" class="mr-2" />
           {{ errorMsg }}
         </div>
 
@@ -52,7 +52,7 @@
                     class="w-12 h-12 object-contain" />
                 </div>
                 <div class="app-icon text-red-500">
-                  <Icon name="fa-solid:mobile-alt" class="fa-2x" />
+                  <Icon name="fa7-solid:mobile-alt" class="fa-2x" />
                 </div>
               </div>
               <p class="text-center text-gray-600 text-sm mt-4">
@@ -63,7 +63,7 @@
             <div class="bg-blue-50 p-4 rounded-lg">
               <div class="flex">
                 <div class="flex-shrink-0">
-                  <Icon name="fa-solid:info-circle" class="text-blue-500 mt-1" />
+                  <Icon name="fa7-solid:info-circle" class="text-blue-500 mt-1" />
                 </div>
                 <div class="ml-3">
                   <h3 class="text-sm font-medium text-blue-800">How it works</h3>
@@ -80,7 +80,7 @@
             <button type="button" @click="showStep(2)"
               class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
               Get Started
-              <Icon name="fa-solid:arrow-right" class="ml-2" />
+              <Icon name="fa7-solid:arrow-right" class="ml-2" />
             </button>
           </div>
         </div>
@@ -114,13 +114,13 @@
           <div class="flex justify-between pt-2">
             <button type="button" @click="showStep(1)"
               class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center">
-              <Icon name="fa-solid:arrow-left" class="mr-2" />
+              <Icon name="fa7-solid:arrow-left" class="mr-2" />
               Back
             </button>
             <button type="button" @click="showStep(3)"
               class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center">
               Next
-              <Icon name="fa-solid:arrow-right" class="ml-2" />
+              <Icon name="fa7-solid:arrow-right" class="ml-2" />
             </button>
           </div>
         </div>
@@ -151,7 +151,7 @@
               <div class="bg-blue-50 p-4 rounded-lg mt-6">
                 <div class="flex">
                   <div class="flex-shrink-0">
-                    <Icon name="fa-solid:lightbulb" class="text-blue-500 mt-0.5" />
+                    <Icon name="fa7-solid:lightbulb" class="text-blue-500 mt-0.5" />
                   </div>
                   <div class="ml-3">
                     <h3 class="text-sm font-medium text-blue-800">Don't see a code?</h3>
@@ -168,12 +168,12 @@
           <div class="flex justify-between pt-2">
             <button type="button" @click="showStep(2)"
               class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center">
-              <Icon name="fa-solid:arrow-left" class="mr-2" />
+              <Icon name="fa7-solid:arrow-left" class="mr-2" />
               Back
             </button>
             <button type="submit" form="verifyForm"
               class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center">
-              <Icon name="fa-solid:check" class="mr-2" />
+              <Icon name="fa7-solid:check" class="mr-2" />
               Verify & Enable
             </button>
           </div>

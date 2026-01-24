@@ -38,7 +38,7 @@
         </div>
 
         <div v-if="errorMsg" class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-          <Icon name="fa-solid:exclamation-circle" class="mr-2" />
+          <Icon name="fa7-solid:exclamation-circle" class="mr-2" />
           {{ errorMsg }}
         </div>
 

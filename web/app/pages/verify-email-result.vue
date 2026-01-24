@@ -4,7 +4,7 @@
 
       <div v-if="success">
         <div class="w-24 h-24 mx-auto bg-green-100 flex items-center justify-center rounded-full mb-4">
-          <Icon name="fa-solid:circle-check" class="text-green-500 text-5xl" aria-hidden="true" />
+          <Icon name="fa7-solid:circle-check" class="text-green-500 text-5xl" aria-hidden="true" />
         </div>
         <h1 class="text-3xl font-bold text-gray-800 mb-4">Email Verified</h1>
         <p class="text-gray-600 mt-2">
@@ -14,14 +14,14 @@
         <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
           <a href="/login"
             class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200">
-            <Icon name="fa-solid:sign-in-alt" class="mr-2" />
+            <Icon name="fa7-solid:sign-in-alt" class="mr-2" />
             Go to Login
           </a>
         </div>
       </div>
       <div v-else>
         <div class="w-24 h-24 mx-auto bg-red-100 flex items-center justify-center rounded-full mb-4">
-          <Icon name="fa-solid:circle-xmark" class="text-red-500 text-5xl" aria-hidden="true" />
+          <Icon name="fa7-solid:circle-xmark" class="text-red-500 text-5xl" aria-hidden="true" />
         </div>
         <h1 class="text-3xl font-bold text-gray-800 mb-4">Verification Failed</h1>
         <p class="text-gray-600 text-base leading-relaxed">
@@ -32,7 +32,7 @@
         <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
           <a href="/"
             class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200">
-            <Icon name="fa-solid:home" class="mr-2" />
+            <Icon name="fa7-solid:home" class="mr-2" />
             Return to Home
           </a>
         </div>

@@ -19,14 +19,14 @@
 
     <div v-if="successMsg" class="mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-green-800">
       <div class="flex items-center">
-        <Icon name="fa-solid:check-circle" class="mr-2" />
+        <Icon name="fa7-solid:check-circle" class="mr-2" />
         <span>{{ successMsg }}</span>
       </div>
     </div>
 
     <div v-if="errorMsg" class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-800">
       <div class="flex items-center">
-        <Icon name="fa-solid:exclamation-circle" class="mr-2" />
+        <Icon name="fa7-solid:exclamation-circle" class="mr-2" />
         <span>{{ errorMsg }}</span>
       </div>
     </div>
@@ -35,7 +35,7 @@
       <div class="service-card flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-white">
         <div class="flex items-center">
           <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-4">
-            <Icon name="fa-brands:google" class="text-blue-600" />
+            <Icon name="fa7-brands:google" class="text-blue-600" />
           </div>
           <div>
             <div class="flex items-center gap-2">
@@ -57,7 +57,7 @@
       <div class="service-card flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-white">
         <div class="flex items-center">
           <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4">
-            <Icon name="fa-brands:github" class="text-gray-800" />
+            <Icon name="fa7-brands:github" class="text-gray-800" />
           </div>
           <div>
             <div class="font-medium text-gray-800">GitHub</div>

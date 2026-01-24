@@ -19,21 +19,21 @@
 
     <div v-if="effectiveSuccessMsg" class="alert-box success">
       <div class="flex items-center">
-        <Icon name="fa-solid:check-circle" class="mr-2" />
+        <Icon name="fa7-solid:check-circle" class="mr-2" />
         <span>{{ effectiveSuccessMsg }}</span>
       </div>
     </div>
 
     <div v-if="effectiveWarningMsg" class="alert-box warning">
       <div class="flex items-center">
-        <Icon name="fa-solid:exclamation-triangle" class="mr-2" />
+        <Icon name="fa7-solid:exclamation-triangle" class="mr-2" />
         <span>{{ effectiveWarningMsg }}</span>
       </div>
     </div>
 
     <div v-if="effectiveErrorMsg" class="alert-box error">
       <div class="flex items-center">
-        <Icon name="fa-solid:exclamation-circle" class="mr-2" />
+        <Icon name="fa7-solid:exclamation-circle" class="mr-2" />
         <span>{{ effectiveErrorMsg }}</span>
       </div>
     </div>
@@ -46,17 +46,12 @@
           <div class="flex items-start justify-between">
             <div class="flex items-start space-x-4">
               <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <Icon name="fa-solid:envelope" class="text-blue-600 text-xl" />
+                <Icon name="fa7-solid:envelope" class="text-blue-600 text-xl" />
               </div>
               <div>
                 <h3 class="font-bold text-gray-800 text-lg mb-1">Email Authentication</h3>
                 <div class="flex items-center text-sm text-gray-500">
-                  <Icon name="fa-solid:envelope" class="mr-2" />
                   <span>{{ email || 'No email address configured' }}</span>
-                </div>
-                <div v-if="emailEnabled" class="mt-2 text-sm text-green-600">
-                  <Icon name="fa-solid:check-circle" class="mr-1" />
-                  <span>Email authentication is enabled</span>
                 </div>
               </div>
             </div>
@@ -79,17 +74,12 @@
           <div class="flex items-start justify-between">
             <div class="flex items-start space-x-4">
               <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                <Icon name="fa-solid:mobile" class="text-green-600 text-xl" />
+                <Icon name="fa7-solid:mobile" class="text-green-600 text-xl" />
               </div>
               <div>
                 <h3 class="font-bold text-gray-800 text-lg mb-1">SMS Authentication</h3>
                 <div class="flex items-center text-sm text-gray-500">
-                  <Icon name="fa-solid:phone" class="mr-2" />
                   <span>{{ phoneNumber || 'No phone number added' }}</span>
-                </div>
-                <div v-if="smsEnabled" class="mt-2 text-sm text-green-600">
-                  <Icon name="fa-solid:check-circle" class="mr-1" />
-                  <span>SMS authentication is enabled</span>
                 </div>
               </div>
             </div>
@@ -99,21 +89,6 @@
                 <input type="checkbox" v-model="smsEnabled" :disabled="!phoneNumber" @change="onSMSToggle" />
                 <span class="toggle-slider"></span>
               </label>
-            </div>
-          </div>
-
-          <div v-if="!phoneNumber" class="mt-4 pt-4 border-t border-gray-100">
-            <p class="text-sm text-gray-600 mb-3">Add a phone number to enable SMS authentication:</p>
-            <div class="flex space-x-3">
-              <input
-                type="tel"
-                v-model="phoneInput"
-                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
-                placeholder="+1 (555) 123-4567" />
-              <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                @click="addPhone">
-                Add Phone
-              </button>
             </div>
           </div>
         </div>
@@ -127,34 +102,21 @@
               <div>
                 <h3 class="font-bold text-gray-800 text-lg mb-1">Authenticator App</h3>
                 <div class="text-sm text-gray-500">
-                  <Icon name="fa-solid:clock" class="mr-2" />
                   <span>Time-based verification codes</span>
-                </div>
-                <div v-if="totpEnabled" class="mt-2 text-sm text-green-600">
-                  <Icon name="fa-solid:check-circle" class="mr-1" />
-                  <span>Authenticator app is configured</span>
                 </div>
               </div>
             </div>
 
             <div class="flex items-center space-x-4">
-              <div v-if="totpEnabled">
-                <label class="toggle-switch">
-                  <input
-                    type="checkbox"
-                    name="totpEnabled"
-                    value="true"
-                    v-model="totpEnabled"
-                    @change="onTOTPToggle" />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-              <div v-else>
-                <NuxtLink to="/totp-enrollment"
-                  class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                  Set Up
-                </NuxtLink>
-              </div>
+              <label class="toggle-switch">
+                <input
+                  type="checkbox"
+                  name="totpEnabled"
+                  value="true"
+                  v-model="totpEnabled"
+                  @change="onTOTPToggle" />
+                <span class="toggle-slider"></span>
+              </label>
             </div>
           </div>
         </div>
@@ -176,46 +138,46 @@
 
       <div class="flex flex-wrap gap-3">
         <button type="button" class="copy-btn" @click="copyAllCodes">
-          <Icon name="fa-solid:copy" class="mr-1" /> Copy All
+          <Icon name="fa7-solid:copy" class="mr-1" /> Copy All
         </button>
         <button type="button" class="copy-btn" @click="downloadCodes">
-          <Icon name="fa-solid:download" class="mr-1" /> Download
+          <Icon name="fa7-solid:download" class="mr-1" /> Download
         </button>
         <button type="button" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100"
           @click="regenerateCodes">
-          <Icon name="fa-solid:rotate" class="mr-1" /> Regenerate Codes
+          <Icon name="fa7-solid:rotate" class="mr-1" /> Regenerate Codes
         </button>
       </div>
 
       <div class="mt-4 text-sm text-gray-500">
-        <Icon name="fa-solid:info-circle" class="mr-1" />
+        <Icon name="fa7-solid:info-circle" class="mr-1" />
         Each code can only be used once. Store them in a secure place.
       </div>
     </div>
 
     <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mt-8">
       <div class="flex items-start">
-        <Icon name="fa-solid:shield-halved" class="text-blue-500 mt-1 mr-3 text-xl" />
+        <Icon name="fa7-solid:shield-halved" class="text-blue-500 mt-1 mr-3 text-xl" />
         <div>
           <h3 class="font-medium text-blue-800 text-lg mb-2">Why Enable Two-Factor Authentication?</h3>
           <ul class="text-sm text-blue-700 space-y-2">
             <li class="flex items-start">
-              <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
               <span><strong>Extra Security:</strong> Even if someone steals your password, they can't access your
                 account without the second factor</span>
             </li>
             <li class="flex items-start">
-              <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
               <span><strong>Protection Against Phishing:</strong> 2FA codes are unique and time-sensitive, making
                 phishing attacks much harder</span>
             </li>
             <li class="flex items-start">
-              <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
               <span><strong>Compliance:</strong> Many services and regulations now require or recommend 2FA for enhanced
                 security</span>
             </li>
             <li class="flex items-start">
-              <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
               <span><strong>Peace of Mind:</strong> Know that your account has an additional layer of protection</span>
             </li>
           </ul>
@@ -250,7 +212,8 @@ const email = useServerVar<string>('email', '')
 // Mock SMS state (UI only)
 const phoneNumber = useServerVar<string>('phoneNumber', '')
 const smsEnabled = useServerVar<boolean>('smsEnabled', false)
-const phoneInput = ref('')
+
+const initialTotpEnabled = ref(totpEnabled.value)
 
 const uiSuccessMsg = ref('')
 const uiWarningMsg = ref('')
@@ -274,6 +237,13 @@ const submitForm = () => {
 const onTOTPToggle = () => {
   clearUiAlerts()
 
+  if (totpEnabled.value && !initialTotpEnabled.value) {
+    // Trying to enable but not set up, redirect to enrollment
+    navigateTo('/totp-enrollment')
+    totpEnabled.value = false
+    return
+  }
+
   if (!totpEnabled.value) {
     const ok = confirm(
       'Are you sure you want to disable the authenticator app? You may need to set it up again to re-enable.'
@@ -284,22 +254,6 @@ const onTOTPToggle = () => {
     }
   }
   submitForm()
-}
-
-const addPhone = () => {
-  clearUiAlerts()
-  const value = phoneInput.value.trim()
-  if (!value) {
-    uiErrorMsg.value = 'Please enter a phone number.'
-    return
-  }
-  if (value.replace(/\D/g, '').length < 10) {
-    uiErrorMsg.value = 'Please enter a valid phone number.'
-    return
-  }
-  phoneNumber.value = value
-  phoneInput.value = ''
-  uiSuccessMsg.value = 'Phone number added successfully. (mock)'
 }
 
 const onSMSToggle = () => {

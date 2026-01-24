@@ -4,7 +4,7 @@
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-bold text-gray-800">Crop Your Photo</h2>
         <button class="text-gray-500 hover:text-gray-700" @click="onCancel">
-          <Icon name="fa-solid:times" />
+          <Icon name="fa7-solid:times" />
         </button>
       </div>
 
@@ -15,10 +15,10 @@
       </div>
 
       <div class="flex items-center justify-center gap-3 mt-4 mb-6">
-        <Icon name="fa-solid:search-minus" class="text-gray-500" />
+        <Icon name="fa7-solid:search-minus" class="text-gray-500" />
         <input type="range" min="1" max="3" step="0.1" v-model.number="zoomLevel"
           class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
-        <Icon name="fa-solid:search-plus" class="text-gray-500" />
+        <Icon name="fa7-solid:search-plus" class="text-gray-500" />
       </div>
 
       <div class="flex justify-end gap-3">
@@ -29,7 +29,7 @@
         <button type="button"
           class="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-70 flex items-center"
           @click="onApply" :disabled="isProcessing">
-          <Icon v-if="isProcessing" name="fa-solid:spinner" class="animate-spin mr-2" />
+          <Icon v-if="isProcessing" name="fa7-solid:spinner" class="animate-spin mr-2" />
           {{ isProcessing ? 'Saving...' : 'Apply Crop' }}
         </button>
       </div>

@@ -23,12 +23,12 @@
       </NuxtLink>
 
       <NuxtLink to="/personal-info" :class="linkClass('/personal-info')">
-        <Icon name="fa-solid:user" class="mr-3" size="20" />
+        <Icon name="fa7-solid:user" class="mr-3" size="20" />
         Personal Info
       </NuxtLink>
 
       <NuxtLink to="/change-password" :class="linkClass('/change-password')">
-        <Icon name="fa-solid:key" class="mr-3" size="20" />
+        <Icon name="fa7-solid:key" class="mr-3" size="20" />
         Password
       </NuxtLink>
 
@@ -38,12 +38,12 @@
       </NuxtLink>
 
       <NuxtLink to="/connected-accounts" :class="linkClass('/connected-accounts')">
-        <Icon name="fa-solid:link" class="mr-3" size="20" />
+        <Icon name="fa7-solid:link" class="mr-3" size="20" />
         Connected accounts
       </NuxtLink>
 
       <NuxtLink to="/sessions" :class="linkClass('/sessions')">
-        <Icon name="fa-solid:laptop" class="mr-3" size="20" />
+        <Icon name="fa7-solid:laptop" class="mr-3" size="20" />
         Active sessions
       </NuxtLink>
     </nav>

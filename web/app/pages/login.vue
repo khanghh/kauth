@@ -8,7 +8,7 @@
       </div>
 
       <div v-if="errorMsg" class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-        <Icon name="fa-solid:exclamation-circle" class="mr-2" />
+        <Icon name="fa7-solid:exclamation-circle" class="mr-2" />
         {{ errorMsg }}
       </div>
 
@@ -17,7 +17,7 @@
           <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Username or email</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-              <Icon name="fa-solid:user" />
+              <Icon name="fa7-solid:user" />
             </span>
             <input tabindex="1" type="text" name="username" required
               class="form-input w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
@@ -29,7 +29,7 @@
           <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-              <Icon name="fa-solid:lock" />
+              <Icon name="fa7-solid:lock" />
             </span>
             <input tabindex="2" type="password" id="password" name="password" autocomplete="new-password" required
               class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
