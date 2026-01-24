@@ -17,13 +17,15 @@ var embedFS embed.FS
 var embedTemplate *template.Template
 var templateDir string
 var globalVars map[string]interface{}
+var fallbackToEmbedded bool
 
 func GetValue(key string) any {
 	return globalVars[key]
 }
 
-func Initialize(gVars map[string]interface{}, tmplDir string) error {
+func Initialize(gVars map[string]interface{}, tmplDir string, fallback bool) error {
 	globalVars = gVars
+	fallbackToEmbedded = fallback
 	if tmplDir != "" {
 		info, err := os.Stat(tmplDir)
 		if err != nil {
@@ -96,6 +98,13 @@ func RenderHTML(templateName string, vars map[string]interface{}) (string, error
 		// Read and compile the specific template with its full logical name
 		contents, err := os.ReadFile(filePath)
 		if err != nil {
+			// Fallback to embedded templates if enabled and file not found
+			if fallbackToEmbedded && os.IsNotExist(err) {
+				if err := embedTemplate.ExecuteTemplate(buf, templateName, mergedVars); err != nil {
+					return "", fmt.Errorf("template not found in directory and embedded fallback failed: %w", err)
+				}
+				return buf.String(), nil
+			}
 			return "", err
 		}
 		t, err := template.New(templateName).Parse(string(contents))

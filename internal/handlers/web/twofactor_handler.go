@@ -190,7 +190,7 @@ func (h *TwoFactorHandler) PostChallenge(ctx *fiber.Ctx) error {
 
 	switch method {
 	case "email":
-		if err := h.generateAndSendEmailOTP(ctx, ch, sub, user.Email); err == nil {
+		if err = h.generateAndSendEmailOTP(ctx, ch, sub, user.Email); err == nil {
 			audit.Record2FAChallengeCreated(ctx, user, ch.ID, ch.Type, stateBase64)
 			return redirect(ctx, "/2fa/otp/verify", "state", stateBase64, "nonce", nonce, "cid", ch.ID)
 		}

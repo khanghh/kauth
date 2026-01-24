@@ -18,7 +18,7 @@ func resetRenderState() {
 // RenderHTML uses embedded templates successfully.
 func TestRenderHTML_EmbeddedOnly(t *testing.T) {
 	resetRenderState()
-	if err := Initialize(map[string]interface{}{"siteName": "Embedded"}, ""); err != nil {
+	if err := Initialize(map[string]interface{}{"siteName": "Embedded"}, "", true); err != nil {
 		t.Fatalf("Initialize failed: %v", err)
 	}
 
@@ -50,7 +50,7 @@ func TestRenderHTML_DirOverridesEmbedded(t *testing.T) {
 		t.Fatalf("failed to write temp template: %v", err)
 	}
 
-	if err := Initialize(map[string]interface{}{}, tmpDir); err != nil {
+	if err := Initialize(map[string]interface{}{}, tmpDir, true); err != nil {
 		t.Fatalf("Initialize failed: %v", err)
 	}
 
@@ -78,7 +78,7 @@ func TestRenderHTML_FallbackOnDiskFailure(t *testing.T) {
 		t.Fatalf("failed to write broken temp template: %v", err)
 	}
 
-	if err := Initialize(map[string]interface{}{}, tmpDir); err != nil {
+	if err := Initialize(map[string]interface{}{}, tmpDir, true); err != nil {
 		t.Fatalf("Initialize failed: %v", err)
 	}
 

@@ -235,7 +235,7 @@ func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 
 	// middlewares
 	mustInitCaptchaVerifier(deps.captchaConfig)
-	if err := render.Initialize(deps.globalVars, deps.templateDir); err != nil {
+	if err := render.Initialize(deps.globalVars, deps.templateDir, true); err != nil {
 		log.Fatalf("Failed to initialize render templates: %v", err)
 	}
 	// routes
@@ -260,6 +260,7 @@ func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 	router.Post("/forgot-password", resetPasswordHandler.PostForgotPassword)
 	router.Get("/2fa/challenge", twofactorHandler.GetChallenge)
 	router.Post("/2fa/challenge", twofactorHandler.PostChallenge)
+	router.Get("/2fa/otp/verify", twofactorHandler.GetVerifyOTP)
 	router.Post("/2fa/otp/verify", twofactorHandler.PostVerifyOTP)
 	router.Get("/2fa/totp/verify", twofactorHandler.GetVerifyTOTP)
 	router.Post("/2fa/totp/verify", twofactorHandler.PostVerifyTOTP)
