@@ -324,7 +324,7 @@ func RenderAccountChangePasswordPage(ctx *fiber.Ctx, errorMsg string) error {
 }
 
 func RenderAccountTOTPEnrollmentPage(ctx *fiber.Ctx, data AccountTOTPEnrollmentPageData) error {
-	body, err := RenderHTML("account/totp-enrollment", fiber.Map{
+	body, err := RenderHTML("two-factor/totp/enroll", fiber.Map{
 		"siteName":      globalVars["siteName"],
 		"secretKey":     data.SecretKey,
 		"enrollmentURL": data.EnrollmentURL,

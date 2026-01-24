@@ -262,13 +262,14 @@ func (h *AccountHandler) PostTwoFactorMethods(ctx *fiber.Ctx) error {
 
 	err = h.twofactorService.SetAuthFactorEnabled(ctx.Context(), session.UserID, method, req.Enabled)
 	if err != nil {
-		if err == twofactor.ErrTOTPNotEnrolled {
+		switch err {
+		case twofactor.ErrTOTPNotEnrolled:
 			return Err2FATOTPNotEnrolled
-		} else if err == twofactor.ErrAuthMethodNotSupported {
+		case twofactor.ErrAuthMethodNotSupported:
 			return Err2FAInvalidChallengeMethod
 		}
 		return err
 	}
 
-	return ctx.Redirect(ctx.OriginalURL(), fiber.StatusFound)
+	return ctx.SendStatus(fiber.StatusOK)
 }

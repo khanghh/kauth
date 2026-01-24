@@ -356,41 +356,6 @@ func generateTOTPSecret() string {
 	return secret
 }
 
-func (h *TwoFactorHandler) GetTOTPEnroll(ctx *fiber.Ctx) error {
-	renew := ctx.Query("renew")
-	session := sessions.Get(ctx)
-	if session == nil || !session.IsAuthenticated() {
-		return forceLogout(ctx, "")
-	}
-
-	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
-	if err != nil {
-		return forceLogout(ctx, "")
-	}
-
-	var secret string
-	err = session.GetField(ctx.Context(), totpEnrollSecretSessionKey, &secret)
-	if err != nil || renew == "true" {
-		secret = generateTOTPSecret()
-		err := session.SetField(ctx.Context(), totpEnrollSecretSessionKey, secret)
-		if err != nil {
-			return err
-		}
-	}
-
-	issuer, _ := render.GetValue("siteName").(string)
-	enrollmentURL, err := h.generateTOTPEnrollmentURL(issuer, user.Username, secret)
-	if err != nil {
-		return err
-	}
-
-	pageData := render.AccountTOTPEnrollmentPageData{
-		SecretKey:     secret,
-		EnrollmentURL: enrollmentURL,
-	}
-	return render.RenderAccountTOTPEnrollmentPage(ctx, pageData)
-}
-
 func (h *TwoFactorHandler) PostTOTPEnroll(ctx *fiber.Ctx) error {
 	code := ctx.FormValue("verificationCode")
 
@@ -534,31 +499,6 @@ func isFactorEnabled(authFactors []*model.UserFactor, factorType string) bool {
 		}
 	}
 	return false
-}
-
-// GetTwoFactor returns the 2FA settings page
-// GET /two-factor
-func (h *TwoFactorHandler) GetTwoFactor(ctx *fiber.Ctx) error {
-	session := sessions.Get(ctx)
-	if session == nil || !session.IsAuthenticated() {
-		return forceLogout(ctx, "")
-	}
-
-	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
-	if err != nil {
-		return forceLogout(ctx, "")
-	}
-	authFactors, err := h.userService.GetAuthFactors(ctx.Context(), session.UserID)
-	if err != nil {
-		return err
-	}
-
-	pageData := render.AccountTwoFASettingsPageData{
-		Email:        user.Email,
-		EmailEnabled: isFactorEnabled(authFactors, string(twofactor.AuthFactorEmail)),
-		TOTPEnabled:  isFactorEnabled(authFactors, string(twofactor.AuthFactorTOTP)),
-	}
-	return render.RenderAccount2FASettingsPage(ctx, pageData)
 }
 
 func NewTwoFactorHandler(twoFactorService TwoFactorService, userService UserService, mailSender mail.MailSender) *TwoFactorHandler {
