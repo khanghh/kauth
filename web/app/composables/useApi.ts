@@ -1,3 +1,4 @@
+import PersonalInfo from '~/pages/personal-info.vue'
 import { useHttpGet } from './http'
 
 export interface UserInfo {
@@ -8,11 +9,11 @@ export interface UserInfo {
   picture?: string
 }
 
-export interface UserProfile extends UserInfo {
-  birthDay: number
+export interface PersonalInfo extends UserInfo {
+  birthday?: number
+  gender?: string
   phoneNumber?: string
   country?: string
-  timeZone?: string
 }
 
 export interface Challenge {
@@ -22,10 +23,21 @@ export interface Challenge {
   target?: string
 }
 
+export interface PersonalInfoUpdate {
+  fullName?: string
+  birthday?: number
+  gender?: string
+  phoneNumber?: string
+  country?: string
+}
+
 export const useApi = () => {
   return {
     getCurrentUser: () => useHttpGet<UserInfo>('/api/account'),
-    getUserProfile: () => useHttpGet<UserProfile>('/api/account/profile'),
+    getPersonalInfo: () => useHttpGet<PersonalInfo>('/api/account/personal-info'),
+    updatePersonalInfo: (update: PersonalInfoUpdate) => {
+      return useHttpPatch<PersonalInfo>("/api/account/personal-info", { body: update })
+    },
     changePassword: (currentPassword: string, newPassword: string) => {
       return useHttpPost("/api/account/change-password", {
         body: {

@@ -96,7 +96,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import type { UserProfile } from '~/composables/useApi'
+import type { PersonalInfo } from '~/composables/useApi'
 import auth from '~/middlewares/auth'
 
 const api = useApi()
@@ -108,11 +108,11 @@ definePageMeta({
 
 useHead({ title: useSiteTitle('Connected Accounts') })
 
-const profile = ref<UserProfile>({} as UserProfile)
+const profile = ref<PersonalInfo>({} as PersonalInfo)
 
 onMounted(async () => {
   try {
-    const data = await api.getUserProfile()
+    const data = await api.getPersonalInfo()
     profile.value = data
   } catch (err: any) {
     if (err?.code === 401 || err?.statusCode === 401) return
