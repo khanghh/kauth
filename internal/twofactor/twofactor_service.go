@@ -9,12 +9,18 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 	"github.com/khanghh/kauth/internal/store"
 	"github.com/khanghh/kauth/internal/users"
 	"github.com/khanghh/kauth/model"
 	"github.com/khanghh/kauth/model/query"
 	"github.com/khanghh/kauth/params"
+)
+
+const (
+	AuthFactorEmail = "email"
+	AuthFactorTOTP  = "totp"
 )
 
 type TwoFactorService struct {
@@ -219,6 +225,33 @@ func (s *TwoFactorService) GetAllAuthFactors(ctx context.Context, userID uint) (
 
 func (s *TwoFactorService) GetEnabledAuthFactors(ctx context.Context, userID uint) ([]*model.UserFactor, error) {
 	return s.userFactorRepo.Find(ctx, query.UserFactor.UserID.Eq(userID), query.UserFactor.Enabled.Is(true))
+}
+
+func (s *TwoFactorService) SetAuthFactorEnabled(ctx context.Context, userID uint, factorType string, enabled bool) error {
+	if factorType == AuthFactorEmail {
+		emailFactor := model.UserFactor{
+			UserID:  userID,
+			Type:    string(factorType),
+			Enabled: enabled,
+		}
+		if err := s.userFactorRepo.Upsert(ctx, &emailFactor); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	if factorType == AuthFactorTOTP {
+		updates := map[string]interface{}{
+			query.ColUserFactorEnabled: enabled,
+		}
+		var mysqlErr *mysql.MySQLError
+		ret, err := s.userFactorRepo.Updates(ctx, updates, query.UserFactor.UserID.Eq(userID), query.UserFactor.Type.Eq(string(factorType)))
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 || ret.RowsAffected == 0 {
+			return ErrTOTPNotEnrolled
+		}
+		return err
+	}
+	return ErrAuthMethodNotSupported
 }
 
 func (s *TwoFactorService) OTP() *OTPChallenger {

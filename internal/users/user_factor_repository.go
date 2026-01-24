@@ -9,13 +9,6 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-type AuthFactor string
-
-const (
-	AuthFactorEmail AuthFactor = "email"
-	AuthFactorTOTP  AuthFactor = "totp"
-)
-
 type UserFactorRepository interface {
 	WithTx(tx *query.Query) UserFactorRepository
 	Create(ctx context.Context, user *model.UserFactor) error

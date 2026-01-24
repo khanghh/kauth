@@ -349,7 +349,7 @@ func RenderTOTPEnrollSuccessPage(ctx *fiber.Ctx) error {
 }
 
 func RenderAccount2FASettingsPage(ctx *fiber.Ctx, data AccountTwoFASettingsPageData) error {
-	body, err := RenderHTML("account/twofactor-settings", fiber.Map{
+	body, err := RenderHTML("two-factor", fiber.Map{
 		"siteName":     globalVars["siteName"],
 		"email":        data.Email,
 		"emailEnabled": data.EmailEnabled,

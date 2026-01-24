@@ -24,6 +24,7 @@ var (
 	ErrOTPRequestRateLimited     = errors.New("otp request rate limited")
 	ErrTOTPNotEnrolled           = errors.New("TOTP not enrolled")
 	ErrTOTPVerifyFailed          = errors.New("TOTP verification failed")
+	ErrAuthMethodNotSupported    = errors.New("authentication method not supported")
 )
 
 type UserLockedError struct {

@@ -26,6 +26,7 @@ type TwoFactorService interface {
 	FinalizeChallenge(ctx context.Context, cid string, sub twofactor.Subject, callbackURL string) error
 	GetEnabledAuthFactors(ctx context.Context, userID uint) ([]*model.UserFactor, error)
 	GetAllAuthFactors(ctx context.Context, userID uint) ([]*model.UserFactor, error)
+	SetAuthFactorEnabled(ctx context.Context, userID uint, factor string, enabled bool) error
 	OTP() *twofactor.OTPChallenger
 	TOTP() *twofactor.TOTPChallenger
 	JWT() *twofactor.JWTChallenger
@@ -45,5 +46,4 @@ type UserService interface {
 	UpdatePassword(ctx context.Context, userID uint, newPassword string) error
 	UpdatePersonalInfo(ctx context.Context, userID uint, updates users.PersonalInfoUpdate) error
 	GetAuthFactors(ctx context.Context, userID uint) ([]*model.UserFactor, error)
-	SetAuthFactorEnabled(ctx context.Context, userID uint, factorType users.AuthFactor, enabled bool) error
 }

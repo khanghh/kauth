@@ -204,6 +204,8 @@ func setupAPIRoutes(router fiber.Router, deps *apiDependencies) {
 	apiRouter.Get("/account/personal-info", accountHandler.GetPersonalInfo)
 	apiRouter.Patch("/account/personal-info", accountHandler.PatchPersonalInfo)
 	apiRouter.Post("/account/change-password", accountHandler.PostChangePassword)
+	apiRouter.Get("/account/2fa/methods", accountHandler.GetTwoFactorMethods)
+	apiRouter.Post("/account/2fa/methods/:method", accountHandler.PostTwoFactorMethods)
 }
 
 type webDependencies struct {
@@ -238,10 +240,8 @@ func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 	router.Get("/", accountHandler.GetAccountHomePage)
 	router.Get("/personal-info", accountHandler.GetPersonalInfo)
 	router.Get("/change-password", accountHandler.GetChangePassword)
-	router.Get("/2fa/settings", twofactorHandler.GetTwoFASettings)
-	router.Post("/2fa/settings", twofactorHandler.PostTwoFASettings)
-	router.Get("/2fa/totp/enroll", twofactorHandler.GetTOTPEnroll)
-	router.Post("/2fa/totp/enroll", twofactorHandler.PostTOTPEnroll)
+	router.Get("/two-factor", twofactorHandler.GetTwoFactor)
+	router.Get("/two-factor/totp/enroll", twofactorHandler.GetTOTPEnroll)
 	router.Get("/login", authHandler.GetLogin)
 	router.Post("/login", authHandler.PostLogin)
 	router.Post("/logout", authHandler.PostLogout)

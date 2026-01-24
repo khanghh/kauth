@@ -274,33 +274,6 @@ func (s *UserService) UpdatePersonalInfo(ctx context.Context, userID uint, param
 	return err
 }
 
-func (s *UserService) SetAuthFactorEnabled(ctx context.Context, userID uint, factorType AuthFactor, enabled bool) error {
-	if factorType == AuthFactorEmail {
-		emailFactor := model.UserFactor{
-			UserID:  userID,
-			Type:    string(factorType),
-			Enabled: enabled,
-		}
-		if err := s.userFactorRepo.Upsert(ctx, &emailFactor); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	if factorType == AuthFactorTOTP {
-		updates := map[string]interface{}{
-			query.ColUserFactorEnabled: enabled,
-		}
-		var mysqlErr *mysql.MySQLError
-		ret, err := s.userFactorRepo.Updates(ctx, updates, query.UserFactor.UserID.Eq(userID), query.UserFactor.Type.Eq(string(factorType)))
-		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 || ret.RowsAffected == 0 {
-			return ErrAuthFactorNotSetup
-		}
-		return err
-	}
-	return ErrAuthFactorNotSupported
-}
-
 func NewUserService(userRepo UserRepository, userOAuthRepo UserOAuthRepository, userFactorRepo UserFactorRepository, pendingUserRepo PendingUserRepository) *UserService {
 	return &UserService{
 		userRepo:        userRepo,

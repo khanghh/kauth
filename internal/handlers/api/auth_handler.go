@@ -89,7 +89,7 @@ func (h *AuthHandler) PostLogin(ctx *fiber.Ctx) error {
 	if req.ClientID != "" && req.ClientSecret != "" {
 		service, err = h.authorizeService.GetServiceByClientID(ctx.Context(), req.ClientID)
 		if err != nil || service.ClientSecret != req.ClientSecret {
-			return ErrUnAuthorized
+			return ErrUnauthorized
 		}
 	} else if err = captcha.Verify(ctx); err != nil {
 		return ErrCaptchaVerificationFailed

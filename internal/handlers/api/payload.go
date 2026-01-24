@@ -19,3 +19,10 @@ type userProfileResponse struct {
 	Country     string `json:"country,omitempty"`
 	TimeZone    string `json:"timeZone,omitempty"`
 }
+
+type twoFactorMethodResponse struct {
+	Type    string `json:"type"`
+	Enabled bool   `json:"enabled"`
+	Email   string `json:"email,omitempty"`
+	Phone   string `json:"phone,omitempty"`
+}

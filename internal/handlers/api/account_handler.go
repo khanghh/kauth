@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
+	"github.com/khanghh/kauth/internal/twofactor"
 	"github.com/khanghh/kauth/internal/users"
 	"github.com/khanghh/kauth/internal/validation"
 	"golang.org/x/crypto/bcrypt"
@@ -16,18 +17,25 @@ type AccountHandler struct {
 	twofactorService TwoFactorService
 }
 
+func NewAccountHandler(userService UserService, twofactorService TwoFactorService) *AccountHandler {
+	return &AccountHandler{
+		userService:      userService,
+		twofactorService: twofactorService,
+	}
+}
+
 // GetAccountInfo handles GET /api/account
 // Returns basic account information of the authenticated user.
 func (h *AccountHandler) GetAccountInfo(ctx *fiber.Ctx) error {
 	session := sessions.Get(ctx)
 	if session == nil || !session.IsAuthenticated() {
-		return ErrUnAuthorized
+		return ErrUnauthorized
 	}
 
 	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
 	if err != nil {
 		if err == users.ErrUserNotFound {
-			return ErrUnAuthorized
+			return ErrUnauthorized
 		}
 		return ErrInternalServer
 	}
@@ -48,12 +56,12 @@ func (h *AccountHandler) GetAccountInfo(ctx *fiber.Ctx) error {
 func (h *AccountHandler) GetPersonalInfo(ctx *fiber.Ctx) error {
 	session := sessions.Get(ctx)
 	if session == nil || !session.IsAuthenticated() {
-		return ErrUnAuthorized
+		return ErrUnauthorized
 	}
 	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
 	if err != nil {
 		if err == users.ErrUserNotFound {
-			return ErrUnAuthorized
+			return ErrUnauthorized
 		}
 	}
 
@@ -133,7 +141,7 @@ func validatePersonalInfoUpdates(req updatePersonalInfoRequest) (users.PersonalI
 func (h *AccountHandler) PatchPersonalInfo(ctx *fiber.Ctx) error {
 	session := sessions.Get(ctx)
 	if session == nil || !session.IsAuthenticated() {
-		return ErrUnAuthorized
+		return ErrUnauthorized
 	}
 	var req updatePersonalInfoRequest
 	if err := ctx.BodyParser(&req); err != nil {
@@ -148,7 +156,7 @@ func (h *AccountHandler) PatchPersonalInfo(ctx *fiber.Ctx) error {
 	err = h.userService.UpdatePersonalInfo(ctx.Context(), session.UserID, updates)
 	if err != nil {
 		if err == users.ErrUserNotFound {
-			return ErrUnAuthorized
+			return ErrUnauthorized
 		}
 		return ErrInternalServer
 	}
@@ -164,7 +172,7 @@ type changePasswordRequest struct {
 func (h *AccountHandler) PostChangePassword(ctx *fiber.Ctx) error {
 	session := sessions.Get(ctx)
 	if session == nil || !session.IsAuthenticated() {
-		return ErrUnAuthorized
+		return ErrUnauthorized
 	}
 
 	var req changePasswordRequest
@@ -179,7 +187,7 @@ func (h *AccountHandler) PostChangePassword(ctx *fiber.Ctx) error {
 	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
 	if err != nil {
 		if err == users.ErrUserNotFound {
-			return ErrUnAuthorized
+			return ErrUnauthorized
 		}
 		return ErrInternalServer
 	}
@@ -196,9 +204,71 @@ func (h *AccountHandler) PostChangePassword(ctx *fiber.Ctx) error {
 	return ctx.SendStatus(fiber.StatusOK)
 }
 
-func NewAccountHandler(userService UserService, twofactorService TwoFactorService) *AccountHandler {
-	return &AccountHandler{
-		userService:      userService,
-		twofactorService: twofactorService,
+func (h *AccountHandler) GetTwoFactorMethods(ctx *fiber.Ctx) error {
+	session := sessions.Get(ctx)
+	if session == nil || !session.IsAuthenticated() {
+		return ErrUnauthorized
 	}
+
+	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
+	if err != nil {
+		if err == users.ErrUserNotFound {
+			return ErrUnauthorized
+		}
+		return ErrInternalServer
+	}
+
+	factors, err := h.twofactorService.GetAllAuthFactors(ctx.Context(), session.UserID)
+	if err != nil {
+		return ErrInternalServer
+	}
+
+	methods := make([]twoFactorMethodResponse, 0, len(factors))
+	for _, factor := range factors {
+		method := twoFactorMethodResponse{
+			Type:    factor.Type,
+			Enabled: factor.Enabled,
+		}
+		if factor.Type == "email" {
+			method.Email = user.Email
+		} else if factor.Type == "sms" {
+			method.Phone = user.PhoneNumber
+		}
+		methods = append(methods, method)
+	}
+
+	return ctx.JSON(NewDataResponse(methods))
+}
+
+func (h *AccountHandler) PostTwoFactorMethods(ctx *fiber.Ctx) error {
+	method := ctx.Params("method")
+
+	session := sessions.Get(ctx)
+	if session == nil || !session.IsAuthenticated() {
+		return ErrUnauthorized
+	}
+
+	_, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
+	if err != nil {
+		return ErrUnauthorized
+	}
+
+	var req struct {
+		Enabled bool `json:"enabled"`
+	}
+	if err := ctx.BodyParser(&req); err != nil {
+		return ErrMissingParameters
+	}
+
+	err = h.twofactorService.SetAuthFactorEnabled(ctx.Context(), session.UserID, method, req.Enabled)
+	if err != nil {
+		if err == twofactor.ErrTOTPNotEnrolled {
+			return Err2FATOTPNotEnrolled
+		} else if err == twofactor.ErrAuthMethodNotSupported {
+			return Err2FAInvalidChallengeMethod
+		}
+		return err
+	}
+
+	return ctx.Redirect(ctx.OriginalURL(), fiber.StatusFound)
 }
