@@ -25,7 +25,6 @@
     <MobileNavMenu />
     <RecentActivitySection />
   </div>
-
 </template>
 
 <script setup lang="ts">

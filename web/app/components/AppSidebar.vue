@@ -76,7 +76,7 @@ const baseLinkClass =
   'flex items-center px-5 py-4 rounded-2xl text-base font-medium transition'
 
 const linkClass = (path: string) => {
-  const isActive = route.path === path
+  const isActive = route.path.startsWith(path)
   return [
     baseLinkClass,
     isActive

@@ -35,6 +35,7 @@ export default defineNuxtConfig({
         "/personal-info",
         "/change-password",
         "/two-factor",
+        "/two-factor/totp/enroll",
         "/connected-accounts",
         "/sessions",
         "/2fa/challenge",
