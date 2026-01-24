@@ -29,17 +29,22 @@
 
       <NuxtLink to="/change-password" :class="linkClass('/change-password')">
         <Icon name="fa-solid:key" class="mr-3" size="20" />
-        Change Password
+        Password
       </NuxtLink>
 
-      <NuxtLink to="/twofactor-settings" :class="linkClass('/twofactor-settings')">
-        <Icon name="fa7-solid:mobile-screen-button" class="mr-3" size="20" />
-        Two Factor Authentication
+      <NuxtLink to="/two-factor" :class="linkClass('/two-factor')">
+        <Icon name="fa7-solid:shield-halved" class="mr-3" size="20" />
+        Two-factor authentication
       </NuxtLink>
 
-      <NuxtLink to="/" :class="linkClass('/services')">
-        <Icon name="fa-solid:server" class="mr-3" size="20" />
-        Services
+      <NuxtLink to="/connected-accounts" :class="linkClass('/connected-accounts')">
+        <Icon name="fa-solid:link" class="mr-3" size="20" />
+        Connected accounts
+      </NuxtLink>
+
+      <NuxtLink to="/sessions" :class="linkClass('/sessions')">
+        <Icon name="fa-solid:laptop" class="mr-3" size="20" />
+        Active sessions
       </NuxtLink>
     </nav>
   </aside>

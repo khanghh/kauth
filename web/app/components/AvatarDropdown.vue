@@ -31,26 +31,22 @@
           <p class="text-sm text-gray-500 truncate">{{ user.email }}</p>
         </div>
 
-        <div class="py-2">
-          <a href="/personal-info"
-            class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-            <Icon name="fa7-solid:user" class="mr-3 text-gray-400" />
-            My Profile
-          </a>
-        </div>
+        <a href="/personal-info"
+          class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-800 transition-colors">
+          <Icon name="fa7-solid:user" class="mr-3 text-gray-400" />
+          My Profile
+        </a>
 
         <div class="border-t border-gray-100 my-2"></div>
 
-        <div class="px-4 py-3">
-          <form :action="logoutAction" method="POST">
-            <button
-              type="submit"
-              class="flex items-center w-full px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-              <Icon name="fa7-solid:right-from-bracket" class="mr-3" />
-              Log out
-            </button>
-          </form>
-        </div>
+        <form :action="logoutAction" method="POST">
+          <button
+            type="submit"
+            class="flex items-center w-full px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors">
+            <Icon name="fa7-solid:right-from-bracket" class="mr-3" />
+            Log out
+          </button>
+        </form>
       </div>
     </div>
   </div>

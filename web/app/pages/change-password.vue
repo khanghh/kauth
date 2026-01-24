@@ -1,8 +1,20 @@
 <template>
   <div class="max-w-4xl mx-auto">
     <div class="mb-8">
-      <h1 class="text-2xl font-bold text-gray-800 mb-2">Change Password</h1>
-      <p class="text-gray-600">Update your password to keep your account secure</p>
+      <div class="flex items-center mb-2">
+        <NuxtLink
+          to="/"
+          aria-label="Back"
+          class="md:hidden flex items-center mr-2">
+          <Icon name="fa7-solid:arrow-left" class="text-gray-700 w-8 h-8" />
+        </NuxtLink>
+        <h1 class="text-2xl font-bold text-gray-800 leading-none">
+          Change Password
+        </h1>
+      </div>
+      <p class="text-gray-600">
+        Update your password to keep your account secure
+      </p>
     </div>
 
     <div v-if="successMsg" class="mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-green-800">
@@ -20,6 +32,10 @@
     </div>
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-semibold text-gray-800">Change Password</h2>
+      </div>
+
       <form class="space-y-6" method="POST" @submit="onSubmit">
         <div>
           <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
@@ -117,32 +133,7 @@
           <p v-if="confirmPasswordError" class="mt-2 text-sm text-red-600">{{ confirmPasswordError }}</p>
         </div>
 
-        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div class="flex items-start">
-            <Icon name="fa7-solid:shield-halved" class="text-blue-500 mt-1 mr-3" />
-            <div>
-              <h3 class="font-medium text-blue-800 mb-2">Password Security Tips</h3>
-              <ul class="text-sm text-blue-700 space-y-1">
-                <li class="flex items-start">
-                  <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
-                  <span>Use a unique password that you don't use for other accounts</span>
-                </li>
-                <li class="flex items-start">
-                  <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
-                  <span>Consider using a password manager to generate and store secure passwords</span>
-                </li>
-                <li class="flex items-start">
-                  <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
-                  <span>Avoid using personal information like your name, birthdate, or common words</span>
-                </li>
-                <li class="flex items-start">
-                  <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
-                  <span>Change your password regularly for better security</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
+
 
         <div class="flex items-center justify-between pt-6 border-t border-gray-200">
           <div v-if="lastPasswordChange" class="text-sm text-gray-500">Last password change: {{ lastPasswordChange }}
@@ -165,6 +156,33 @@
           </div>
         </div>
       </form>
+    </div>
+
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6">
+      <div class="flex items-start">
+        <Icon name="fa7-solid:shield-halved" class="text-blue-500 mt-1 mr-3" />
+        <div>
+          <h3 class="font-medium text-blue-800 mb-2">Password Security Tips</h3>
+          <ul class="text-sm text-blue-700 space-y-1">
+            <li class="flex items-start">
+              <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+              <span>Use a unique password that you don't use for other accounts</span>
+            </li>
+            <li class="flex items-start">
+              <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+              <span>Consider using a password manager to generate and store secure passwords</span>
+            </li>
+            <li class="flex items-start">
+              <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+              <span>Avoid using personal information like your name, birthdate, or common words</span>
+            </li>
+            <li class="flex items-start">
+              <Icon name="fa-solid:check" class="mr-2 mt-0.5 text-xs" />
+              <span>Change your password regularly for better security</span>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </template>

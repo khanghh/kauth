@@ -1,8 +1,20 @@
 <template>
   <div class="max-w-4xl mx-auto">
     <div class="mb-8">
-      <h1 class="text-2xl font-bold text-gray-800 mb-2">Two-Factor Authentication</h1>
-      <p class="text-gray-600">Add an extra layer of security to your account</p>
+      <div class="flex items-center mb-2">
+        <NuxtLink
+          to="/"
+          aria-label="Back"
+          class="md:hidden flex items-center mr-2">
+          <Icon name="fa7-solid:arrow-left" class="text-gray-700 w-8 h-8" />
+        </NuxtLink>
+        <h1 class="text-2xl font-bold text-gray-800 leading-none">
+          Two-Factor Authentication
+        </h1>
+      </div>
+      <p class="text-gray-600">
+        Add an extra layer of security to your account
+      </p>
     </div>
 
     <div v-if="effectiveSuccessMsg" class="alert-box success">
