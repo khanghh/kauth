@@ -31,46 +31,20 @@
       </div>
     </div>
 
-    <div class="space-y-4">
-      <div class="service-card flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-white">
-        <div class="flex items-center">
-          <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-4">
-            <Icon name="fa7-brands:google" class="text-blue-600" />
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <div class="font-medium text-gray-800">Google</div>
-              <span
-                class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full inline-flex items-center">Connected</span>
-            </div>
-            <div class="text-sm text-gray-500">{{ email }}</div>
-          </div>
-        </div>
-        <div class="flex items-center space-x-2">
-          <button type="button" class="text-red-600 hover:text-red-800 text-sm font-medium"
-            @click="disconnectGoogle">
-            Disconnect
-          </button>
-        </div>
-      </div>
+    <div v-if="loading" class="flex items-center justify-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+    </div>
 
-      <div class="service-card flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-white">
-        <div class="flex items-center">
-          <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4">
-            <Icon name="fa7-brands:github" class="text-gray-800" />
-          </div>
-          <div>
-            <div class="font-medium text-gray-800">GitHub</div>
-            <div class="text-sm text-gray-500">Not connected</div>
-          </div>
-        </div>
-        <button
-          type="button"
-          class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 text-sm font-medium transition"
-          @click="connectGithub">
-          Connect
-        </button>
-      </div>
+    <div v-else class="space-y-4">
+      <OauthAccountCard
+        v-for="account in accounts"
+        :key="account.provider"
+        :account="account"
+        :icon-name="providerIcons[account.provider] || 'fa7-solid:link'"
+        :icon-class="providerColors[account.provider]?.text || 'text-gray-600'"
+        :processing="processing === account.provider"
+        @connect="handleConnect(account.provider)"
+        @disconnect="handleDisconnect(account.provider)" />
     </div>
 
     <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6">
@@ -92,8 +66,8 @@
 <style scoped></style>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import type { PersonalInfo } from '~/composables/useApi'
+import { onMounted, ref } from 'vue'
+import type { OAuthAccount } from '~/composables/useApi'
 import auth from '~/middlewares/auth'
 
 const api = useApi()
@@ -105,31 +79,95 @@ definePageMeta({
 
 useHead({ title: useSiteTitle('Connected Accounts') })
 
-const profile = ref<PersonalInfo>({} as PersonalInfo)
-
-onMounted(async () => {
-  try {
-    const data = await api.getPersonalInfo()
-    profile.value = data
-  } catch (err: any) {
-    if (err?.code === 401 || err?.statusCode === 401) return
-    showError(err?.message ?? 'Failed to fetch profile')
-  }
-})
-
-const email = computed(() => profile.value?.email ?? '')
-
+const accounts = ref<OAuthAccount[]>([])
+const loading = ref(true)
+const processing = ref<string | null>(null)
 const successMsg = ref('')
 const errorMsg = ref('')
+
+const providerIcons: Record<string, string> = {
+  google: 'fa7-brands:google',
+  facebook: 'fa7-brands:facebook',
+  apple: 'fa7-brands:apple',
+  microsoft: 'fa7-brands:microsoft',
+  discord: 'fa7-brands:discord',
+}
+
+const providerColors: Record<string, { text: string }> = {
+  google: { text: 'text-red-600' },
+  facebook: { text: 'text-blue-600' },
+  apple: { text: 'text-gray-800' },
+  microsoft: { text: 'text-blue-700' },
+  discord: { text: 'text-indigo-600' },
+}
+
+const allProviders = ['discord', 'google', 'facebook', 'apple', 'microsoft']
+
 const showSuccess = (msg: string) => { errorMsg.value = ''; successMsg.value = msg }
 const showError = (msg: string) => { successMsg.value = ''; errorMsg.value = msg }
 
-const disconnectGoogle = () => {
-  if (!confirm('Are you sure you want to disconnect your Google account? This may affect your ability to sign in.')) return
-  showSuccess('Google account disconnected. (mock)')
+const fetchAccounts = async () => {
+  try {
+    loading.value = true
+    const fetchedAccounts = await api.getOAuthAccounts()
+
+    const accountMap = new Map<string, OAuthAccount>()
+    fetchedAccounts.forEach(acc => accountMap.set(acc.provider, acc))
+
+    const allAccounts: OAuthAccount[] = []
+
+    // First, append all fetched (connected) accounts
+    fetchedAccounts.forEach(acc => {
+      if (acc.connected) {
+        allAccounts.push(acc)
+      }
+    })
+
+    // Then, append all not connected providers
+    allProviders.forEach(provider => {
+      if (!accountMap.has(provider)) {
+        allAccounts.push({
+          provider,
+          connected: false,
+          accountId: '',
+          displayName: '',
+          email: '',
+          picture: '',
+        })
+      }
+    })
+
+    accounts.value = allAccounts
+  } catch (err: any) {
+    showError(err?.message ?? 'Failed to fetch connected accounts')
+  } finally {
+    loading.value = false
+  }
 }
 
-const connectGithub = () => {
-  showSuccess('Redirecting to GitHub authorization... (mock)')
+onMounted(() => {
+  fetchAccounts()
+})
+
+const handleDisconnect = async (provider: string) => {
+  if (!confirm(`Are you sure you want to disconnect your ${provider} account? This may affect your ability to sign in.`)) return
+
+  try {
+    processing.value = provider
+    // TODO: Implement api.disconnectAccount when backend is ready
+    showSuccess(`${provider} account disconnected. (Mock)`)
+    await fetchAccounts()
+  } catch (err: any) {
+    showError(err?.message ?? `Failed to disconnect ${provider}`)
+  } finally {
+    processing.value = null
+  }
+}
+
+const handleConnect = (provider: string) => {
+  processing.value = provider
+  // Typically redirects to an OAuth endpoint
+  showSuccess(`Redirecting to ${provider} authorization... (Mock)`)
+  setTimeout(() => { processing.value = null }, 2000)
 }
 </script>

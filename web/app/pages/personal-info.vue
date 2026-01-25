@@ -356,7 +356,9 @@ const minBirthdayISO = computed(() => {
 const lastUpdatedText = ref('')
 const isSubmitting = ref(false)
 
-const onSubmit = () => {
+const onSubmit = async (e: Event) => {
+  e.preventDefault()
+
   const changes: PersonalInfoUpdate = {}
 
   if (form.fullName !== original.value.fullName) {
@@ -377,7 +379,7 @@ const onSubmit = () => {
 
   if (Object.keys(changes).length > 0) {
     isSubmitting.value = true
-    api.updatePersonalInfo(changes).then(() => {
+    await api.updatePersonalInfo(changes).then(() => {
       original.value = { ...form }
       const now = new Date()
       lastUpdatedText.value = `Last updated: ${now.toLocaleString()}`

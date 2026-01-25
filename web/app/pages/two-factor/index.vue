@@ -28,7 +28,7 @@
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
     </div>
 
-    <div v-else class="space-y-6">
+    <div v-else class="space-y-4">
       <TwofactorMethodCard
         title="Email Authentication"
         iconName="fa7-solid:envelope"

@@ -42,6 +42,15 @@ export interface TOTPSetup {
   enrollmentUrl: string
 }
 
+export interface OAuthAccount {
+  provider: string
+  accountId: string
+  displayName: string
+  email: string
+  picture: string
+  connected: boolean
+}
+
 export const useApi = () => {
   return {
     getCurrentUser: () => useHttpGet<UserInfo>('/api/account'),
@@ -71,6 +80,7 @@ export const useApi = () => {
       return useHttpPost('/api/account/2fa/totp/enroll', {
         body: { code }
       })
-    }
+    },
+    getOAuthAccounts: () => useHttpGet<OAuthAccount[]>('/api/account/oauth')
   }
 }

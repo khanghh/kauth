@@ -36,7 +36,7 @@
         <h2 class="text-lg font-semibold text-gray-800">Change Password</h2>
       </div>
 
-      <form class="space-y-6" method="POST" @submit="onSubmit">
+      <form class="space-y-6" @submit="onSubmit">
         <div>
           <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
           <div class="relative">

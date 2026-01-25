@@ -31,11 +31,17 @@
           <p class="text-sm text-gray-500 truncate">{{ user.email }}</p>
         </div>
 
-        <a href="/personal-info"
+        <NuxtLink href="/"
+          class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-800 transition-colors">
+          <Icon name="fa7-solid:house" class="mr-3 text-gray-400" />
+          Home
+        </NuxtLink>
+
+        <NuxtLink href="/personal-info"
           class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-800 transition-colors">
           <Icon name="fa7-solid:user" class="mr-3 text-gray-400" />
           My Profile
-        </a>
+        </NuxtLink>
 
         <div class="border-t border-gray-100 my-2"></div>
 

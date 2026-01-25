@@ -35,7 +35,12 @@
               class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
               placeholder="Enter your password">
           </div>
-          <div class="flex justify-end mt-1">
+          <div class="flex justify-between items-center mt-2">
+            <label class="flex items-center">
+              <input type="checkbox" name="remember" value="true"
+                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+              <span class="ml-2 text-sm text-gray-700">Remember me</span>
+            </label>
             <a href="/forgot-password" class="text-sm text-blue-600 hover:text-blue-500">Forgot password?</a>
           </div>
         </div>
