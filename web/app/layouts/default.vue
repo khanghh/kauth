@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center p-4 antialiased">
-    <main class="w-full max-w-md sm:max-w-lg bg-white">
+  <div class="bg-gray-50 min-h-screen flex items-center justify-center p-4 font-sans antialiased">
+    <main class="w-full max-w-md sm:max-w-lg">
       <slot></slot>
     </main>
   </div>

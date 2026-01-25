@@ -103,9 +103,11 @@
 </template>
 
 <script setup lang="ts">
+const config = useRuntimeConfig().public
+const turnstileSiteKey = config.turnstileSiteKey
+
 const errorMsg = useServerVar<string>('errorMsg', '')
 const identifier = useServerVar<string>('identifier', '')
-const turnstileSiteKey = useServerVar<string>('turnstileSiteKey', '{{.turnstileSiteKey}}')
 
 const googleOAuthURL = useServerVar<string>('googleOAuthURL', '')
 const facebookOAuthURL = useServerVar<string>('facebookOAuthURL', '')
@@ -114,10 +116,7 @@ const microsoftOAuthURL = useServerVar<string>('microsoftOAuthURL', '')
 const appleOAuthURL = useServerVar<string>('appleOAuthURL', '')
 
 useHead({
-  title: useSiteTitle('Đăng nhập'),
-  bodyAttrs: {
-    class: 'bg-gray-50'
-  },
+  title: useSiteTitle('Login'),
   script: [
     {
       src: 'https://challenges.cloudflare.com/turnstile/v0/api.js',

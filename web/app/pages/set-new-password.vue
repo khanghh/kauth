@@ -16,29 +16,31 @@
         {{ errorMsg }}
       </div>
 
-      <form id="setPasswordForm" method="POST" class="space-y-4 text-left">
+      <form id="setPasswordForm" method="POST" class="space-y-4 text-left" @submit="onSubmit">
         <div>
           <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Create password</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
               <Icon name="fa7-solid:lock" />
             </span>
-            <input type="password" id="newPassword" name="newPassword" autocomplete="new-password" required
+            <input v-model="newPassword" :type="showPassword ? 'text' : 'password'" id="newPassword" name="newPassword"
+              autocomplete="new-password" required
               class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
-              placeholder="Create a secure password">
-            <span class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
-              <Icon name="fa7-solid:eye" />
+              placeholder="Create a secure password" @input="onPasswordInput">
+            <span class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
+              @click="toggleShowPassword">
+              <Icon :name="showPassword ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" />
             </span>
           </div>
 
-          <div class="mt-2 hidden" id="passwordStrengthContainer">
+          <div class="mt-2" :class="{ hidden: !showStrength }" id="passwordStrengthContainer">
             <div class="flex bg-gray-200 rounded-full overflow-hidden h-1.5">
-              <div id="passwordStrength" class="strength-bar strength-weak"></div>
+              <div :class="strengthClass" id="passwordStrength"></div>
             </div>
-            <p id="passwordStrengthText" class="text-xs mt-1 text-gray-500">Password strength: Weak</p>
+            <p id="passwordStrengthText" :class="strengthTextClass">{{ strengthText }}</p>
           </div>
-          <p id="passwordError" :class="['mt-1 text-sm text-red-600', { hidden: !passwordError }]">{{ passwordError }}
-          </p>
+          <p id="passwordError" class="mt-1 text-sm text-red-600" v-if="clientPasswordError || serverPasswordError">{{
+            clientPasswordError || serverPasswordError }}</p>
         </div>
 
         <div>
@@ -47,17 +49,19 @@
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
               <Icon name="fa7-solid:lock" />
             </span>
-            <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required
+            <input v-model="confirmPassword" :type="showConfirm ? 'text' : 'password'" id="confirm_password"
+              name="confirm_password" autocomplete="new-password" required
               class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
-              placeholder="Confirm your password">
-            <span class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
-              <Icon name="fa7-solid:eye" />
+              placeholder="Confirm your password" @input="onConfirmInput">
+            <span class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
+              @click="toggleShowConfirm">
+              <Icon :name="showConfirm ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" />
             </span>
           </div>
-          <p id="confirmPasswordError" class="mt-1 text-sm text-red-600 hidden"></p>
+          <p id="confirmPasswordError" class="mt-1 text-sm text-red-600" v-if="clientConfirmError">{{ clientConfirmError
+          }}</p>
         </div>
 
-        <input type="hidden" name="_csrf" :value="csrfToken">
         <div v-if="turnstileSiteKey" class="cf-turnstile text-center" :data-sitekey="turnstileSiteKey"></div>
         <div class="pt-2">
           <button type="submit"
@@ -83,132 +87,8 @@
     </footer>
   </div>
 
-  <script v-pre>
-    document.addEventListener('DOMContentLoaded', function () {
-      const form = document.getElementById('setPasswordForm');
-      const passwordInput = document.getElementById('newPassword');
-      const confirmPasswordInput = document.getElementById('confirm_password');
-      const passwordStrength = document.getElementById('passwordStrength');
-      const passwordStrengthText = document.getElementById('passwordStrengthText');
-      const passwordStrengthContainer = document.getElementById('passwordStrengthContainer');
-      const passwordError = document.getElementById('passwordError')
-      const confirmPasswordError = document.getElementById('confirmPasswordError')
 
-      // Password visibility toggle
-      document.querySelectorAll('.password-toggle').forEach(toggle => {
-        toggle.addEventListener('click', function () {
-          const input = this.parentElement.querySelector('input');
-          const icon = this.querySelector('i');
-
-          if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-          } else {
-            input.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-          }
-        });
-      });
-
-      // Password strength indicator
-      passwordInput.addEventListener('input', function () {
-        const password = this.value;
-        let strength = 0;
-        let message = 'Password strength: ';
-        passwordError.classList.add('hidden')
-        confirmPasswordError.classList.add('hidden')
-
-        // Check password length
-        if (password.length >= 8) strength++;
-
-        // Check for lowercase letters
-        if (/[a-z]/.test(password)) strength++;
-
-        // Check for uppercase letters
-        if (/[A-Z]/.test(password)) strength++;
-
-        // Check for numbers
-        if (/[0-9]/.test(password)) strength++;
-
-        // Check for special characters
-        if (/[^A-Za-z0-9]/.test(password)) strength++;
-
-        // Update strength indicator
-        if (password.length > 0) {
-          passwordStrengthContainer.classList.remove('hidden');
-        } else {
-          passwordStrengthContainer.classList.add('hidden');
-        }
-        if (password.length === 0) {
-          passwordStrength.className = 'strength-bar';
-          passwordStrengthText.textContent = 'Enter a password';
-        } else if (strength <= 2) {
-          passwordStrength.className = 'strength-bar strength-weak';
-          passwordStrengthText.textContent = message + 'Weak';
-          passwordStrengthText.className = 'text-xs mt-1 text-red-500';
-        } else if (strength <= 4) {
-          passwordStrength.className = 'strength-bar strength-medium';
-          passwordStrengthText.textContent = message + 'Medium';
-          passwordStrengthText.className = 'text-xs mt-1 text-yellow-500';
-        } else {
-          passwordStrength.className = 'strength-bar strength-strong';
-          passwordStrengthText.textContent = message + 'Strong';
-          passwordStrengthText.className = 'text-xs mt-1 text-green-500';
-        }
-
-      });
-
-      confirmPasswordInput.addEventListener('input', function () {
-        const password = passwordInput.value
-        const confirmPassword = this.value
-        if (password !== confirmPassword) {
-          confirmPasswordError.textContent = 'Passwords do not match.';
-          confirmPasswordError.classList.remove('hidden');
-        } else {
-          confirmPasswordError.classList.add('hidden');
-        }
-      })
-
-      // Form validation
-      form.addEventListener('submit', function (e) {
-        let valid = true;
-
-        // Clear old errors
-        passwordError.classList.add('hidden');
-
-        // Password check
-        const password = document.getElementById('password').value;
-        if (password.length < 6) {
-          passwordError.textContent = 'Password must be at least 6 characters.';
-          passwordError.classList.remove('hidden');
-          passwordStrengthContainer.classList.add('hidden');
-          valid = false;
-        }
-
-        // Confirm password check
-        const confirmPassword = document.getElementById('confirm_password').value;
-        if (password !== confirmPassword) {
-          confirmPasswordError.textContent = 'Passwords do not match.';
-          confirmPasswordError.classList.remove('hidden');
-          valid = false;
-        }
-
-        // If invalid, stop form submission
-        if (!valid) e.preventDefault();
-      });
-    });
-
-  </script>
 </template>
-
-<script setup lang="ts">
-const errorMsg = useServerVar<string>('errorMsg', '')
-const passwordError = useServerVar<string>('passwordError', '')
-const csrfToken = useServerVar<string>('csrfToken', '')
-const turnstileSiteKey = useServerVar<string>('turnstileSiteKey', '')
-</script>
 
 <style scoped>
 .avatar {
@@ -254,3 +134,98 @@ const turnstileSiteKey = useServerVar<string>('turnstileSiteKey', '')
   width: 100%;
 }
 </style>
+
+
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const config = useRuntimeConfig().public
+const turnstileSiteKey = config.turnstileSiteKey
+
+const errorMsg = useServerVar<string>('errorMsg', '')
+const serverPasswordError = useServerVar<string>('passwordError', '')
+
+const newPassword = ref('')
+const confirmPassword = ref('')
+const showPassword = ref(false)
+const showConfirm = ref(false)
+const showStrength = ref(false)
+const strengthClass = ref('strength-bar')
+const strengthText = ref('Enter a password')
+const strengthTextClass = ref('text-xs mt-1 text-gray-500')
+const clientPasswordError = ref('')
+const clientConfirmError = ref('')
+
+function evaluateStrength(pw: string) {
+  let strength = 0
+  if (pw.length >= 8) strength++
+  if (/[a-z]/.test(pw)) strength++
+  if (/[A-Z]/.test(pw)) strength++
+  if (/[0-9]/.test(pw)) strength++
+  if (/[^A-Za-z0-9]/.test(pw)) strength++
+
+  if (pw.length > 0) {
+    showStrength.value = true
+  } else {
+    showStrength.value = false
+  }
+
+  if (pw.length === 0) {
+    strengthClass.value = 'strength-bar'
+    strengthText.value = 'Enter a password'
+    strengthTextClass.value = 'text-xs mt-1 text-gray-500'
+  } else if (strength <= 2) {
+    strengthClass.value = 'strength-bar strength-weak'
+    strengthText.value = 'Password strength: Weak'
+    strengthTextClass.value = 'text-xs mt-1 text-red-500'
+  } else if (strength <= 4) {
+    strengthClass.value = 'strength-bar strength-medium'
+    strengthText.value = 'Password strength: Medium'
+    strengthTextClass.value = 'text-xs mt-1 text-yellow-500'
+  } else {
+    strengthClass.value = 'strength-bar strength-strong'
+    strengthText.value = 'Password strength: Strong'
+    strengthTextClass.value = 'text-xs mt-1 text-green-500'
+  }
+}
+
+function onPasswordInput() {
+  clientPasswordError.value = ''
+  clientConfirmError.value = ''
+  evaluateStrength(newPassword.value)
+}
+
+function onConfirmInput() {
+  clientConfirmError.value = ''
+  if (newPassword.value !== confirmPassword.value) {
+    clientConfirmError.value = 'Passwords do not match.'
+  }
+}
+
+function toggleShowPassword() { showPassword.value = !showPassword.value }
+function toggleShowConfirm() { showConfirm.value = !showConfirm.value }
+
+function onSubmit(e: Event) {
+  e.preventDefault()
+  clientPasswordError.value = ''
+  clientConfirmError.value = ''
+
+  let valid = true
+  if (newPassword.value.length < 6) {
+    clientPasswordError.value = 'Password must be at least 6 characters.'
+    showStrength.value = false
+    valid = false
+  }
+  if (newPassword.value !== confirmPassword.value) {
+    clientConfirmError.value = 'Passwords do not match.'
+    valid = false
+  }
+
+  if (!valid) return
+
+  // submit the native form
+  const form = (e.target as HTMLFormElement)
+  form.submit()
+}
+
+</script>

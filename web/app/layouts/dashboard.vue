@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-50 min-h-screen font-sans">
+  <div class="bg-gray-50 min-h-screen font-sans antialiased">
     <div class="flex flex-col md:flex-row min-h-screen">
       <AppSidebar class="hidden md:block" />
       <!-- Main Content -->

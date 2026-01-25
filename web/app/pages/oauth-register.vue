@@ -89,7 +89,6 @@
           </div>
         </div>
 
-        <input type="hidden" name="_csrf" :value="csrfToken">
         <div v-if="turnstileSiteKey" class="cf-turnstile text-center" :data-sitekey="turnstileSiteKey"></div>
         <div class="pt-2">
           <button type="submit"
@@ -247,6 +246,9 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const config = useRuntimeConfig().public
+const turnstileSiteKey = config.turnstileSiteKey
+
 const siteName = useServerVar<string>('siteName', '')
 const picture = useServerVar<string>('picture', '')
 const fullName = useServerVar<string>('fullName', '')
@@ -258,12 +260,14 @@ const username = useServerVar<string>('username', '')
 const usernameError = useServerVar<string>('usernameError', '')
 const passwordError = useServerVar<string>('passwordError', '')
 
-const csrfToken = useServerVar<string>('csrfToken', '')
-const turnstileSiteKey = useServerVar<string>('turnstileSiteKey', '')
-
 useHead({
-  title: siteName.value ? `Complete Your Registration - ${siteName.value}` : 'Complete Your Registration',
-  script: [{ src: 'https://challenges.cloudflare.com/turnstile/v0/api.js', defer: true }],
+  title: useSiteTitle('Complete Your Registration'),
+  script: [
+    {
+      src: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
+      defer: true
+    }
+  ]
 })
 </script>
 

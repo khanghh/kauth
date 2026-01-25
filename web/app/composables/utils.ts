@@ -5,24 +5,25 @@ export function useSiteTitle(...subTitles: string[]) {
     .filter(Boolean)
     .join(' - ')
 }
-
 export function useServerVar<T>(key: string, defaultValue: T): Ref<T> {
   const nuxtApp = useNuxtApp()
+  const state = ref<T>(defaultValue)
 
-  // Inject template variable value for the client to read during hydration.
-  // On the server we *never* want to treat unresolved placeholders as truthy values.
   if (import.meta.server) {
     nuxtApp.payload.data ||= {}
     nuxtApp.payload.data[`s:${key}`] = `{{.${key}}}`
-    return ref(defaultValue) as Ref<T>
+    return state as Ref<T>
   }
 
-  const raw = nuxtApp.payload.data?.[`s:${key}`]
-  const parsed = parseServerVar(raw, defaultValue)
-  return ref(parsed) as Ref<T>
+  onMounted(() => {
+    const raw = nuxtApp.payload.data?.[`s:${key}`]
+    state.value = parseServerVar(raw, defaultValue)
+  })
+
+  return state as Ref<T>
 }
 
-function parseServerVar<T>(raw: unknown, defaultValue: T): T {
+export function parseServerVar<T>(raw: unknown, defaultValue: T): T {
   if (raw == null) return defaultValue
 
   if (typeof raw !== 'string') return raw as T

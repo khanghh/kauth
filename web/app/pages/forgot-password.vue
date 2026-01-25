@@ -1,14 +1,15 @@
 <template>
   <div class="bg-white shadow-lg rounded-2xl overflow-hidden">
     <div class="px-6 sm:px-10 py-10">
-      <div v-if="emailSent" class="text-center mt-6">
-        <div class="w-24 h-24 mx-auto bg-blue-100 flex items-center justify-center rounded-full mb-6">
-          <Icon name="fa7-solid:envelope-open-text" class="text-blue-600 text-5xl" aria-hidden="true" />
+      <div v-if="emailSent">
+        <div class="text-center mb-6">
+          <img src="/images/logo.png" alt="Logo" class="h-16 mx-auto mb-4 object-contain">
+          <h1 class="text-3xl font-bold text-gray-800 mb-4">Reset Link Sent</h1>
+          <p class="text-gray-600 mb-4">
+            We've sent a password reset link to your email address. Please check your inbox and follow the
+            instructions.
+          </p>
         </div>
-        <h1 class="text-3xl font-bold text-gray-800 mb-4">Reset Link Sent</h1>
-        <p class="text-gray-600 mb-4">
-          We've sent a password reset link to your email address. Please check your inbox and follow the instructions.
-        </p>
         <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
           <a href="/login"
             class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200">
@@ -23,7 +24,8 @@
           <img src="/images/logo.png" alt="Logo" class="h-16 mx-auto mb-4 object-contain">
           <h1 class="text-3xl font-bold text-gray-800 mb-4">Forgot Password?</h1>
           <p class="text-gray-600 mt-2">
-            Enter your username and the email address associated with your account. We'll send you a link to reset your
+            Enter your username and the email address associated with your account. We'll send you a link to reset
+            your
             password.
           </p>
         </div>
@@ -58,7 +60,7 @@
             </div>
           </div>
 
-          <div v-if="turnstileSiteKey" class="cf-turnstile text-center" :data-sitekey="turnstileSiteKey"></div>
+          <div class="cf-turnstile text-center" :data-sitekey="turnstileSiteKey"></div>
           <div class="pt-2">
             <button type="submit"
               class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
@@ -85,7 +87,20 @@
 </template>
 
 <script setup lang="ts">
+const config = useRuntimeConfig().public
+const turnstileSiteKey = config.turnstileSiteKey
+
 const emailSent = useServerVar<boolean>('emailSent', false)
-const errorMsg = useServerVar<string>('errorMsg', '')
-const turnstileSiteKey = useServerVar<string>('turnstileSiteKey', '')
+const errorMsg = useServerVar<boolean>('errorMsg', false)
+
+useHead({
+  title: useSiteTitle('Forgot Password'),
+  script: [
+    {
+      src: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
+      defer: true
+    }
+  ]
+})
+
 </script>

@@ -100,7 +100,6 @@
           </div>
         </div>
 
-        <input type="hidden" name="_csrf" :value="csrfToken">
         <div v-if="turnstileSiteKey" class="cf-turnstile text-center" :data-sitekey="turnstileSiteKey"></div>
         <div class="pt-2">
           <button type="submit"
@@ -121,11 +120,56 @@
   </div>
 </template>
 
-<script setup lang="ts">
-const errorMsg = useServerVar<string>('errorMsg', '')
+<style scoped>
+.avatar {
+  transition: all 0.3s ease;
+}
 
-const csrfToken = useServerVar<string>('csrfToken', '')
-const turnstileSiteKey = useServerVar<string>('turnstileSiteKey', '')
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.form-input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.password-toggle {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.password-toggle:hover {
+  color: #3b82f6;
+}
+
+.strength-bar {
+  height: 5px;
+  border-radius: 3px;
+  transition: width 0.3s, background-color 0.3s;
+}
+
+.strength-weak {
+  background-color: #ef4444;
+  width: 33%;
+}
+
+.strength-medium {
+  background-color: #f59e0b;
+  width: 66%;
+}
+
+.strength-strong {
+  background-color: #10b981;
+  width: 100%;
+}
+</style>
+
+<script setup lang="ts">
+const config = useRuntimeConfig().public
+const turnstileSiteKey = config.turnstileSiteKey
+
+const errorMsg = useServerVar<string>('errorMsg', '')
 
 const formEl = ref<HTMLFormElement | null>(null)
 
@@ -238,49 +282,15 @@ const onSubmit = (e: Event) => {
 
   formEl.value?.submit()
 }
+
+
+useHead({
+  title: useSiteTitle('Login'),
+  script: [
+    {
+      src: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
+      defer: true
+    }
+  ]
+})
 </script>
-
-<style scoped>
-.avatar {
-  transition: all 0.3s ease;
-}
-
-.avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.form-input:focus {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-}
-
-.password-toggle {
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.password-toggle:hover {
-  color: #3b82f6;
-}
-
-.strength-bar {
-  height: 5px;
-  border-radius: 3px;
-  transition: width 0.3s, background-color 0.3s;
-}
-
-.strength-weak {
-  background-color: #ef4444;
-  width: 33%;
-}
-
-.strength-medium {
-  background-color: #f59e0b;
-  width: 66%;
-}
-
-.strength-strong {
-  background-color: #10b981;
-  width: 100%;
-}
-</style>

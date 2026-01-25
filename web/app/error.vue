@@ -74,7 +74,7 @@ import type { NuxtError } from '#app'
 
 const props = defineProps<{ error: NuxtError }>()
 
-const config = useRuntimeConfig()
+const config = useRuntimeConfig().public
 const contactLink = config.contactLink as string || '#'
 
 const goHome = () => {

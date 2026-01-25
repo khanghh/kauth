@@ -23,7 +23,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       siteName: "{{.siteName}}",
-      contactLink: "{{.contactLink}}"
+      contactLink: "{{.contactLink}}",
+      turnstileSiteKey: "{{.turnstileSiteKey}}"
     }
   },
   nitro: {
@@ -38,6 +39,8 @@ export default defineNuxtConfig({
         "/two-factor/totp/enroll",
         "/connected-accounts",
         "/sessions",
+        "/verify-email",
+        "/forgot-password",
         "/2fa/challenge",
         "/2fa/otp/verify",
         "/2fa/totp/verify",
