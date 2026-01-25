@@ -47,4 +47,5 @@ type UserService interface {
 	UpdatePassword(ctx context.Context, userID uint, newPassword string) error
 	UpdatePersonalInfo(ctx context.Context, userID uint, updates users.PersonalInfoUpdate) error
 	GetAuthFactors(ctx context.Context, userID uint) ([]*model.UserFactor, error)
+	UnlinkOAuthAccount(ctx context.Context, userID uint, provider string) error
 }

@@ -193,22 +193,24 @@ type apiDependencies struct {
 	authorizeService *auth.AuthorizeService
 	userService      *users.UserService
 	twoFactorService *twofactor.TwoFactorService
+	oauthProviders   []oauth.OAuthProvider
 }
 
 func setupAPIRoutes(router fiber.Router, deps *apiDependencies) {
 	serviceValidateHandler := api.NewServiceValidateHandler(deps.authorizeService, deps.userService, deps.twoFactorService)
-	accountHandler := api.NewAccountHandler(deps.userService, deps.twoFactorService)
+	accountHandler := api.NewAccountHandler(deps.userService, deps.twoFactorService, deps.oauthProviders)
 	apiRouter := router.Group("/api")
 	apiRouter.Post("/serviceValidate", serviceValidateHandler.PostServiceValidate)
 	apiRouter.Get("/account", accountHandler.GetAccountInfo)
 	apiRouter.Get("/account/personal-info", accountHandler.GetPersonalInfo)
 	apiRouter.Patch("/account/personal-info", accountHandler.PatchPersonalInfo)
 	apiRouter.Post("/account/change-password", accountHandler.PostChangePassword)
-	apiRouter.Get("/account/oauth", accountHandler.GetOAuthAccounts)
 	apiRouter.Get("/account/2fa", accountHandler.GetTwoFactorMethods)
 	apiRouter.Patch("/account/2fa/:method", accountHandler.PatchTwoFactorMethod)
 	apiRouter.Get("/account/2fa/totp/enroll", accountHandler.GetTwoFactorTOTPEnroll)
 	apiRouter.Post("/account/2fa/totp/enroll", accountHandler.PostTwoFactorTOTPEnroll)
+	apiRouter.Get("/account/oauth", accountHandler.GetOAuthAccounts)
+	apiRouter.Delete("/account/oauth/:provider", accountHandler.DeleteOAuthAccount)
 }
 
 type webDependencies struct {
@@ -349,6 +351,7 @@ func run(ctx *cli.Context) error {
 		authorizeService: authorizeService,
 		userService:      userService,
 		twoFactorService: twoFactorService,
+		oauthProviders:   oauthProviders,
 	})
 
 	if !config.APIOnly {

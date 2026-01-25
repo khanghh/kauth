@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
+	"github.com/khanghh/kauth/internal/oauth"
 	"github.com/khanghh/kauth/internal/render"
 	"github.com/khanghh/kauth/internal/twofactor"
 	"github.com/khanghh/kauth/internal/users"
@@ -24,12 +25,14 @@ const (
 type AccountHandler struct {
 	userService      UserService
 	twofactorService TwoFactorService
+	oauthProviders   []oauth.OAuthProvider
 }
 
-func NewAccountHandler(userService UserService, twofactorService TwoFactorService) *AccountHandler {
+func NewAccountHandler(userService UserService, twofactorService TwoFactorService, oauthProviders []oauth.OAuthProvider) *AccountHandler {
 	return &AccountHandler{
 		userService:      userService,
 		twofactorService: twofactorService,
+		oauthProviders:   oauthProviders,
 	}
 }
 
@@ -395,6 +398,7 @@ type OAuthAccountResponse struct {
 	Email       string `json:"email"`
 	Picture     string `json:"picture"`
 	Connected   bool   `json:"connected"`
+	ConnectURL  string `json:"connectUrl,omitempty"`
 }
 
 func (h *AccountHandler) GetOAuthAccounts(ctx *fiber.Ctx) error {
@@ -408,16 +412,56 @@ func (h *AccountHandler) GetOAuthAccounts(ctx *fiber.Ctx) error {
 		return ErrInternalServer
 	}
 
-	response := make([]OAuthAccountResponse, 0, len(userOAuths))
+	connectedByProvider := make(map[string]OAuthAccountResponse, len(userOAuths))
 	for _, acc := range userOAuths {
-		response = append(response, OAuthAccountResponse{
+		if _, exists := connectedByProvider[acc.Provider]; exists {
+			continue
+		}
+		connectedByProvider[acc.Provider] = OAuthAccountResponse{
 			Provider:    acc.Provider,
 			AccountID:   acc.AccountID,
 			DisplayName: acc.DisplayName,
 			Email:       acc.Email,
 			Picture:     acc.Picture,
 			Connected:   true,
+		}
+	}
+
+	response := make([]OAuthAccountResponse, 0, len(h.oauthProviders))
+	for _, provider := range h.oauthProviders {
+		name := provider.Name()
+		if acc, ok := connectedByProvider[name]; ok {
+			response = append(response, acc)
+			continue
+		}
+		response = append(response, OAuthAccountResponse{
+			Provider:   name,
+			Connected:  false,
+			ConnectURL: provider.GetAuthCodeURL(""),
 		})
 	}
+
 	return ctx.JSON(NewDataResponse(response))
+}
+
+func (h *AccountHandler) DeleteOAuthAccount(ctx *fiber.Ctx) error {
+	session := sessions.Get(ctx)
+	if session == nil || !session.IsAuthenticated() {
+		return ErrUnauthorized
+	}
+	provider := ctx.Params("provider")
+	if provider != oauth.OAuthProviderDiscord &&
+		provider != oauth.OAuthProviderGoogle &&
+		provider != oauth.OAuthProviderFacebook &&
+		provider != oauth.OAuthProviderApple {
+		return ErrInvalidOAuthProvider
+	}
+	err := h.userService.UnlinkOAuthAccount(ctx.Context(), session.UserID, provider)
+	if err != nil {
+		if err == users.ErrOAuthAccountNotFound {
+			return ErrOAuthProviderNotConnected
+		}
+		return ErrInternalServer
+	}
+	return ctx.SendStatus(fiber.StatusOK)
 }

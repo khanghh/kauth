@@ -278,6 +278,17 @@ func (s *UserService) GetUserOAuths(ctx context.Context, userID uint) ([]*model.
 	return s.userOAuthRepo.Find(ctx, query.UserOAuth.UserID.Eq(userID))
 }
 
+func (s *UserService) UnlinkOAuthAccount(ctx context.Context, userID uint, provider string) error {
+	ok, err := s.userOAuthRepo.Delete(ctx, query.UserOAuth.UserID.Eq(userID), query.UserOAuth.Provider.Eq(provider))
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return ErrOAuthAccountNotFound
+	}
+	return nil
+}
+
 func NewUserService(userRepo UserRepository, userOAuthRepo UserOAuthRepository, userFactorRepo UserFactorRepository, pendingUserRepo PendingUserRepository) *UserService {
 	return &UserService{
 		userRepo:        userRepo,

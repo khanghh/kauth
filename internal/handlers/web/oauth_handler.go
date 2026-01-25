@@ -68,7 +68,7 @@ func (h *OAuthHandler) handleOAuthLogin(ctx *fiber.Ctx, userOAuth *model.UserOAu
 }
 
 func (h *OAuthHandler) handleOAuthLink(ctx *fiber.Ctx, userID uint, userOAuth *model.UserOAuth) error {
-	return nil
+	return ctx.Redirect("/connected-accounts")
 }
 
 func (h *OAuthHandler) redirectRegisterOAuth(ctx *fiber.Ctx, userOAuth *model.UserOAuth) error {
@@ -119,12 +119,10 @@ func (h *OAuthHandler) GetOAuthCallback(ctx *fiber.Ctx) error {
 	}
 
 	session := sessions.Get(ctx)
-	if userOAuth.UserID != 0 {
-		return h.handleOAuthLogin(ctx, userOAuth)
-	}
-
 	if session.IsAuthenticated() {
 		return h.handleOAuthLink(ctx, session.UserID, userOAuth)
+	} else if userOAuth.UserID != 0 {
+		return h.handleOAuthLogin(ctx, userOAuth)
 	}
 
 	return h.redirectRegisterOAuth(ctx, userOAuth)

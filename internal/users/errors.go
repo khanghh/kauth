@@ -12,4 +12,5 @@ var (
 	ErrInvalidVerificationToken = errors.New("invalid verification token")
 	ErrAuthFactorNotSupported   = errors.New("authentication factor not supported")
 	ErrAuthFactorNotSetup       = errors.New("authentication factor not set up")
+	ErrOAuthAccountNotFound     = errors.New("oauth account not found")
 )

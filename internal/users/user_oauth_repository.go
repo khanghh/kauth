@@ -6,15 +6,16 @@ import (
 	"github.com/khanghh/kauth/model"
 	"github.com/khanghh/kauth/model/query"
 	"gorm.io/gen"
-	"gorm.io/gen/field"
 	"gorm.io/gorm/clause"
 )
 
 type UserOAuthRepository interface {
 	WithTx(tx *query.Query) UserOAuthRepository
 	First(ctx context.Context, conds ...gen.Condition) (*model.UserOAuth, error)
+	Take(ctx context.Context, conds ...gen.Condition) (*model.UserOAuth, error)
 	Upsert(ctx context.Context, userOAuth *model.UserOAuth) error
 	Find(ctx context.Context, conds ...gen.Condition) ([]*model.UserOAuth, error)
+	Delete(ctx context.Context, conds ...gen.Condition) (bool, error)
 	CreateIfNotExists(ctx context.Context, userOAuth *model.UserOAuth) (*model.UserOAuth, error)
 }
 
@@ -24,6 +25,10 @@ type userOAuthRepository struct {
 
 func (r *userOAuthRepository) First(ctx context.Context, conds ...gen.Condition) (*model.UserOAuth, error) {
 	return r.query.UserOAuth.WithContext(ctx).Where(conds...).First()
+}
+
+func (r *userOAuthRepository) Take(ctx context.Context, conds ...gen.Condition) (*model.UserOAuth, error) {
+	return r.query.UserOAuth.WithContext(ctx).Where(conds...).Take()
 }
 
 func (r *userOAuthRepository) WithTx(tx *query.Query) UserOAuthRepository {
@@ -38,17 +43,36 @@ func (r *userOAuthRepository) Upsert(ctx context.Context, userOAuth *model.UserO
 }
 
 func (r *userOAuthRepository) CreateIfNotExists(ctx context.Context, userOAuth *model.UserOAuth) (*model.UserOAuth, error) {
-	return r.query.UserOAuth.WithContext(ctx).
-		Where(
-			query.UserOAuth.Provider.Eq(userOAuth.Provider),
-			query.UserOAuth.ProfileID.Eq(userOAuth.AccountID),
-		).
-		Attrs(field.Attrs(userOAuth)).
-		FirstOrCreate()
+	err := r.query.UserOAuth.WithContext(ctx).
+		Clauses(clause.OnConflict{
+			DoUpdates: clause.Assignments(map[string]interface{}{
+				query.ColUserOAuthDisplayName: userOAuth.DisplayName,
+				query.ColUserOAuthEmail:       userOAuth.Email,
+				query.ColUserOAuthPicture:     userOAuth.Picture,
+				query.ColUserOAuthDeletedAt:   nil,
+			}),
+		}).
+		Create(userOAuth)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.Take(ctx, r.query.UserOAuth.UserID.Eq(userOAuth.UserID))
 }
 
 func (r *userOAuthRepository) Find(ctx context.Context, conds ...gen.Condition) ([]*model.UserOAuth, error) {
 	return r.query.UserOAuth.WithContext(ctx).Where(conds...).Find()
+}
+
+func (r *userOAuthRepository) Delete(ctx context.Context, conds ...gen.Condition) (bool, error) {
+	ret, err := r.query.UserOAuth.WithContext(ctx).Where(conds...).Delete()
+	if err != nil {
+		return false, err
+	}
+	if ret.RowsAffected == 0 {
+		return false, nil
+	}
+	return true, nil
 }
 
 func NewUserOAuthRepository(query *query.Query) UserOAuthRepository {

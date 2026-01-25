@@ -33,6 +33,14 @@ var (
 		Code:    fiber.StatusUnauthorized,
 		Message: "Incorrect username or password",
 	}
+	ErrInvalidOAuthProvider = &APIError{
+		Code:    fiber.StatusBadRequest,
+		Message: "Invalid OAuth provider",
+	}
+	ErrOAuthProviderNotConnected = &APIError{
+		Code:    fiber.StatusConflict,
+		Message: "OAuth provider not connected",
+	}
 )
 
 // Two-factor authentication errors
