@@ -12,6 +12,7 @@ function applyOptions(options: any = {}): any {
   options.initialCache = options.initialCache ?? false
   options.headers = options.headers || {}
   options.method = options.method || 'GET'
+  options.ignoreResponseError = true
 
   // Forward cookies for SSR
   const headers = useRequestHeaders(['cookie'])
