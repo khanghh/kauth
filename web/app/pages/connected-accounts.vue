@@ -44,7 +44,7 @@
         :icon-class="providerColors[account.provider]?.text || 'text-gray-600'"
         :processing="processing === account.provider"
         @connect="handleConnect(account.provider)"
-        @disconnect="handleDisconnect(account.provider)" />
+        @disconnect="handleDisconnect(account)" />
     </div>
 
     <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6">
@@ -101,8 +101,6 @@ const providerColors: Record<string, { text: string }> = {
   discord: { text: 'text-indigo-600' },
 }
 
-const allProviders = ['discord', 'google', 'facebook', 'apple', 'microsoft']
-
 const showSuccess = (msg: string) => { errorMsg.value = ''; successMsg.value = msg }
 const showError = (msg: string) => { successMsg.value = ''; errorMsg.value = msg }
 
@@ -111,33 +109,7 @@ const fetchAccounts = async () => {
     loading.value = true
     const fetchedAccounts = await api.getOAuthAccounts()
 
-    const accountMap = new Map<string, OAuthAccount>()
-    fetchedAccounts.forEach(acc => accountMap.set(acc.provider, acc))
-
-    const allAccounts: OAuthAccount[] = []
-
-    // First, append all fetched (connected) accounts
-    fetchedAccounts.forEach(acc => {
-      if (acc.connected) {
-        allAccounts.push(acc)
-      }
-    })
-
-    // Then, append all not connected providers
-    allProviders.forEach(provider => {
-      if (!accountMap.has(provider)) {
-        allAccounts.push({
-          provider,
-          connected: false,
-          accountId: '',
-          displayName: '',
-          email: '',
-          picture: '',
-        })
-      }
-    })
-
-    accounts.value = allAccounts
+    accounts.value = fetchedAccounts
   } catch (err: any) {
     showError(err?.message ?? 'Failed to fetch connected accounts')
   } finally {
@@ -149,13 +121,13 @@ onMounted(() => {
   fetchAccounts()
 })
 
-const handleDisconnect = async (provider: string) => {
+const handleDisconnect = async (account: OAuthAccount) => {
+  const provider = account.provider
   if (!confirm(`Are you sure you want to disconnect your ${provider} account? This may affect your ability to sign in.`)) return
-
   try {
     processing.value = provider
-    // TODO: Implement api.disconnectAccount when backend is ready
-    showSuccess(`${provider} account disconnected. (Mock)`)
+    await api.disconnectOAuthAccount(provider)
+
     await fetchAccounts()
   } catch (err: any) {
     showError(err?.message ?? `Failed to disconnect ${provider}`)
@@ -164,10 +136,16 @@ const handleDisconnect = async (provider: string) => {
   }
 }
 
-const handleConnect = (provider: string) => {
+const handleConnect = async (provider: string) => {
+  const account = accounts.value.find(a => a.provider === provider)
+  const connectUrl = account?.connectUrl
+  if (!connectUrl) {
+    showError(`Missing connect URL for ${provider}`)
+    return
+  }
+
   processing.value = provider
-  // Typically redirects to an OAuth endpoint
-  showSuccess(`Redirecting to ${provider} authorization... (Mock)`)
-  setTimeout(() => { processing.value = null }, 2000)
+  // External redirect to provider auth URL.
+  await navigateTo(connectUrl, { external: true })
 }
 </script>
