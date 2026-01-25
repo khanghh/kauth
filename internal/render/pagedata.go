@@ -67,3 +67,8 @@ type AccountHomePageData struct {
 	Picture      string
 	TwoFAEnabled bool
 }
+
+type VerifyEmailPageData struct {
+	Email   string
+	Success bool
+}

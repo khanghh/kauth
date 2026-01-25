@@ -257,8 +257,6 @@ func setupWebRoutes(router fiber.Router, deps *webDependencies) {
 	router.Get("/register", registerHandler.GetRegister)
 	router.Post("/register", registerHandler.PostRegister)
 	router.Get("/register/verify", registerHandler.GetRegisterVerify)
-	router.Get("/register/oauth", registerHandler.GetRegisterWithOAuth)
-	router.Post("/register/oauth", registerHandler.PostRegisterWithOAuth)
 	router.Get("/reset-password", resetPasswordHandler.GetResetPassword)
 	router.Post("/reset-password", resetPasswordHandler.PostResetPassword)
 	router.Get("/forgot-password", resetPasswordHandler.GetForgotPassword)

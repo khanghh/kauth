@@ -77,27 +77,9 @@ func RenderRegisterPage(ctx *fiber.Ctx, data RegisterPageData) error {
 		"siteName":         globalVars["siteName"],
 		"turnstileSiteKey": globalVars["turnstileSiteKey"],
 		"username":         data.Username,
-		"email":            data.Email,
-		"usernameError":    data.FormErrors["username"],
-		"passwordError":    data.FormErrors["password"],
-		"emailError":       data.FormErrors["email"],
-		"errorMsg":         data.ErrorMsg,
-	})
-	if err != nil {
-		return err
-	}
-	ctx.Set("Content-Type", "text/html; charset=utf-8")
-	return ctx.Status(fiber.StatusOK).SendString(body)
-}
-
-func RenderOAuthRegisterPage(ctx *fiber.Ctx, data RegisterPageData) error {
-	body, err := RenderHTML("oauth-register", fiber.Map{
-		"siteName":         globalVars["siteName"],
-		"turnstileSiteKey": globalVars["turnstileSiteKey"],
-		"username":         data.Username,
 		"fullName":         data.FullName,
-		"email":            data.Email,
 		"picture":          data.Picture,
+		"email":            data.Email,
 		"oauthProvider":    data.OAuthProvider,
 		"usernameError":    data.FormErrors["username"],
 		"passwordError":    data.FormErrors["password"],
@@ -220,35 +202,11 @@ func RenderVerifyOTPPage(ctx *fiber.Ctx, pageData VerifyOTPPageData) error {
 	return ctx.Status(fiber.StatusOK).SendString(body)
 }
 
-func RenderRegisterVerifyEmailPage(ctx *fiber.Ctx, email string) error {
-	body, err := RenderHTML("verify-email", fiber.Map{
+func RenderRegisterVerifyEmailPage(ctx *fiber.Ctx, pageData VerifyEmailPageData) error {
+	body, err := RenderHTML("register/verify", fiber.Map{
 		"siteName": globalVars["siteName"],
-		"email":    email,
-	})
-	if err != nil {
-		return err
-	}
-	ctx.Set("Content-Type", "text/html; charset=utf-8")
-	return ctx.Status(fiber.StatusOK).SendString(body)
-}
-
-func RenderEmailVerificationSuccessPage(ctx *fiber.Ctx, email string) error {
-	body, err := RenderHTML("verify-email-result", fiber.Map{
-		"siteName": globalVars["siteName"],
-		"success":  true,
-		"email":    email,
-	})
-	if err != nil {
-		return err
-	}
-	ctx.Set("Content-Type", "text/html; charset=utf-8")
-	return ctx.Status(fiber.StatusOK).SendString(body)
-}
-
-func RenderEmailVerificationFailurePage(ctx *fiber.Ctx) error {
-	body, err := RenderHTML("verify-email-result", fiber.Map{
-		"siteName": globalVars["siteName"],
-		"success":  false,
+		"email":    pageData.Email,
+		"success":  pageData.Success,
 	})
 	if err != nil {
 		return err

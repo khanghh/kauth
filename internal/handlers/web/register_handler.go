@@ -13,6 +13,7 @@ import (
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/render"
 	"github.com/khanghh/kauth/internal/users"
+	"github.com/khanghh/kauth/model"
 )
 
 var (
@@ -59,7 +60,20 @@ func (h *RegisterHandler) GetRegister(ctx *fiber.Ctx) error {
 	if session == nil || session.IsLoggedIn() {
 		return ctx.Redirect("/")
 	}
-	return render.RenderRegisterPage(ctx, render.RegisterPageData{})
+	pageData := render.RegisterPageData{}
+
+	oauthID := ctx.QueryInt("oauth_id")
+	if session.OAuthID != 0 && uint(oauthID) == session.OAuthID {
+		userOAuth, err := h.userService.GetUserOAuthByID(ctx.Context(), session.OAuthID)
+		if err == nil {
+			pageData.Email = userOAuth.Email
+			pageData.FullName = userOAuth.DisplayName
+			pageData.Picture = userOAuth.Picture
+			pageData.OAuthProvider = userOAuth.Provider
+		}
+	}
+
+	return render.RenderRegisterPage(ctx, pageData)
 }
 
 type RegisterClaims struct {
@@ -85,6 +99,20 @@ func (h *RegisterHandler) PostRegister(ctx *fiber.Ctx) error {
 		Email:    email,
 	}
 
+	var userOAuth *model.UserOAuth
+	if session.OAuthID != 0 {
+		var err error
+		userOAuth, err = h.userService.GetUserOAuthByID(ctx.Context(), session.OAuthID)
+		if err != nil {
+			return err
+		}
+		email = strings.ToLower(userOAuth.Email)
+		pageData.Email = email
+		pageData.FullName = userOAuth.DisplayName
+		pageData.Picture = userOAuth.Picture
+		pageData.OAuthProvider = userOAuth.Provider
+	}
+
 	if err := captcha.Verify(ctx); err != nil {
 		pageData.ErrorMsg = MsgInvalidCaptcha
 		return render.RenderRegisterPage(ctx, pageData)
@@ -95,6 +123,39 @@ func (h *RegisterHandler) PostRegister(ctx *fiber.Ctx) error {
 		return render.RenderRegisterPage(ctx, pageData)
 	}
 
+	if userOAuth != nil {
+		// OAuth registration flow
+		userOpts := users.CreateUserOptions{
+			Username:  username,
+			FullName:  userOAuth.DisplayName,
+			Email:     email,
+			Picture:   userOAuth.Picture,
+			UserOAuth: userOAuth,
+			Password:  password,
+		}
+		user, err := h.userService.CreateUser(ctx.Context(), userOpts)
+		if err != nil {
+			if errors.Is(err, users.ErrUsernameTaken) {
+				pageData.FormErrors["username"] = MsgUsernameTaken
+				return render.RenderRegisterPage(ctx, pageData)
+			} else if errors.Is(err, users.ErrEmailRegisterd) {
+				pageData.FormErrors["email"] = MsgEmailRegistered
+				return render.RenderRegisterPage(ctx, pageData)
+			}
+			slog.Error("Failed to create user with OAuth", "error", err)
+			return err
+		}
+
+		session.UserID = user.ID
+		serviceURL := ctx.Query("service")
+		if serviceURL == "" {
+			return ctx.Redirect("/")
+		}
+		serviceState := ctx.Query("state")
+		return redirectAuthorize(ctx, session, serviceURL, serviceState)
+	}
+
+	// Normal registration flow
 	userOpts := users.CreateUserOptions{
 		Username: username,
 		Email:    email,
@@ -109,7 +170,7 @@ func (h *RegisterHandler) PostRegister(ctx *fiber.Ctx) error {
 			pageData.FormErrors["email"] = MsgEmailRegistered
 			return render.RenderRegisterPage(ctx, pageData)
 		}
-		slog.Error("Failed to create user", "error", err)
+		slog.Error("Failed to register user", "error", err)
 		return err
 	}
 
@@ -118,99 +179,20 @@ func (h *RegisterHandler) PostRegister(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	return render.RenderRegisterVerifyEmailPage(ctx, email)
-}
-
-func (h *RegisterHandler) GetRegisterWithOAuth(ctx *fiber.Ctx) error {
-	session := sessions.Get(ctx)
-	if session == nil || session.IsLoggedIn() || session.OAuthID == 0 {
-		return ctx.Redirect("/login")
-	}
-
-	userOAuth, err := h.userService.GetUserOAuthByID(ctx.Context(), session.OAuthID)
-	if err != nil {
-		return err
-	}
-
-	return render.RenderOAuthRegisterPage(ctx, render.RegisterPageData{
-		Email:         userOAuth.Email,
-		FullName:      userOAuth.DisplayName,
-		Picture:       userOAuth.Picture,
-		OAuthProvider: userOAuth.Provider,
-	})
-}
-
-func (h *RegisterHandler) PostRegisterWithOAuth(ctx *fiber.Ctx) error {
-	session := sessions.Get(ctx)
-	if session == nil || session.IsLoggedIn() || session.OAuthID == 0 {
-		return ctx.Redirect("/")
-	}
-
-	userOAuth, err := h.userService.GetUserOAuthByID(ctx.Context(), session.OAuthID)
-	if err != nil {
-		return err
-	}
-
-	var (
-		username = ctx.FormValue("username")
-		password = ctx.FormValue("password")
-	)
-
-	pageData := render.RegisterPageData{
-		Username:      username,
-		Email:         userOAuth.Email,
-		FullName:      userOAuth.DisplayName,
-		Picture:       userOAuth.Picture,
-		OAuthProvider: userOAuth.Provider,
-	}
-
-	if err := captcha.Verify(ctx); err != nil {
-		pageData.ErrorMsg = MsgInvalidCaptcha
-		return render.RenderOAuthRegisterPage(ctx, pageData)
-	}
-
-	pageData.FormErrors = validateRegisterForm(username, password, userOAuth.Email)
-	if len(pageData.FormErrors) > 0 {
-		return render.RenderOAuthRegisterPage(ctx, pageData)
-	}
-
-	userOpts := users.CreateUserOptions{
-		Username:  username,
-		FullName:  userOAuth.DisplayName,
-		Email:     userOAuth.Email,
-		Picture:   userOAuth.Picture,
-		UserOAuth: userOAuth,
-		Password:  password,
-	}
-	user, err := h.userService.CreateUser(ctx.Context(), userOpts)
-	if err != nil {
-		if errors.Is(err, users.ErrUsernameTaken) {
-			pageData.FormErrors["username"] = MsgUsernameTaken
-			return render.RenderOAuthRegisterPage(ctx, pageData)
-		} else if errors.Is(err, users.ErrEmailRegisterd) {
-			pageData.FormErrors["email"] = MsgEmailRegistered
-			return render.RenderOAuthRegisterPage(ctx, pageData)
-		}
-		slog.Error("Failed to create user", "error", err)
-		return err
-	}
-
-	session.UserID = user.ID
-	serviceURL := ctx.Query("service")
-	if serviceURL == "" {
-		return ctx.Redirect("/")
-	}
-	serviceState := ctx.Query("state")
-	return redirectAuthorize(ctx, session, serviceURL, serviceState)
+	return render.RenderRegisterVerifyEmailPage(ctx, render.VerifyEmailPageData{Email: email})
 }
 
 func (h *RegisterHandler) GetRegisterVerify(ctx *fiber.Ctx) error {
 	email := ctx.Query("email")
 	token := ctx.Query("token")
 
-	if _, err := h.userService.ApprovePendingUser(ctx.Context(), email, token); err != nil {
-		return render.RenderEmailVerificationFailurePage(ctx)
+	if email == "" || token == "" {
+		return ctx.Redirect("/")
 	}
 
-	return render.RenderEmailVerificationSuccessPage(ctx, email)
+	if _, err := h.userService.ApprovePendingUser(ctx.Context(), email, token); err != nil {
+		return render.RenderRegisterVerifyEmailPage(ctx, render.VerifyEmailPageData{Success: false})
+	}
+
+	return render.RenderRegisterVerifyEmailPage(ctx, render.VerifyEmailPageData{Success: true})
 }
