@@ -22,8 +22,8 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      baseUrl: '',
-      siteName: "{{.siteName}}"
+      siteName: "{{.siteName}}",
+      contactLink: "{{.contactLink}}"
     }
   },
   nitro: {

@@ -58,7 +58,7 @@
             <Icon name="fa7-solid:sign-in-alt" class="mr-2" />
             Return to Home
           </button>
-          <a href="/contact"
+          <a :href="contactLink"
             class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-3 px-4 rounded-lg transition duration-200 border border-gray-300">
             Contact Support
           </a>
@@ -73,6 +73,9 @@
 import type { NuxtError } from '#app'
 
 const props = defineProps<{ error: NuxtError }>()
+
+const config = useRuntimeConfig()
+const contactLink = config.contactLink as string || '#'
 
 const goHome = () => {
   clearError({ redirect: '/' })

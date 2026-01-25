@@ -55,7 +55,7 @@
         <Icon name="fa7-solid:sign-in-alt" class="mr-2" />
         Return to Home
       </a>
-      <a href="/contact"
+      <a :href="contactLink"
         class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-3 px-4 rounded-lg transition duration-200 border border-gray-300">
         Contact Support
       </a>
@@ -65,4 +65,8 @@
 
 <script setup lang="ts">
 const statusCode = useServerVar<number>('statusCode', 404)
+
+const config = useRuntimeConfig()
+const contactLink = config.contactLink as string || '#'
+
 </script>
