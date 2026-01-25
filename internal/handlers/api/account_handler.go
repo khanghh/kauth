@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/khanghh/kauth/internal/audit"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/internal/oauth"
 	"github.com/khanghh/kauth/internal/render"
@@ -464,4 +465,60 @@ func (h *AccountHandler) DeleteOAuthAccount(ctx *fiber.Ctx) error {
 		return ErrInternalServer
 	}
 	return ctx.SendStatus(fiber.StatusOK)
+}
+
+type accountEventResponse struct {
+	SessionID     string `json:"sessionId"`
+	EventType     string `json:"eventType"`
+	AuthMethod    string `json:"authMethod,omitempty"`
+	ChallengeType string `json:"challengeType,omitempty"`
+	Service       string `json:"service,omitempty"`
+	CallbackURL   string `json:"callbackUrl,omitempty"`
+	Reason        string `json:"reason,omitempty"`
+	IP            string `json:"ip"`
+	UserAgent     string `json:"userAgent"`
+	CreatedAt     int64  `json:"createdAt"` // unix timestamp in milliseconds
+}
+
+type cursorResponse[T any] struct {
+	Items   []T    `json:"items"`
+	Cursor  uint64 `json:"cursor"`
+	HasMore bool   `json:"hasMore"`
+}
+
+func (h *AccountHandler) GetRecentEvents(ctx *fiber.Ctx) error {
+	session := sessions.Get(ctx)
+	if session == nil || !session.IsAuthenticated() {
+		return ErrUnauthorized
+	}
+	cursorMs := ctx.QueryInt("cursor", 0)
+
+	events, hasMore, err := audit.GetAuditEventsByUserID(ctx, session.UserID, uint64(cursorMs))
+	if err != nil {
+		return ErrInternalServer
+	}
+
+	result := make([]accountEventResponse, 0, len(events))
+	for _, event := range events {
+		item := accountEventResponse{
+			SessionID:     event.SessionID,
+			EventType:     event.EventType,
+			AuthMethod:    event.AuthMethod,
+			ChallengeType: event.ChallengeType,
+			Service:       event.ServiceName,
+			CallbackURL:   event.CallbackURL,
+			Reason:        event.Reason,
+			IP:            event.IP,
+			UserAgent:     event.UserAgent,
+			CreatedAt:     event.CreatedAt.UnixMilli(),
+		}
+		result = append(result, item)
+		cursorMs = int(item.CreatedAt)
+	}
+
+	return ctx.JSON(NewDataResponse(cursorResponse[accountEventResponse]{
+		Items:   result,
+		Cursor:  uint64(cursorMs),
+		HasMore: hasMore,
+	}))
 }

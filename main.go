@@ -211,6 +211,7 @@ func setupAPIRoutes(router fiber.Router, deps *apiDependencies) {
 	apiRouter.Post("/account/2fa/totp/enroll", accountHandler.PostTwoFactorTOTPEnroll)
 	apiRouter.Get("/account/oauth", accountHandler.GetOAuthAccounts)
 	apiRouter.Delete("/account/oauth/:provider", accountHandler.DeleteOAuthAccount)
+	apiRouter.Get("/account/events", accountHandler.GetRecentEvents)
 }
 
 type webDependencies struct {

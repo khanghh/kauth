@@ -5,6 +5,7 @@ import "time"
 type AuditEvent struct {
 	ID            uint64    `gorm:"primaryKey;autoIncrement"`
 	UserID        uint      `gorm:"index;not null"`         // internal user id
+	SessionID     string    `gorm:"size:64;index"`          // session id
 	Username      string    `gorm:"size:64;not null;index"` // snapshot of username at event time
 	EventType     string    `gorm:"size:64;not null;index"` // login_success, login_failure...
 	AuthMethod    string    `gorm:"size:32;index"`          // password, oauth, totp, etc. (optional)

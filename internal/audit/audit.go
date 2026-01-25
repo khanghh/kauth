@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/khanghh/kauth/internal/middlewares/sessions"
 	"github.com/khanghh/kauth/model"
 )
 
@@ -17,13 +18,13 @@ func Initialize(repo AuditLogRepository) {
 }
 
 const (
-	EventTypeLoginSuccess        = "login_success"
-	EventTypeLoginFailure        = "login_failure"
-	EventTypeUserLogout          = "logout"
-	EventTypeServiceAuthorized   = "service_authorized"
-	EventType2FAChallengeCreated = "2fa_challenge_created"
-	EventType2FAAttemptSuccess   = "2fa_attempt_success"
-	EventType2FAAttemptFailure   = "2fa_attempt_failure"
+	EventTypeLoginSuccess        = "auth.login.success"
+	EventTypeLoginFailure        = "auth.login.failure"
+	EventTypeUserLogout          = "auth.logout"
+	EventTypeServiceAuthorized   = "auth.service.authorized"
+	EventType2FAChallengeCreated = "auth.2fa.challenge.created"
+	EventType2FAAttemptSuccess   = "auth.2fa.attempt.success"
+	EventType2FAAttemptFailure   = "auth.2fa.attempt.failure"
 )
 
 const (
@@ -32,8 +33,10 @@ const (
 )
 
 func RecordLoginSuccess(ctx *fiber.Ctx, user *model.User, method string) error {
+
 	return auditRepo.RecordEvent(ctx.Context(), &model.AuditEvent{
 		UserID:     user.ID,
+		SessionID:  sessions.Get(ctx).ID(),
 		Username:   user.Username,
 		EventType:  EventTypeLoginSuccess,
 		AuthMethod: method,
@@ -45,6 +48,7 @@ func RecordLoginSuccess(ctx *fiber.Ctx, user *model.User, method string) error {
 func RecordLoginFailure(ctx *fiber.Ctx, user *model.User, method string, reason string) error {
 	return auditRepo.RecordEvent(ctx.Context(), &model.AuditEvent{
 		UserID:     user.ID,
+		SessionID:  sessions.Get(ctx).ID(),
 		Username:   user.Username,
 		EventType:  EventTypeLoginFailure,
 		AuthMethod: method,
@@ -67,6 +71,7 @@ func RecordUserLogout(ctx *fiber.Ctx, userID uint, username string) error {
 func RecordServiceAuthorized(ctx *fiber.Ctx, user *model.User, service *model.Service, callbackURL string) error {
 	return auditRepo.RecordEvent(ctx.Context(), &model.AuditEvent{
 		UserID:      user.ID,
+		SessionID:   sessions.Get(ctx).ID(),
 		Username:    user.Username,
 		EventType:   EventTypeServiceAuthorized,
 		ServiceID:   service.ID,
@@ -80,6 +85,7 @@ func RecordServiceAuthorized(ctx *fiber.Ctx, user *model.User, service *model.Se
 func Record2FAChallengeCreated(ctx *fiber.Ctx, user *model.User, cid string, ctype string, callbackURL string) error {
 	return auditRepo.RecordEvent(ctx.Context(), &model.AuditEvent{
 		UserID:        user.ID,
+		SessionID:     sessions.Get(ctx).ID(),
 		Username:      user.Username,
 		EventType:     EventType2FAChallengeCreated,
 		ChallengeID:   cid,
@@ -93,6 +99,7 @@ func Record2FAChallengeCreated(ctx *fiber.Ctx, user *model.User, cid string, cty
 func Record2FAAttemptSuccess(ctx *fiber.Ctx, user *model.User, cid string, ctype string) error {
 	return auditRepo.RecordEvent(ctx.Context(), &model.AuditEvent{
 		UserID:        user.ID,
+		SessionID:     sessions.Get(ctx).ID(),
 		Username:      user.Username,
 		EventType:     EventType2FAAttemptSuccess,
 		ChallengeID:   cid,
@@ -105,6 +112,7 @@ func Record2FAAttemptSuccess(ctx *fiber.Ctx, user *model.User, cid string, ctype
 func Record2FAAttemptFailure(ctx *fiber.Ctx, user *model.User, cid string, ctype string, reason string) error {
 	return auditRepo.RecordEvent(ctx.Context(), &model.AuditEvent{
 		UserID:        user.ID,
+		SessionID:     sessions.Get(ctx).ID(),
 		Username:      user.Username,
 		EventType:     EventType2FAAttemptFailure,
 		ChallengeID:   cid,
@@ -113,4 +121,8 @@ func Record2FAAttemptFailure(ctx *fiber.Ctx, user *model.User, cid string, ctype
 		IP:            ctx.IP(),
 		UserAgent:     ctx.Get("User-Agent"),
 	})
+}
+
+func GetAuditEventsByUserID(ctx *fiber.Ctx, userID uint, cursorMs uint64) ([]*model.AuditEvent, bool, error) {
+	return auditRepo.GetEventsByUserID(ctx.Context(), userID, cursorMs)
 }
