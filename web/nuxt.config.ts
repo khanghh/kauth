@@ -47,6 +47,7 @@ export default defineNuxtConfig({
         "/error",
         "/login",
         "/register",
+        "/register/verify",
       ]
     },
     hooks: {

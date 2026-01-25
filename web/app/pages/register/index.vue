@@ -2,9 +2,28 @@
   <div class="bg-white shadow-lg rounded-2xl overflow-hidden">
     <div class="px-6 sm:px-10 py-10">
       <div class="text-center mb-8">
-        <img src="/images/logo.png" alt="Logo" class="h-16 mx-auto mb-4 object-contain">
-        <h1 class="text-3xl font-bold text-gray-800 mb-3 text-center">Create your account</h1>
-        <p class="text-gray-600 mt-2">Fill out the form to create your account</p>
+        <template v-if="oauthProvider">
+          <div class="flex justify-center mb-4">
+            <img v-if="picture" :src="picture" alt="Profile"
+              class="avatar w-20 h-20 rounded-full border-4 border-blue-100 object-cover">
+            <div v-else
+              class="avatar w-20 h-20 rounded-full border-4 border-blue-100 bg-indigo-600 flex items-center justify-center text-white text-3xl font-bold">
+              {{ (fullName?.[0] || 'U').toUpperCase() }}
+            </div>
+          </div>
+          <h1 class="text-3xl font-bold text-gray-800 mb-2">Welcome, {{ fullName }}</h1>
+          <p class="text-gray-600 mt-1">{{ email }}</p>
+          <div class="mt-3 inline-flex items-center bg-blue-50 text-blue-700 text-sm px-3 py-1 rounded-full">
+            <Icon name="fa7-solid:check-circle" class="mr-1" />
+            Connected via &nbsp; <span class="capitalize">{{ oauthProvider }}</span>
+          </div>
+          <p class="text-gray-600 mt-4">Set a username and password to continue</p>
+        </template>
+        <template v-else>
+          <img src="/images/logo.png" alt="Logo" class="h-16 mx-auto mb-4 object-contain">
+          <h1 class="text-3xl font-bold text-gray-800 mb-3 text-center">Create your account</h1>
+          <p class="text-gray-600 mt-2">Fill out the form to create your account</p>
+        </template>
       </div>
 
       <div v-if="errorMsg" class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
@@ -27,7 +46,7 @@
           </p>
         </div>
 
-        <div>
+        <div v-if="!oauthProvider">
           <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
@@ -52,7 +71,7 @@
               placeholder="Create a secure password" v-model="password">
             <button class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
               type="button"
-              @click="showPassword = !showPassword" aria-label="Toggle password visibility">
+              tabindex="-1" @click="showPassword = !showPassword" aria-label="Toggle password visibility">
               <Icon :name="showPassword ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" />
             </button>
           </div>
@@ -79,12 +98,13 @@
               placeholder="Confirm your password" v-model="confirmPassword">
             <button class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
               type="button"
-              @click="showConfirmPassword = !showConfirmPassword" aria-label="Toggle confirm password visibility">
+              tabindex="-1" @click="showConfirmPassword = !showConfirmPassword"
+              aria-label="Toggle confirm password visibility">
               <Icon :name="showConfirmPassword ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" />
             </button>
           </div>
           <p :class="['mt-1 text-sm text-red-600', { hidden: !confirmPasswordError }]">{{ confirmPasswordError
-            }}</p>
+          }}</p>
         </div>
 
         <div class="flex items-start">
@@ -105,13 +125,20 @@
           <button type="submit"
             class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 w-full flex items-center justify-center">
             <Icon name="fa7-solid:user-plus" class="mr-2" />
-            Create Account
+            {{ oauthProvider ? 'Complete Registration' : 'Create Account' }}
           </button>
+        </div>
+
+        <div v-if="oauthProvider" class="text-center mt-4">
+          <a href="/login?renew=true" class="text-sm text-blue-600 hover:underline flex items-center justify-center">
+            <Icon name="fa7-solid:right-to-bracket" class="mr-2" />
+            Sign in with another account
+          </a>
         </div>
 
       </form>
     </div>
-    <div class="bg-gray-50 px-6 py-4 text-center border-t border-gray-100">
+    <div v-if="!oauthProvider" class="bg-gray-50 px-6 py-4 text-center border-t border-gray-100">
       <p class="text-gray-600 text-sm">
         Already have an account?
         <a href="/login" class="text-blue-600 hover:text-blue-500 font-medium">Sign in</a>
@@ -169,19 +196,23 @@
 const config = useRuntimeConfig().public
 const turnstileSiteKey = config.turnstileSiteKey
 
+const oauthProvider = useServerVar<string>('oauthProvider', '')
+const email = useServerVar<string>('email', '')
+const picture = useServerVar<string>('picture', '')
+const fullName = useServerVar<string>('fullName', '')
+const username = useServerVar<string>('username', '')
+
 const errorMsg = useServerVar<string>('errorMsg', '')
+const usernameError = useServerVar<string>('usernameError', '')
+const emailError = useServerVar<string>('emailError', '')
+const passwordError = useServerVar<string>('passwordError', '')
 
 const formEl = ref<HTMLFormElement | null>(null)
 
-const username = useServerVar<string>('username', '')
-const email = useServerVar<string>('email', '')
 const password = ref('')
 const confirmPassword = ref('')
 const termsAccepted = ref(false)
 
-const usernameError = useServerVar<string>('usernameError', '')
-const emailError = useServerVar<string>('emailError', '')
-const passwordError = useServerVar<string>('passwordError', '')
 const confirmPasswordError = ref('')
 const termsError = ref('')
 
@@ -247,13 +278,15 @@ const validate = () => {
     valid = false
   }
 
-  const e = email.value.trim()
-  if (!e) {
-    emailError.value = 'Email address is required.'
-    valid = false
-  } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(e)) {
-    emailError.value = 'Invalid email address.'
-    valid = false
+  if (!oauthProvider.value) {
+    const e = email.value?.trim()
+    if (!e) {
+      emailError.value = 'Email address is required.'
+      valid = false
+    } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(e)) {
+      emailError.value = 'Invalid email address.'
+      valid = false
+    }
   }
 
   if (password.value.length < 6) {
@@ -285,7 +318,7 @@ const onSubmit = (e: Event) => {
 
 
 useHead({
-  title: useSiteTitle('Login'),
+  title: useSiteTitle('Create Your Account'),
   script: [
     {
       src: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
