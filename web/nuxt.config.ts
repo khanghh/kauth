@@ -84,7 +84,7 @@ export default defineNuxtConfig({
   icon: {
     localApiEndpoint: '/icons',
     serverBundle: {
-      collections: ['fa7-solid', 'fa7-brands'],
+      collections: ['fa7-solid', 'fa7-brands', 'mdi'],
     },
   },
   tailwindcss: {

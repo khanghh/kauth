@@ -52,6 +52,35 @@ export interface OAuthAccount {
   connectUrl?: string
 }
 
+export enum AccountEventType {
+  LoginSuccess = "auth.login.success",
+  LoginFailure = "auth.login.failure",
+  UserLogout = "auth.logout",
+  ServiceAuthorized = "auth.service.authorized",
+  TwoFAChallengeCreated = "auth.2fa.challenge.created",
+  TwoFAAttemptSuccess = "auth.2fa.attempt.success",
+  TwoFAAttemptFailure = "auth.2fa.attempt.failure",
+}
+
+export interface AccountEvent {
+  sessionId: string
+  eventType: AccountEventType
+  authMethod?: string
+  challengeType?: string
+  service?: string
+  callbackUrl?: string
+  reason?: string
+  ip: string
+  userAgent: string
+  createdAt: number
+}
+
+export interface CursorResponse<T> {
+  items: T[]
+  cursor: number
+  hasMore: boolean
+}
+
 export const useApi = () => {
   return {
     getCurrentUser() {
@@ -91,6 +120,11 @@ export const useApi = () => {
     },
     disconnectOAuthAccount(provider: string) {
       return useHttpDelete(`/api/account/oauth/${provider}`)
+    },
+    getRecentActivities(cursor?: number) {
+      return useHttpGet<CursorResponse<AccountEvent>>('/api/account/events', {
+        params: { cursor }
+      })
     }
   }
 }

@@ -45,7 +45,7 @@
                 v-if="avatarOk && avatarSrc"
                 :src="avatarSrc"
                 alt="Profile"
-                class="w-full h-full object-coverIncorrect use of <label for="
+                class="w-full h-full object-cover"
                 @error="avatarOk = false" />
               <span v-else class="text-white text-2xl font-bold select-none">{{ userInitial }}</span>
             </div>
@@ -337,9 +337,6 @@ const onCropSaved = (newImage: string) => {
   avatarPreviewUrl.value = newImage
   showSuccess('Profile picture updated successfully!')
   closeCropper()
-  revokePreviewUrl()
-  avatarOk.value = false
-  showSuccess('Profile picture removed (preview)')
 }
 
 const todayISO = computed(() => {

@@ -10,7 +10,7 @@
           <div
             class="relative w-10 h-10 rounded-full bg-transparent flex items-center justify-center text-gray-700 font-bold">
             <img
-              v-if="avatarOk"
+              v-if="avatarOk && user.picture"
               :src="user.picture"
               alt="Profile"
               class="w-full h-full rounded-full object-cover"
@@ -45,7 +45,7 @@
 
         <div class="border-t border-gray-100 my-2"></div>
 
-        <form :action="logoutAction" method="POST">
+        <form action="/logout" method="POST">
           <button
             type="submit"
             class="flex items-center w-full px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors">
@@ -68,17 +68,6 @@ const user = computed(() => {
     return userStore.user
   }
   return {} as UserInfo
-})
-
-const props = defineProps({
-  logoutAction: {
-    type: String,
-    default: '/logout',
-  },
-  csrfToken: {
-    type: String,
-    default: '',
-  },
 })
 
 const userInitial = computed(() => (user.value.username?.trim()?.[0] ?? 'U').toUpperCase())

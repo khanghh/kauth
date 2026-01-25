@@ -4,7 +4,7 @@
       <AppSidebar class="hidden md:block" />
       <!-- Main Content -->
       <div class="flex-1 flex flex-col">
-        <AvatarDropdown logout-action="/logout" csrf-token="token" />
+        <AvatarDropdown />
 
         <!-- Main body -->
         <main class="flex-1 p-4 sm:p-6 lg:p-8">

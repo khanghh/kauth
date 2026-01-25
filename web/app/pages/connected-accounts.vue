@@ -40,8 +40,8 @@
         v-for="account in accounts"
         :key="account.provider"
         :account="account"
-        :icon-name="providerIcons[account.provider] || 'fa7-solid:link'"
-        :icon-class="providerColors[account.provider]?.text || 'text-gray-600'"
+        :iconName="providerIcons[account.provider] || 'fa7-solid:link'"
+        :iconClass="providerColors[account.provider]?.text || 'text-gray-600'"
         :processing="processing === account.provider"
         @connect="handleConnect(account.provider)"
         @disconnect="handleDisconnect(account)" />
@@ -94,7 +94,7 @@ const providerIcons: Record<string, string> = {
 }
 
 const providerColors: Record<string, { text: string }> = {
-  google: { text: 'text-red-600' },
+  google: { text: 'text-red-500' },
   facebook: { text: 'text-blue-600' },
   apple: { text: 'text-gray-800' },
   microsoft: { text: 'text-blue-700' },
