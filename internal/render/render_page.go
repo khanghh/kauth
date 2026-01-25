@@ -337,6 +337,17 @@ func RenderAccountTOTPEnrollmentPage(ctx *fiber.Ctx, data AccountTOTPEnrollmentP
 	return ctx.Status(fiber.StatusOK).SendString(body)
 }
 
+func RenderOAuthConnectionsPage(ctx *fiber.Ctx) error {
+	body, err := RenderHTML("connected-accounts", fiber.Map{
+		"siteName": globalVars["siteName"],
+	})
+	if err != nil {
+		return err
+	}
+	ctx.Set("Content-Type", "text/html; charset=utf-8")
+	return ctx.Status(fiber.StatusOK).SendString(body)
+}
+
 func RenderTOTPEnrollSuccessPage(ctx *fiber.Ctx) error {
 	body, err := RenderHTML("totp-enroll-success", fiber.Map{
 		"siteName": globalVars["siteName"],

@@ -157,3 +157,17 @@ func (h *AccountHandler) GetTwoFactorTOTPEnroll(ctx *fiber.Ctx) error {
 	}
 	return render.RenderAccountTOTPEnrollmentPage(ctx, pageData)
 }
+
+func (h *AccountHandler) GetConnectedAccounts(ctx *fiber.Ctx) error {
+	session := sessions.Get(ctx)
+	if session == nil || !session.IsAuthenticated() {
+		return forceLogout(ctx, "")
+	}
+
+	_, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
+	if err != nil {
+		return forceLogout(ctx, "")
+	}
+
+	return render.RenderOAuthConnectionsPage(ctx)
+}

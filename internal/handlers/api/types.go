@@ -41,6 +41,7 @@ type UserService interface {
 	GetUserByEmail(ctx context.Context, email string) (*model.User, error)
 	GetUserByUsername(ctx context.Context, username string) (*model.User, error)
 	GetUserByUsernameOrEmail(ctx context.Context, identifier string) (*model.User, error)
+	GetUserOAuths(ctx context.Context, userID uint) ([]*model.UserOAuth, error)
 	GetUserOAuthByID(ctx context.Context, userOAuthID uint) (*model.UserOAuth, error)
 	GetOrCreateUserOAuth(ctx context.Context, userOAuth *model.UserOAuth) (*model.UserOAuth, error)
 	UpdatePassword(ctx context.Context, userID uint, newPassword string) error

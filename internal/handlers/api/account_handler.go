@@ -387,3 +387,37 @@ func (h *AccountHandler) PostTwoFactorTOTPEnroll(ctx *fiber.Ctx) error {
 	session.DeleteField(ctx.Context(), totpEnrollSecretSessionKey)
 	return ctx.SendStatus(fiber.StatusOK)
 }
+
+type OAuthAccountResponse struct {
+	Provider    string `json:"provider"`
+	AccountID   string `json:"accountId"`
+	DisplayName string `json:"displayName"`
+	Email       string `json:"email"`
+	Picture     string `json:"picture"`
+	Connected   bool   `json:"connected"`
+}
+
+func (h *AccountHandler) GetOAuthAccounts(ctx *fiber.Ctx) error {
+	session := sessions.Get(ctx)
+	if session == nil || !session.IsAuthenticated() {
+		return ErrUnauthorized
+	}
+
+	userOAuths, err := h.userService.GetUserOAuths(ctx.Context(), session.UserID)
+	if err != nil {
+		return ErrInternalServer
+	}
+
+	response := make([]OAuthAccountResponse, 0, len(userOAuths))
+	for _, acc := range userOAuths {
+		response = append(response, OAuthAccountResponse{
+			Provider:    acc.Provider,
+			AccountID:   acc.AccountID,
+			DisplayName: acc.DisplayName,
+			Email:       acc.Email,
+			Picture:     acc.Picture,
+			Connected:   true,
+		})
+	}
+	return ctx.JSON(NewDataResponse(response))
+}

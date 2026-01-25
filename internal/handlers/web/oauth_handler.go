@@ -109,7 +109,7 @@ func (h *OAuthHandler) GetOAuthCallback(ctx *fiber.Ctx) error {
 
 	userOAuth, err := h.userService.GetOrCreateUserOAuth(ctx.Context(), &model.UserOAuth{
 		Provider:    providerName,
-		ProfileID:   oauthUserInfo.ID,
+		AccountID:   oauthUserInfo.ID,
 		Email:       oauthUserInfo.Email,
 		DisplayName: oauthUserInfo.Name,
 		Picture:     oauthUserInfo.Picture,

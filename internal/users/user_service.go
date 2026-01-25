@@ -274,6 +274,10 @@ func (s *UserService) UpdatePersonalInfo(ctx context.Context, userID uint, param
 	return err
 }
 
+func (s *UserService) GetUserOAuths(ctx context.Context, userID uint) ([]*model.UserOAuth, error) {
+	return s.userOAuthRepo.Find(ctx, query.UserOAuth.UserID.Eq(userID))
+}
+
 func NewUserService(userRepo UserRepository, userOAuthRepo UserOAuthRepository, userFactorRepo UserFactorRepository, pendingUserRepo PendingUserRepository) *UserService {
 	return &UserService{
 		userRepo:        userRepo,

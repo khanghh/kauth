@@ -10,6 +10,13 @@ const (
 	stateEncryptionKey = "secretKey"
 )
 
+const (
+	OAuthProviderGoogle   = "google"
+	OAuthProviderApple    = "apple"
+	OAuthProviderFacebook = "facebook"
+	OAuthProviderDiscord  = "discord"
+)
+
 type OAuthToken = oauth2.Token
 
 type OAuthUserInfo struct {
