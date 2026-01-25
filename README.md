@@ -7,13 +7,11 @@ It provides a secure, scalable, and easy-to-deploy authentication service for ma
 
 ## Features
 
-✅ **Centralized Authentication** – Single sign-on (SSO) for multiple services  
-✅ **User Registration** – Built-in account registration flow  
-✅ **OAuth Login** – Supports login via third-party providers (e.g., Google, Discord)  
+✅ **Centralized Authentication** – Single sign-on across multiple applications with one secure identity provider.  
+✅ **OAuth Login** – Authenticate users via trusted third-party providers (e.g., Google), with account linking and access control.  
 ✅ **Two-Factor Authentication (2FA)** – Supports email OTP, time-based OTP (TOTP), and token verification  
-✅ **Service Registry** – Secure way to register and manage services  
-✅ **Session Management** – Cookie-based session handling  
-✅ **Customizable Templates** – Fully customizable HTML pages and email templates  
+✅ **Service Registry & Access Control** –  Register and manage services that support login via the CAS server  
+✅ **Audit & Security Events** –  Track authentication events such as logins, 2FA attempts, and service authorizations.  
 
 ---
 
@@ -95,18 +93,8 @@ captcha:
 
 ## 🖥️ Screenshots
 <p float="left">
-  <img src="https://github.com/khanghh/kauth/blob/screenshots/login.png?raw=true" width="49%"> 
-  <img src="https://github.com/khanghh/kauth/blob/screenshots/profile.png?raw=true" width="49%"> 
-</p>
-
-<p float="left">
-  <img src="https://github.com/khanghh/kauth/blob/screenshots/2fa_challenge.png?raw=true" width="49%"> 
-  <img src="https://github.com/khanghh/kauth/blob/screenshots/verify_otp.png?raw=true" width="49%"> 
-</p>
-
-<p float="left">
-  <img src="https://github.com/khanghh/kauth/blob/screenshots/totp_enrollment.png?raw=true" width="49%"> 
-  <img src="https://github.com/khanghh/kauth/blob/screenshots/totp_enrollment2.png?raw=true" width="49%"> 
+  <img src="https://github.com/khanghh/kauth/blob/screenshots/recent-activities.png?raw=true" width="49%"> 
+  <img src="https://github.com/khanghh/kauth/blob/screenshots/2fa-settings.png?raw=true" width="49%"> 
 </p>
 
 ---
