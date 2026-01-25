@@ -57,7 +57,7 @@ func (r *userOAuthRepository) CreateIfNotExists(ctx context.Context, userOAuth *
 		return nil, err
 	}
 
-	return r.Take(ctx, r.query.UserOAuth.UserID.Eq(userOAuth.UserID))
+	return r.Take(ctx, r.query.UserOAuth.AccountID.Eq(userOAuth.AccountID))
 }
 
 func (r *userOAuthRepository) Find(ctx context.Context, conds ...gen.Condition) ([]*model.UserOAuth, error) {
