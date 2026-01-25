@@ -17,8 +17,8 @@
       <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ currentUser.fullName }}</h1>
 
       <p class="text-gray-600 text-lg inline-flex items-center justify-center">
-        <Icon name="fa7-solid:envelope" class="mr-2" />
-        {{ currentUser.email }}
+        <Icon name="fa7-solid:at" />
+        {{ currentUser.username }}
       </p>
     </div>
 

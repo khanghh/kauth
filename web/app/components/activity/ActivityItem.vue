@@ -76,7 +76,7 @@ const config = computed(() => {
         iconColor: 'text-indigo-600',
         title: 'Service Authorized',
         descriptionParts: {
-          before: 'Authorized access for service ',
+          before: 'Authorized access to service ',
           bold: serviceName,
           after: ''
         }
