@@ -28,6 +28,7 @@ func newAuditEvent(db *gorm.DB, opts ...gen.DOOption) auditEvent {
 	_auditEvent.ALL = field.NewAsterisk(tableName)
 	_auditEvent.ID = field.NewUint64(tableName, "id")
 	_auditEvent.UserID = field.NewUint(tableName, "user_id")
+	_auditEvent.SessionID = field.NewString(tableName, "session_id")
 	_auditEvent.Username = field.NewString(tableName, "username")
 	_auditEvent.EventType = field.NewString(tableName, "event_type")
 	_auditEvent.AuthMethod = field.NewString(tableName, "auth_method")
@@ -52,6 +53,7 @@ type auditEvent struct {
 	ALL           field.Asterisk
 	ID            field.Uint64
 	UserID        field.Uint
+	SessionID     field.String
 	Username      field.String
 	EventType     field.String
 	AuthMethod    field.String
@@ -82,6 +84,7 @@ func (a *auditEvent) updateTableName(table string) *auditEvent {
 	a.ALL = field.NewAsterisk(table)
 	a.ID = field.NewUint64(table, "id")
 	a.UserID = field.NewUint(table, "user_id")
+	a.SessionID = field.NewString(table, "session_id")
 	a.Username = field.NewString(table, "username")
 	a.EventType = field.NewString(table, "event_type")
 	a.AuthMethod = field.NewString(table, "auth_method")
@@ -110,9 +113,10 @@ func (a *auditEvent) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *auditEvent) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 14)
+	a.fieldMap = make(map[string]field.Expr, 15)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["user_id"] = a.UserID
+	a.fieldMap["session_id"] = a.SessionID
 	a.fieldMap["username"] = a.Username
 	a.fieldMap["event_type"] = a.EventType
 	a.fieldMap["auth_method"] = a.AuthMethod

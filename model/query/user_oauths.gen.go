@@ -29,7 +29,7 @@ func newUserOAuth(db *gorm.DB, opts ...gen.DOOption) userOAuth {
 	_userOAuth.ID = field.NewUint(tableName, "id")
 	_userOAuth.UserID = field.NewUint(tableName, "user_id")
 	_userOAuth.Provider = field.NewString(tableName, "provider")
-	_userOAuth.ProfileID = field.NewString(tableName, "profile_id")
+	_userOAuth.AccountID = field.NewString(tableName, "account_id")
 	_userOAuth.Email = field.NewString(tableName, "email")
 	_userOAuth.DisplayName = field.NewString(tableName, "display_name")
 	_userOAuth.Picture = field.NewString(tableName, "picture")
@@ -49,7 +49,7 @@ type userOAuth struct {
 	ID          field.Uint
 	UserID      field.Uint
 	Provider    field.String
-	ProfileID   field.String
+	AccountID   field.String
 	Email       field.String
 	DisplayName field.String
 	Picture     field.String
@@ -75,7 +75,7 @@ func (u *userOAuth) updateTableName(table string) *userOAuth {
 	u.ID = field.NewUint(table, "id")
 	u.UserID = field.NewUint(table, "user_id")
 	u.Provider = field.NewString(table, "provider")
-	u.ProfileID = field.NewString(table, "profile_id")
+	u.AccountID = field.NewString(table, "account_id")
 	u.Email = field.NewString(table, "email")
 	u.DisplayName = field.NewString(table, "display_name")
 	u.Picture = field.NewString(table, "picture")
@@ -102,7 +102,7 @@ func (u *userOAuth) fillFieldMap() {
 	u.fieldMap["id"] = u.ID
 	u.fieldMap["user_id"] = u.UserID
 	u.fieldMap["provider"] = u.Provider
-	u.fieldMap["profile_id"] = u.ProfileID
+	u.fieldMap["account_id"] = u.AccountID
 	u.fieldMap["email"] = u.Email
 	u.fieldMap["display_name"] = u.DisplayName
 	u.fieldMap["picture"] = u.Picture
