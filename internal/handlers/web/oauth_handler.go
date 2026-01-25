@@ -68,24 +68,25 @@ func (h *OAuthHandler) handleOAuthLogin(ctx *fiber.Ctx, userOAuth *model.UserOAu
 }
 
 func (h *OAuthHandler) handleOAuthLink(ctx *fiber.Ctx, userID uint, userOAuth *model.UserOAuth) error {
+	err := h.userService.LinkOAuthAccount(ctx.Context(), userID, userOAuth.ID)
+	if err != nil {
+		return err
+	}
 	return ctx.Redirect("/connected-accounts")
 }
 
 func (h *OAuthHandler) redirectRegisterOAuth(ctx *fiber.Ctx, userOAuth *model.UserOAuth) error {
-	_, err := h.userService.GetUserByUsernameOrEmail(ctx.Context(), userOAuth.Email)
+	_, err := h.userService.GetUserByEmail(ctx.Context(), userOAuth.Email)
 	if err == nil {
 		return redirect(ctx, "/login", "service", ctx.Query("service"), "error", "email_conflict")
 	}
 
-	if userOAuth.UserID == 0 {
-		sessions.Save(ctx, sessions.SessionData{
-			IP:        ctx.IP(),
-			OAuthID:   userOAuth.ID,
-			LoginTime: time.Now(),
-		})
-		return redirect(ctx, "/register/oauth", "service", ctx.Query("service"))
-	}
-	return nil
+	sessions.Save(ctx, sessions.SessionData{
+		IP:        ctx.IP(),
+		OAuthID:   userOAuth.ID,
+		LoginTime: time.Now(),
+	})
+	return redirect(ctx, "/register", "service", ctx.Query("service"), "oauth_id", userOAuth.ID)
 }
 
 func (h *OAuthHandler) GetOAuthCallback(ctx *fiber.Ctx) error {

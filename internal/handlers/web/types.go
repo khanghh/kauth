@@ -43,4 +43,6 @@ type UserService interface {
 	GetOrCreateUserOAuth(ctx context.Context, userOAuth *model.UserOAuth) (*model.UserOAuth, error)
 	UpdatePassword(ctx context.Context, userID uint, newPassword string) error
 	GetAuthFactors(ctx context.Context, userID uint) ([]*model.UserFactor, error)
+	LinkOAuthAccount(ctx context.Context, userID uint, userOAuthID uint) error
+	UnlinkOAuthAccount(ctx context.Context, userID uint, provider string) error
 }

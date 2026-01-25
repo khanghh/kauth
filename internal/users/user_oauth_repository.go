@@ -14,6 +14,7 @@ type UserOAuthRepository interface {
 	First(ctx context.Context, conds ...gen.Condition) (*model.UserOAuth, error)
 	Take(ctx context.Context, conds ...gen.Condition) (*model.UserOAuth, error)
 	Upsert(ctx context.Context, userOAuth *model.UserOAuth) error
+	Updates(ctx context.Context, updates map[string]interface{}, conds ...gen.Condition) (gen.ResultInfo, error)
 	Find(ctx context.Context, conds ...gen.Condition) ([]*model.UserOAuth, error)
 	Delete(ctx context.Context, conds ...gen.Condition) (bool, error)
 	CreateIfNotExists(ctx context.Context, userOAuth *model.UserOAuth) (*model.UserOAuth, error)
@@ -40,6 +41,10 @@ func (r *userOAuthRepository) Upsert(ctx context.Context, userOAuth *model.UserO
 		Clauses(clause.OnConflict{DoNothing: true}).
 		Returning(&userOAuth).
 		Create(userOAuth)
+}
+
+func (r *userOAuthRepository) Updates(ctx context.Context, updates map[string]interface{}, conds ...gen.Condition) (gen.ResultInfo, error) {
+	return r.query.UserOAuth.WithContext(ctx).Where(conds...).Updates(updates)
 }
 
 func (r *userOAuthRepository) CreateIfNotExists(ctx context.Context, userOAuth *model.UserOAuth) (*model.UserOAuth, error) {

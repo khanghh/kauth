@@ -278,6 +278,20 @@ func (s *UserService) GetUserOAuths(ctx context.Context, userID uint) ([]*model.
 	return s.userOAuthRepo.Find(ctx, query.UserOAuth.UserID.Eq(userID))
 }
 
+func (s *UserService) LinkOAuthAccount(ctx context.Context, userID uint, userOAuthID uint) error {
+	updates := map[string]interface{}{
+		query.ColUserOAuthUserID: userID,
+	}
+	ret, err := s.userOAuthRepo.Updates(ctx, updates, query.UserOAuth.ID.Eq(userOAuthID))
+	if err != nil {
+		return err
+	}
+	if ret.RowsAffected == 0 {
+		return ErrOAuthAccountNotFound
+	}
+	return nil
+}
+
 func (s *UserService) UnlinkOAuthAccount(ctx context.Context, userID uint, provider string) error {
 	ok, err := s.userOAuthRepo.Delete(ctx, query.UserOAuth.UserID.Eq(userID), query.UserOAuth.Provider.Eq(provider))
 	if err != nil {
