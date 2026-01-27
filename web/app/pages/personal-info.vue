@@ -145,7 +145,7 @@
                 v-model="birthdayString"
                 :max="todayISO"
                 :min="minBirthdayISO"
-                class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl input-focus transition text-gray-700" />
+                class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl input-focus transition text-gray-700 appearance-none -webkit-appearance-none" />
             </div>
             <p class="mt-2 text-sm text-gray-500">Your date of birth</p>
           </div>
@@ -171,12 +171,15 @@
               <select
                 name="location"
                 v-model="form.location"
-                class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl input-focus transition text-gray-700">
+                class="w-full pl-12 pr-10 py-3 border border-gray-300 rounded-xl input-focus transition text-gray-700 appearance-none -webkit-appearance-none">
                 <option value="">Select your country</option>
                 <option v-for="country in countries" :key="country.code" :value="country.code">
                   {{ country.name }}
                 </option>
               </select>
+              <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                <Icon name="fa7-solid:angle-down" class="w-4 h-4" />
+              </div>
             </div>
             <p class="mt-2 text-sm text-gray-500">Used to personalize content and localize features.</p>
           </div>
