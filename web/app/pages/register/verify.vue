@@ -14,7 +14,7 @@
           Please click the link in the email to complete your registration. Check your spam folder if you don’t see it.
         </p>
 
-        <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+        <div class="mt-6 flex flex-row gap-3 justify-center">
           <a href="/login"
             class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200">
             <Icon name="fa7-solid:sign-in-alt" class="mr-2" />
@@ -33,7 +33,7 @@
             Your email address has been successfully verified. Your registration is now complete.
           </p>
 
-          <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+          <div class="mt-6 flex flex-row gap-3 justify-center">
             <a href="/login"
               class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200">
               <Icon name="fa7-solid:sign-in-alt" class="mr-2" />
@@ -52,7 +52,7 @@
             Please request a new link or contact support if the issue continues.
           </p>
 
-          <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+          <div class="mt-6 flex flex-row gap-3 justify-center">
             <a href="/"
               class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200">
               <Icon name="fa7-solid:home" class="mr-2" />

@@ -91,7 +91,7 @@ const config = computed(() => {
       }
     case AccountEventType.TwoFAAttemptSuccess:
       return {
-        icon: 'fa7-solid:check-double',
+        icon: 'fa7-solid:circle-check',
         bgColor: 'bg-green-100',
         iconColor: 'text-green-600',
         title: '2FA Success',

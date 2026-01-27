@@ -10,7 +10,7 @@
         Your password has been successfully updated. You can now log in with your new password.
       </p>
 
-      <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+      <div class="mt-6 flex flex-row gap-3 justify-center">
         <a href="/login"
           class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200">
           <Icon name="fa7-solid:sign-in-alt" class="mr-2" />

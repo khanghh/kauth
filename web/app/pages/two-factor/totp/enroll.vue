@@ -113,7 +113,7 @@
                   <div class="secret-key">{{ secretKey }}</div>
                   <button @click="copySecret" class="copy-btn p-2 rounded-lg transition-colors"
                     :class="copied ? 'text-green-500' : 'text-gray-500 hover:text-gray-700'">
-                    <Icon :name="copied ? 'fa7-solid:check-circle' : 'fa-regular:copy'" />
+                    <Icon :name="copied ? 'fa7-solid:circle-check' : 'fa-regular:copy'" />
                   </button>
                 </div>
               </div>

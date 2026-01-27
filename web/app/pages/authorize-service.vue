@@ -39,7 +39,7 @@
       </div>
 
       <form method="post">
-        <div class="flex flex-col sm:flex-row gap-3">
+        <div class="flex flex-row gap-3">
           <a href="/"
             class="flex-1 px-5 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition flex items-center justify-center gap-2">
             <Icon name="fa7-solid:xmark" />

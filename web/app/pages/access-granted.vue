@@ -11,7 +11,7 @@
         This window can be safely closed at any time.
       </p>
 
-      <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+      <div class="mt-6 flex flex-row gap-3 justify-center">
         <a href="/"
           class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200">
           <Icon name="fa7-solid:home" class="mr-2" />

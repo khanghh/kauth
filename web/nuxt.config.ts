@@ -41,6 +41,7 @@ export default defineNuxtConfig({
         "/sessions",
         "/verify-email",
         "/forgot-password",
+        "/reset-password",
         "/2fa/challenge",
         "/2fa/otp/verify",
         "/2fa/totp/verify",

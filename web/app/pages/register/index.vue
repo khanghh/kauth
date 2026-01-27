@@ -1,148 +1,151 @@
 <template>
-  <div class="bg-white shadow-lg rounded-2xl overflow-hidden">
-    <div class="px-6 sm:px-10 py-10">
-      <div class="text-center mb-8">
-        <template v-if="oauthProvider">
-          <div class="flex justify-center mb-4">
-            <img v-if="picture" :src="picture" alt="Profile"
-              class="avatar w-20 h-20 rounded-full border-4 border-blue-100 object-cover">
-            <div v-else
-              class="avatar w-20 h-20 rounded-full border-4 border-blue-100 bg-indigo-600 flex items-center justify-center text-white text-3xl font-bold">
-              {{ (fullName?.[0] || 'U').toUpperCase() }}
+  <div>
+    <div class="bg-white shadow-lg rounded-2xl overflow-hidden">
+      <div class="px-6 sm:px-10 py-10">
+        <div class="text-center mb-8">
+          <template v-if="oauthProvider">
+            <div class="flex justify-center mb-4">
+              <img v-if="picture" :src="picture" alt="Profile"
+                class="avatar w-20 h-20 rounded-full border-4 border-blue-100 object-cover">
+              <div v-else
+                class="avatar w-20 h-20 rounded-full border-4 border-blue-100 bg-indigo-600 flex items-center justify-center text-white text-3xl font-bold">
+                {{ (fullName?.[0] || 'U').toUpperCase() }}
+              </div>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Welcome, {{ fullName }}</h1>
+            <p class="text-gray-600 mt-1">{{ email }}</p>
+            <div class="mt-3 inline-flex items-center bg-blue-50 text-blue-700 text-sm px-3 py-1 rounded-full">
+              <Icon name="fa7-solid:circle-check" class="mr-1" />
+              Connected via &nbsp; <span class="capitalize">{{ oauthProvider }}</span>
+            </div>
+            <p class="text-gray-600 mt-4">Set a username and password to continue</p>
+          </template>
+          <template v-else>
+            <img src="/images/logo.png" alt="Logo" class="h-16 mx-auto mb-4 object-contain">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 text-center">Create your account</h1>
+            <p class="text-gray-600">Fill out the form to create your account</p>
+          </template>
+        </div>
+
+        <div v-if="errorMsg" class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          <Icon name="fa7-solid:exclamation-circle" class="mr-2" />
+          {{ errorMsg }}
+        </div>
+
+        <form ref="formEl" class="space-y-6" method="POST" novalidate @submit="onSubmit">
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Choose a username</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                <Icon name="fa7-solid:user" class="text-gray-400" />
+              </span>
+              <input type="text" id="username" name="username" autocomplete="username" required
+                class="form-input w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
+                placeholder="Enter your username" v-model="username">
+            </div>
+            <p :class="['mt-1 text-sm text-red-600', { hidden: !usernameError }]">{{ usernameError }}
+            </p>
+          </div>
+
+          <div v-if="!oauthProvider">
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                <Icon name="fa7-solid:envelope" class="text-gray-400" />
+              </span>
+              <input type="text" id="email" name="email" required
+                class="form-input w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
+                placeholder="Enter your email address" v-model="email">
+            </div>
+            <p :class="['mt-1 text-sm text-red-600', { hidden: !emailError }]">{{ emailError }}</p>
+          </div>
+
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Create password</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                <Icon name="fa7-solid:lock" class="text-gray-400" />
+              </span>
+              <input :type="showPassword ? 'text' : 'password'" id="password" name="password"
+                autocomplete="new-password"
+                required
+                class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
+                placeholder="Create a secure password" v-model="password">
+              <button class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
+                type="button"
+                tabindex="-1" @click="showPassword = !showPassword" aria-label="Toggle password visibility">
+                <Icon :name="showPassword ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" />
+              </button>
+            </div>
+
+            <div class="mt-2" :class="{ hidden: !showStrength }">
+              <div class="flex bg-gray-200 rounded-full overflow-hidden h-1.5">
+                <div class="strength-bar" :class="strengthBarClass"></div>
+              </div>
+              <p class="text-xs mt-1" :class="strengthTextClass">{{ strengthText }}</p>
+            </div>
+            <p :class="['mt-1 text-sm text-red-600', { hidden: !passwordError }]">{{ passwordError }}
+            </p>
+          </div>
+
+          <div>
+            <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                <Icon name="fa7-solid:lock" class="text-gray-400" />
+              </span>
+              <input :type="showConfirmPassword ? 'text' : 'password'" id="confirm_password" name="confirm_password"
+                autocomplete="new-password" required
+                class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
+                placeholder="Confirm your password" v-model="confirmPassword">
+              <button class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
+                type="button"
+                tabindex="-1" @click="showConfirmPassword = !showConfirmPassword"
+                aria-label="Toggle confirm password visibility">
+                <Icon :name="showConfirmPassword ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" />
+              </button>
+            </div>
+            <p :class="['mt-1 text-sm text-red-600', { hidden: !confirmPasswordError }]">{{ confirmPasswordError
+              }}</p>
+          </div>
+
+          <div class="flex items-start">
+            <div class="flex items-center h-5">
+              <input id="terms" name="terms" type="checkbox" required
+                class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded" v-model="termsAccepted">
+            </div>
+            <div class="ml-3 text-sm">
+              <label for="terms" class="font-medium text-gray-700">I agree to the <a href="/terms"
+                  class="text-blue-600 hover:text-blue-500">Terms of Service</a> and <a href="/privacy"
+                  class="text-blue-600 hover:text-blue-500">Privacy Policy</a></label>
+              <p :class="['mt-1 text-red-600', { hidden: !termsError }]">{{ termsError }}</p>
             </div>
           </div>
-          <h1 class="text-3xl font-bold text-gray-800 mb-2">Welcome, {{ fullName }}</h1>
-          <p class="text-gray-600 mt-1">{{ email }}</p>
-          <div class="mt-3 inline-flex items-center bg-blue-50 text-blue-700 text-sm px-3 py-1 rounded-full">
-            <Icon name="fa7-solid:check-circle" class="mr-1" />
-            Connected via &nbsp; <span class="capitalize">{{ oauthProvider }}</span>
-          </div>
-          <p class="text-gray-600 mt-4">Set a username and password to continue</p>
-        </template>
-        <template v-else>
-          <img src="/images/logo.png" alt="Logo" class="h-16 mx-auto mb-4 object-contain">
-          <h1 class="text-3xl font-bold text-gray-800 mb-3 text-center">Create your account</h1>
-          <p class="text-gray-600 mt-2">Fill out the form to create your account</p>
-        </template>
-      </div>
 
-      <div v-if="errorMsg" class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-        <Icon name="fa7-solid:exclamation-circle" class="mr-2" />
-        {{ errorMsg }}
-      </div>
-
-      <form ref="formEl" class="space-y-6" method="POST" novalidate @submit="onSubmit">
-        <div>
-          <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Choose a username</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-              <Icon name="fa7-solid:user" class="text-gray-400" />
-            </span>
-            <input type="text" id="username" name="username" autocomplete="username" required
-              class="form-input w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
-              placeholder="Enter your username" v-model="username">
-          </div>
-          <p :class="['mt-1 text-sm text-red-600', { hidden: !usernameError }]">{{ usernameError }}
-          </p>
-        </div>
-
-        <div v-if="!oauthProvider">
-          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-              <Icon name="fa7-solid:envelope" class="text-gray-400" />
-            </span>
-            <input type="text" id="email" name="email" required
-              class="form-input w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
-              placeholder="Enter your email address" v-model="email">
-          </div>
-          <p :class="['mt-1 text-sm text-red-600', { hidden: !emailError }]">{{ emailError }}</p>
-        </div>
-
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Create password</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-              <Icon name="fa7-solid:lock" class="text-gray-400" />
-            </span>
-            <input :type="showPassword ? 'text' : 'password'" id="password" name="password" autocomplete="new-password"
-              required
-              class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
-              placeholder="Create a secure password" v-model="password">
-            <button class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
-              type="button"
-              tabindex="-1" @click="showPassword = !showPassword" aria-label="Toggle password visibility">
-              <Icon :name="showPassword ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" />
+          <div v-if="turnstileSiteKey" class="cf-turnstile text-center" :data-sitekey="turnstileSiteKey"></div>
+          <div class="pt-2">
+            <button type="submit"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3.5 px-4 rounded-lg transition duration-200 w-full flex items-center justify-center">
+              <Icon name="fa7-solid:user-plus" class="mr-2" />
+              {{ oauthProvider ? 'Complete Registration' : 'Create Account' }}
             </button>
           </div>
 
-          <div class="mt-2" :class="{ hidden: !showStrength }">
-            <div class="flex bg-gray-200 rounded-full overflow-hidden h-1.5">
-              <div class="strength-bar" :class="strengthBarClass"></div>
-            </div>
-            <p class="text-xs mt-1" :class="strengthTextClass">{{ strengthText }}</p>
+          <div v-if="oauthProvider" class="text-center mt-4">
+            <a href="/login?renew=true" class="text-sm text-blue-600 hover:underline flex items-center justify-center">
+              <Icon name="fa7-solid:right-to-bracket" class="mr-2" />
+              Sign in with another account
+            </a>
           </div>
-          <p :class="['mt-1 text-sm text-red-600', { hidden: !passwordError }]">{{ passwordError }}
-          </p>
-        </div>
 
-        <div>
-          <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-              <Icon name="fa7-solid:lock" class="text-gray-400" />
-            </span>
-            <input :type="showConfirmPassword ? 'text' : 'password'" id="confirm_password" name="confirm_password"
-              autocomplete="new-password" required
-              class="form-input w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200"
-              placeholder="Confirm your password" v-model="confirmPassword">
-            <button class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
-              type="button"
-              tabindex="-1" @click="showConfirmPassword = !showConfirmPassword"
-              aria-label="Toggle confirm password visibility">
-              <Icon :name="showConfirmPassword ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" />
-            </button>
-          </div>
-          <p :class="['mt-1 text-sm text-red-600', { hidden: !confirmPasswordError }]">{{ confirmPasswordError
-          }}</p>
-        </div>
-
-        <div class="flex items-start">
-          <div class="flex items-center h-5">
-            <input id="terms" name="terms" type="checkbox" required
-              class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded" v-model="termsAccepted">
-          </div>
-          <div class="ml-3 text-sm">
-            <label for="terms" class="font-medium text-gray-700">I agree to the <a href="/terms"
-                class="text-blue-600 hover:text-blue-500">Terms of Service</a> and <a href="/privacy"
-                class="text-blue-600 hover:text-blue-500">Privacy Policy</a></label>
-            <p :class="['mt-1 text-red-600', { hidden: !termsError }]">{{ termsError }}</p>
-          </div>
-        </div>
-
-        <div v-if="turnstileSiteKey" class="cf-turnstile text-center" :data-sitekey="turnstileSiteKey"></div>
-        <div class="pt-2">
-          <button type="submit"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 w-full flex items-center justify-center">
-            <Icon name="fa7-solid:user-plus" class="mr-2" />
-            {{ oauthProvider ? 'Complete Registration' : 'Create Account' }}
-          </button>
-        </div>
-
-        <div v-if="oauthProvider" class="text-center mt-4">
-          <a href="/login?renew=true" class="text-sm text-blue-600 hover:underline flex items-center justify-center">
-            <Icon name="fa7-solid:right-to-bracket" class="mr-2" />
-            Sign in with another account
-          </a>
-        </div>
-
-      </form>
-    </div>
-    <div v-if="!oauthProvider" class="bg-gray-50 px-6 py-4 text-center border-t border-gray-100">
-      <p class="text-gray-600 text-sm">
-        Already have an account?
-        <a href="/login" class="text-blue-600 hover:text-blue-500 font-medium">Sign in</a>
-      </p>
+        </form>
+      </div>
+      <div v-if="!oauthProvider" class="bg-gray-50 px-6 py-4 text-center border-t border-gray-100">
+        <p class="text-gray-600 text-sm">
+          Already have an account?
+          <a href="/login" class="text-blue-600 hover:text-blue-500 font-medium">Sign in</a>
+        </p>
+      </div>
     </div>
   </div>
 </template>

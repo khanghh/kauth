@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <div class="flex flex-col sm:flex-row justify-center gap-3">
+    <div class="flex flex-row justify-center gap-3">
       <a href="/"
         class="px-5 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

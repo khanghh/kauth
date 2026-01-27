@@ -21,7 +21,7 @@
       <div v-if="successMsg"
         class="mb-6 rounded-xl border px-4 py-3 border-green-200 bg-green-50 text-green-800">
         <div class="flex items-center">
-          <Icon name="fa7-solid:check-circle" class="mr-2 w-5 h-5" />
+          <Icon name="fa7-solid:circle-check" class="mr-2 w-5 h-5" />
           <span>{{ successMsg }}</span>
         </div>
       </div>
