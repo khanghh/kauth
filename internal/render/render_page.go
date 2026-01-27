@@ -215,8 +215,8 @@ func RenderRegisterVerifyEmailPage(ctx *fiber.Ctx, pageData VerifyEmailPageData)
 	return ctx.Status(fiber.StatusOK).SendString(body)
 }
 
-func RenderAuthorizeServiceAccessPage(ctx *fiber.Ctx, data AuthorizeServicePageData) error {
-	body, err := RenderHTML("authorize-service", fiber.Map{
+func RenderAuthorizeServicePage(ctx *fiber.Ctx, data AuthorizeServicePageData) error {
+	body, err := RenderHTML("authorize", fiber.Map{
 		"siteName":    globalVars["siteName"],
 		"email":       data.Email,
 		"serviceName": data.ServiceName,

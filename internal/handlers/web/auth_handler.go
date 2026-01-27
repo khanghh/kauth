@@ -192,7 +192,7 @@ func (h *AuthHandler) GetAuthorize(ctx *fiber.Ctx) error {
 		ServiceName: service.Name,
 		ServiceURL:  service.CallbackURL,
 	}
-	return render.RenderAuthorizeServiceAccessPage(ctx, pageData)
+	return render.RenderAuthorizeServicePage(ctx, pageData)
 }
 
 func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
