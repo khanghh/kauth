@@ -198,10 +198,12 @@
       </div>
 
       <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6">
-        <div class="flex items-start">
-          <Icon name="fa7-solid:shield-halved" class="text-blue-500 mr-3 text-2xl" />
+        <div>
+          <div class="flex items-center mb-1">
+            <Icon name="fa7-solid:shield-halved" class="text-blue-500 mr-2" />
+            <h3 class="font-medium text-blue-800">Your Privacy Matters</h3>
+          </div>
           <div>
-            <h3 class="font-medium text-blue-800 mb-1">Your Privacy Matters</h3>
             <p class="text-sm text-blue-700">
               We only use your personal information to provide and improve our services.
               Your birthday is used for age verification and personalized experiences.

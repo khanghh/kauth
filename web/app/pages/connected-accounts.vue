@@ -48,9 +48,11 @@
 
     <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6">
       <div class="flex items-start">
-        <Icon name="fa7-solid:shield-halved" class="text-blue-500 mr-3 text-2xl" />
+        <div class="flex items-center mb-1">
+          <Icon name="fa7-solid:shield-halved" class="text-blue-500 mr-2" />
+          <h3 class="font-medium text-blue-800">About Connected Accounts</h3>
+        </div>
         <div>
-          <h3 class="font-medium text-blue-800 mb-1">About Connected Accounts</h3>
           <p class="text-sm text-blue-700">
             Connected accounts allow you to link your account with third-party services for easier login and improved
             functionality.

@@ -57,33 +57,33 @@
       </TwofactorMethodCard>
     </div>
 
-    <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mt-8">
-      <div class="flex items-start">
-        <Icon name="fa7-solid:shield-halved" class="text-blue-500 mt-1 mr-3 text-xl" />
-        <div>
-          <h3 class="font-medium text-blue-800 text-lg mb-2">Why Enable Two-Factor Authentication?</h3>
-          <ul class="text-sm text-blue-700 space-y-2">
-            <li class="flex items-start">
-              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
-              <span><strong>Extra Security:</strong> Even if someone steals your password, they can't access your
-                account without the second factor</span>
-            </li>
-            <li class="flex items-start">
-              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
-              <span><strong>Protection Against Phishing:</strong> 2FA codes are unique and time-sensitive, making
-                phishing attacks much harder</span>
-            </li>
-            <li class="flex items-start">
-              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
-              <span><strong>Compliance:</strong> Many services and regulations now require or recommend 2FA for enhanced
-                security</span>
-            </li>
-            <li class="flex items-start">
-              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
-              <span><strong>Peace of Mind:</strong> Know that your account has an additional layer of protection</span>
-            </li>
-          </ul>
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-8">
+      <div>
+        <div class="flex items-center mb-1">
+          <Icon name="fa7-solid:shield-halved" class="text-blue-500 mr-2" />
+          <h3 class="font-medium text-blue-800">Why Enable Two-Factor Authentication?</h3>
         </div>
+        <ul class="text-sm text-blue-700 space-y-2">
+          <li class="flex items-start">
+            <Icon name="fa7-solid:check" class="mr-2 flex-shrink-0" />
+            <span><strong>Extra Security:</strong> Even if someone steals your password, they can't access your
+              account without the second factor</span>
+          </li>
+          <li class="flex items-start">
+            <Icon name="fa7-solid:check" class="mr-2 flex-shrink-0" />
+            <span><strong>Protection Against Phishing:</strong> 2FA codes are unique and time-sensitive, making
+              phishing attacks much harder</span>
+          </li>
+          <li class="flex items-start">
+            <Icon name="fa7-solid:check" class="mr-2 flex-shrink-0" />
+            <span><strong>Compliance:</strong> Many services and regulations now require or recommend 2FA for enhanced
+              security</span>
+          </li>
+          <li class="flex items-start">
+            <Icon name="fa7-solid:check" class="mr-2 flex-shrink-0" />
+            <span><strong>Peace of Mind:</strong> Know that your account has an additional layer of protection</span>
+          </li>
+        </ul>
       </div>
     </div>
   </div>

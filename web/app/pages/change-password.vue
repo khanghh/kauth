@@ -159,29 +159,29 @@
     </div>
 
     <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6">
-      <div class="flex items-start">
-        <Icon name="fa7-solid:shield-halved" class="text-blue-500 mt-1 mr-3" />
-        <div>
-          <h3 class="font-medium text-blue-800 mb-2">Password Security Tips</h3>
-          <ul class="text-sm text-blue-700 space-y-1">
-            <li class="flex items-start">
-              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
-              <span>Use a unique password that you don't use for other accounts</span>
-            </li>
-            <li class="flex items-start">
-              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
-              <span>Consider using a password manager to generate and store secure passwords</span>
-            </li>
-            <li class="flex items-start">
-              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
-              <span>Avoid using personal information like your name, birthdate, or common words</span>
-            </li>
-            <li class="flex items-start">
-              <Icon name="fa7-solid:check" class="mr-2 mt-0.5 text-xs" />
-              <span>Change your password regularly for better security</span>
-            </li>
-          </ul>
+      <div>
+        <div class="flex items-center mb-1">
+          <Icon name="fa7-solid:shield-halved" class="text-blue-500 mr-2" />
+          <h3 class="font-medium text-blue-800">Password Security Tips</h3>
         </div>
+        <ul class="text-sm text-blue-700 space-y-1">
+          <li class="flex items-start">
+            <Icon name="fa7-solid:check" class="mr-2 flex-shrink-0" />
+            <span>Use a unique password that you don't use for other accounts</span>
+          </li>
+          <li class="flex items-start">
+            <Icon name="fa7-solid:check" class="mr-2 flex-shrink-0" />
+            <span>Consider using a password manager to generate and store secure passwords</span>
+          </li>
+          <li class="flex items-start">
+            <Icon name="fa7-solid:check" class="mr-2 flex-shrink-0" />
+            <span>Avoid using personal information like your name, birthdate, or common words</span>
+          </li>
+          <li class="flex items-start">
+            <Icon name="fa7-solid:check" class="mr-2 flex-shrink-0" />
+            <span>Change your password regularly for better security</span>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
