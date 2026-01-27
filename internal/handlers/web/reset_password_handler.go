@@ -64,7 +64,7 @@ func (h *ResetPasswordHandler) GetResetPassword(ctx *fiber.Ctx) error {
 		if err := decryptState(ctx, state, &claims); err != nil {
 			return render.RenderNotFoundErrorPage(ctx)
 		}
-		return render.RenderSetNewPasswordPage(ctx, "")
+		return render.RenderResetPasswordPage(ctx, "", false)
 	}
 
 	if token != "" {
@@ -98,11 +98,11 @@ func (h *ResetPasswordHandler) PostResetPassword(ctx *fiber.Ctx) error {
 	}
 
 	if err := captcha.Verify(ctx); err != nil {
-		return render.RenderSetNewPasswordPage(ctx, MsgInvalidCaptcha)
+		return render.RenderResetPasswordPage(ctx, MsgInvalidCaptcha, false)
 	}
 
 	if err := validatePassword(newPassword); err != nil {
-		return render.RenderSetNewPasswordPage(ctx, err.Error())
+		return render.RenderResetPasswordPage(ctx, err.Error(), false)
 	}
 
 	err := h.userService.UpdatePassword(ctx.Context(), claims.UserID, newPassword)
@@ -110,8 +110,7 @@ func (h *ResetPasswordHandler) PostResetPassword(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	sessions.Destroy(ctx)
-	return render.RenderPasswordUpdatedPage(ctx)
+	return render.RenderResetPasswordPage(ctx, "", true)
 }
 
 func (h *ResetPasswordHandler) GetForgotPassword(ctx *fiber.Ctx) error {

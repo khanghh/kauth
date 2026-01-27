@@ -244,22 +244,12 @@ func RenderForgotPasswordPage(ctx *fiber.Ctx, pageData ForgotPasswordPageData) e
 	return ctx.Status(fiber.StatusOK).SendString(body)
 }
 
-func RenderSetNewPasswordPage(ctx *fiber.Ctx, errorMsg string) error {
-	body, err := RenderHTML("set-new-password", fiber.Map{
+func RenderResetPasswordPage(ctx *fiber.Ctx, errorMsg string, success bool) error {
+	body, err := RenderHTML("reset-password", fiber.Map{
 		"siteName":         globalVars["siteName"],
 		"turnstileSiteKey": globalVars["turnstileSiteKey"],
 		"errorMsg":         errorMsg,
-	})
-	if err != nil {
-		return err
-	}
-	ctx.Set("Content-Type", "text/html; charset=utf-8")
-	return ctx.Status(fiber.StatusOK).SendString(body)
-}
-
-func RenderPasswordUpdatedPage(ctx *fiber.Ctx) error {
-	body, err := RenderHTML("password-updated", fiber.Map{
-		"siteName": globalVars["siteName"],
+		"success":          success,
 	})
 	if err != nil {
 		return err
