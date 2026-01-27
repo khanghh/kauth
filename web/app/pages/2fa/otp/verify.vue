@@ -8,7 +8,6 @@
       </div>
 
       <form method="POST" class="space-y-6" id="otpForm">
-        <input type="hidden" name="_csrf" :value="csrfToken">
         <input type="hidden" name="cid" :value="cid">
         <input type="hidden" name="code" :value="otpCode">
 
@@ -57,7 +56,6 @@
 </template>
 
 <script setup lang="ts">
-const csrfToken = useServerVar<string>('csrfToken', '')
 const cid = useServerVar<string>('cid', '')
 const errorMsg = useServerVar<string>('errorMsg', '')
 const emailOrPhone = useServerVar<string>('emailOrPhone', '')

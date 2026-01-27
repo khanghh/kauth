@@ -40,7 +40,6 @@
 
     <footer class="bg-gray-50 px-6 py-4 text-center border-t border-gray-100">
       <form action="/logout" method="POST">
-        <input type="hidden" name="_csrf" value="token">
         <button class="text-red-600 hover:text-red-500 text-sm font-medium" type="submit">
           Log out >>
         </button>

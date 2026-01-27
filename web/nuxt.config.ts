@@ -49,6 +49,7 @@ export default defineNuxtConfig({
         "/login",
         "/register",
         "/register/verify",
+        "/authorize",
       ]
     },
     hooks: {
