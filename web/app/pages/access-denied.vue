@@ -54,13 +54,6 @@
 
     <div class="mt-6 text-sm text-gray-500">
       <p>Error code: 403_FORBIDDEN</p>
-      <p class="mt-1">Reference ID:
-        <span class="font-mono">#ERR-
-          <script>
-            document.write(Math.floor(100000 + Math.random() * 900000))
-          </script>
-        </span>
-      </p>
     </div>
   </div>
 </template>

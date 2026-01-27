@@ -83,7 +83,7 @@
 
       <footer class="bg-gray-50 px-6 py-4 text-center border-t border-gray-100">
         <p class="text-gray-500 text-xs sm:text-sm">
-          Need help? <a href="#" class="text-blue-600 hover:underline font-medium">Contact Support</a>
+          Need help? <a :href="contactLink" class="text-blue-600 hover:underline font-medium">Contact Support</a>
         </p>
       </footer>
     </div>
@@ -92,6 +92,7 @@
 
 <script setup lang="ts">
 const config = useRuntimeConfig().public
+const contactLink = config.contactLink as string || '#'
 const turnstileSiteKey = config.turnstileSiteKey
 
 const emailSent = useServerVar<boolean>('emailSent', false)

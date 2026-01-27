@@ -33,19 +33,7 @@ onMounted(async () => {
   }
 })
 
-const email = computed(() => profile.value?.email ?? '')
-
 const successMsg = ref('')
 const errorMsg = ref('')
-const showSuccess = (msg: string) => { errorMsg.value = ''; successMsg.value = msg }
 const showError = (msg: string) => { successMsg.value = ''; errorMsg.value = msg }
-
-const disconnectGoogle = () => {
-  if (!confirm('Are you sure you want to disconnect your Google account? This may affect your ability to sign in.')) return
-  showSuccess('Google account disconnected. (mock)')
-}
-
-const connectGithub = () => {
-  showSuccess('Redirecting to GitHub authorization... (mock)')
-}
 </script>

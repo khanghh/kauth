@@ -66,7 +66,7 @@
 <script setup lang="ts">
 const statusCode = useServerVar<number>('statusCode', 404)
 
-const config = useRuntimeConfig()
+const config = useRuntimeConfig().public
 const contactLink = config.contactLink as string || '#'
 
 </script>

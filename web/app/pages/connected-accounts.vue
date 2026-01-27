@@ -42,7 +42,6 @@
         :account="account"
         :iconName="providerIcons[account.provider] || 'fa7-solid:link'"
         :iconClass="providerColors[account.provider]?.text || 'text-gray-600'"
-        :processing="processing === account.provider"
         @connect="handleConnect(account.provider)"
         @disconnect="handleDisconnect(account)" />
     </div>
@@ -101,7 +100,6 @@ const providerColors: Record<string, { text: string }> = {
   discord: { text: 'text-indigo-600' },
 }
 
-const showSuccess = (msg: string) => { errorMsg.value = ''; successMsg.value = msg }
 const showError = (msg: string) => { successMsg.value = ''; errorMsg.value = msg }
 
 const fetchAccounts = async () => {
