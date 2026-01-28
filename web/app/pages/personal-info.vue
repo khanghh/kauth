@@ -239,15 +239,16 @@ import type { PersonalInfo, PersonalInfoUpdate } from '~/composables/useApi'
 import { countries } from '~/composables/validate'
 import auth from '~/middlewares/auth'
 
-const api = useApi()
+useHead({
+  title: useSiteTitle('Personal Information')
+})
 
 definePageMeta({
   layout: 'dashboard',
   middleware: auth
 })
 
-useHead({ title: useSiteTitle('Personal Information') })
-
+const api = useApi()
 const personalInfo = ref<PersonalInfo>({} as PersonalInfo)
 
 onMounted(async () => {

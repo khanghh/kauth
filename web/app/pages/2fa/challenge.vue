@@ -49,6 +49,11 @@
 </template>
 
 <script setup lang="ts">
+
+useHead({
+  title: useSiteTitle('Verification Required'),
+})
+
 const errorMsg = useServerVar<string>('errorMsg', '')
 const challengeID = useServerVar<string>('challengeID', '')
 const emailEnabled = useServerVar<boolean>('emailEnabled', false)

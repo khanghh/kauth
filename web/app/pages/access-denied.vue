@@ -57,3 +57,11 @@
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+
+useHead({
+  title: useSiteTitle('Access Denied'),
+})
+
+</script>

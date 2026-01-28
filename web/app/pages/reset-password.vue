@@ -156,6 +156,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+useHead({
+  title: useSiteTitle('Reset Password'),
+  script: [
+    {
+      src: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
+      defer: true
+    }
+  ]
+})
+
 const config = useRuntimeConfig().public
 const turnstileSiteKey = config.turnstileSiteKey
 const contactLink = config.contactLink as string || '#'
@@ -247,13 +257,4 @@ function onSubmit(e: Event) {
   form.submit()
 }
 
-useHead({
-  title: useSiteTitle('Reset Password'),
-  script: [
-    {
-      src: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
-      defer: true
-    }
-  ]
-})
 </script>

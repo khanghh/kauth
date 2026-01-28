@@ -29,6 +29,11 @@
 </template>
 
 <script setup lang="ts">
+
+useHead({
+  title: useSiteTitle('Access Granted'),
+})
+
 const config = useRuntimeConfig().public
 const contactLink = config.contactLink as string || '#'
 </script>

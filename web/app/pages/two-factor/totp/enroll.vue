@@ -350,19 +350,13 @@
 <script setup lang="ts">
 import auth from '~/middlewares/auth'
 
+useHead({
+  title: useSiteTitle('Set Up Authenticator App'),
+})
+
 definePageMeta({
   layout: 'dashboard',
   middleware: auth
-})
-
-useHead({
-  title: useSiteTitle('Set Up Authenticator App'),
-  script: [
-    {
-      src: 'https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js',
-      defer: true
-    }
-  ]
 })
 
 const config = useRuntimeConfig().public

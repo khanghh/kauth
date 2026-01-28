@@ -54,6 +54,10 @@ import auth from '~/middlewares/auth'
 import ActivityItem from '~/components/activity/ActivityItem.vue'
 import { type AccountEvent } from '~/composables/useApi'
 
+useHead({
+  title: useSiteTitle('Recent Activity'),
+})
+
 definePageMeta({
   layout: 'dashboard',
   middleware: auth,

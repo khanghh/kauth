@@ -67,6 +67,11 @@
 </template>
 
 <script setup lang="ts">
+
+useHead({
+  title: useSiteTitle('Authorize access'),
+})
+
 const serviceName = useServerVar<string>('serviceName', '')
 const email = useServerVar<string>('email', '')
 const serviceURL = useServerVar<string>('serviceURL', '')

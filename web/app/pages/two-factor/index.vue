@@ -91,12 +91,12 @@
 
 <script setup lang="ts">
 
-definePageMeta({
-  layout: 'dashboard',
-})
-
 useHead({
   title: useSiteTitle('Two-Factor Authentication'),
+})
+
+definePageMeta({
+  layout: 'dashboard',
 })
 
 const api = useApi()

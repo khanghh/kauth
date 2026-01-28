@@ -12,15 +12,16 @@ import { computed, onMounted, ref } from 'vue'
 import type { PersonalInfo } from '~/composables/useApi'
 import auth from '~/middlewares/auth'
 
-const api = useApi()
+useHead({
+  title: useSiteTitle('Active Sessions'),
+})
 
 definePageMeta({
   layout: 'dashboard',
   middleware: auth
 })
 
-useHead({ title: useSiteTitle('Connected Accounts') })
-
+const api = useApi()
 const profile = ref<PersonalInfo>({} as PersonalInfo)
 
 onMounted(async () => {

@@ -192,17 +192,16 @@
 <script setup lang="ts">
 import auth from '~/middlewares/auth'
 
-const api = useApi()
+useHead({
+  title: useSiteTitle('Change password'),
+})
 
 definePageMeta({
   layout: 'dashboard',
   middleware: auth
 })
 
-useHead({
-  title: useSiteTitle('Change password'),
-})
-
+const api = useApi()
 const errorMsg = ref('')
 const successMsg = ref('')
 const lastPasswordChange = ref('')

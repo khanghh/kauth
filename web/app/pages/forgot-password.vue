@@ -91,12 +91,6 @@
 </template>
 
 <script setup lang="ts">
-const config = useRuntimeConfig().public
-const contactLink = config.contactLink as string || '#'
-const turnstileSiteKey = config.turnstileSiteKey
-
-const emailSent = useServerVar<boolean>('emailSent', false)
-const errorMsg = useServerVar<boolean>('errorMsg', false)
 
 useHead({
   title: useSiteTitle('Forgot Password'),
@@ -107,5 +101,12 @@ useHead({
     }
   ]
 })
+
+const config = useRuntimeConfig().public
+const contactLink = config.contactLink as string || '#'
+const turnstileSiteKey = config.turnstileSiteKey
+
+const emailSent = useServerVar<boolean>('emailSent', false)
+const errorMsg = useServerVar<boolean>('errorMsg', false)
 
 </script>

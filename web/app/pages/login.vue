@@ -105,6 +105,16 @@
 </template>
 
 <script setup lang="ts">
+useHead({
+  title: useSiteTitle('Login'),
+  script: [
+    {
+      src: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
+      defer: true
+    }
+  ]
+})
+
 const config = useRuntimeConfig().public
 const turnstileSiteKey = config.turnstileSiteKey
 
@@ -117,13 +127,4 @@ const discordOAuthURL = useServerVar<string>('discordOAuthURL', '')
 const microsoftOAuthURL = useServerVar<string>('microsoftOAuthURL', '')
 const appleOAuthURL = useServerVar<string>('appleOAuthURL', '')
 
-useHead({
-  title: useSiteTitle('Login'),
-  script: [
-    {
-      src: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
-      defer: true
-    }
-  ]
-})
 </script>

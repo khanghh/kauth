@@ -106,7 +106,7 @@
               </button>
             </div>
             <p :class="['mt-1 text-sm text-red-600', { hidden: !confirmPasswordError }]">{{ confirmPasswordError
-              }}</p>
+            }}</p>
           </div>
 
           <div class="flex items-start">
@@ -196,6 +196,17 @@
 </style>
 
 <script setup lang="ts">
+
+useHead({
+  title: useSiteTitle('Create Your Account'),
+  script: [
+    {
+      src: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
+      defer: true
+    }
+  ]
+})
+
 const config = useRuntimeConfig().public
 const turnstileSiteKey = config.turnstileSiteKey
 
@@ -320,13 +331,4 @@ const onSubmit = (e: Event) => {
 }
 
 
-useHead({
-  title: useSiteTitle('Create Your Account'),
-  script: [
-    {
-      src: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
-      defer: true
-    }
-  ]
-})
 </script>

@@ -57,6 +57,10 @@
 
 <script setup lang="ts">
 
+useHead({
+  title: useSiteTitle('Verify Your Code'),
+})
+
 const config = useRuntimeConfig().public
 const contactLink = config.contactLink as string || '#'
 

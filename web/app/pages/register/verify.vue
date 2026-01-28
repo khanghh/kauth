@@ -74,6 +74,10 @@
 
 <script setup lang="ts">
 
+useHead({
+  title: useSiteTitle('Verify Email'),
+})
+
 const config = useRuntimeConfig().public
 const contactLink = config.contactLink as string || '#'
 
