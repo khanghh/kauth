@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -105,8 +104,8 @@ func mustInitDatabase(dbConfig config.MySQLConfig) *gorm.DB {
 
 	sqlDB.SetMaxOpenConns(dbConfig.MaxOpenConns)
 	sqlDB.SetMaxIdleConns(dbConfig.MaxIdleConns)
-	sqlDB.SetConnMaxIdleTime(time.Duration(dbConfig.ConnMaxIdleTime) * time.Second)
-	sqlDB.SetConnMaxLifetime(time.Duration(dbConfig.ConnMaxLifetime) * time.Second)
+	sqlDB.SetConnMaxIdleTime(dbConfig.ConnMaxIdleTime)
+	sqlDB.SetConnMaxLifetime(dbConfig.ConnMaxLifetime)
 
 	if err := db.AutoMigrate(model.Models...); err != nil {
 		slog.Error("Database migration failed", "error", err)

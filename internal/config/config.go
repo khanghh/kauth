@@ -14,12 +14,12 @@ const (
 )
 
 type MySQLConfig struct {
-	Dsn             string `mapstructure:"dsn"`
-	TablePrefix     string `mapstructure:"tablePrefix"`
-	MaxIdleConns    int    `mapstructure:"maxIdleConns"`
-	MaxOpenConns    int    `mapstructure:"maxOpenConns"`
-	ConnMaxLifetime int    `mapstructure:"connMaxLifetime"` // in seconds
-	ConnMaxIdleTime int    `mapstructure:"connMaxIdleTime"` // in seconds
+	Dsn             string        `mapstructure:"dsn"`
+	TablePrefix     string        `mapstructure:"tablePrefix"`
+	MaxIdleConns    int           `mapstructure:"maxIdleConns"`
+	MaxOpenConns    int           `mapstructure:"maxOpenConns"`
+	ConnMaxLifetime time.Duration `mapstructure:"connMaxLifetime"` // in seconds
+	ConnMaxIdleTime time.Duration `mapstructure:"connMaxIdleTime"` // in seconds
 }
 
 type SessionConfig struct {
