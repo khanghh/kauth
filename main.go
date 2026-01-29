@@ -25,6 +25,7 @@ import (
 	"github.com/khanghh/kauth/internal/render"
 	"github.com/khanghh/kauth/internal/store"
 	"github.com/khanghh/kauth/internal/twofactor"
+	"github.com/khanghh/kauth/internal/upload"
 	"github.com/khanghh/kauth/internal/users"
 	"github.com/khanghh/kauth/model"
 	"github.com/khanghh/kauth/model/query"
@@ -188,16 +189,18 @@ func mustInitRedisClient(redisCfg config.RedisConfig) redis.UniversalClient {
 }
 
 type apiDependencies struct {
+	config           *config.Config
 	globalVars       fiber.Map
 	authorizeService *auth.AuthorizeService
 	userService      *users.UserService
 	twoFactorService *twofactor.TwoFactorService
 	oauthProviders   []oauth.OAuthProvider
+	uploader         upload.Uploader
 }
 
 func setupAPIRoutes(router fiber.Router, deps *apiDependencies) {
 	serviceValidateHandler := api.NewServiceValidateHandler(deps.authorizeService, deps.userService, deps.twoFactorService)
-	accountHandler := api.NewAccountHandler(deps.userService, deps.twoFactorService, deps.oauthProviders)
+	accountHandler := api.NewAccountHandler(deps.userService, deps.twoFactorService, deps.oauthProviders, deps.uploader)
 	apiRouter := router.Group("/api")
 	apiRouter.Post("/serviceValidate", serviceValidateHandler.PostServiceValidate)
 	apiRouter.Get("/account", accountHandler.GetAccountInfo)
@@ -211,6 +214,8 @@ func setupAPIRoutes(router fiber.Router, deps *apiDependencies) {
 	apiRouter.Get("/account/oauth", accountHandler.GetOAuthAccounts)
 	apiRouter.Delete("/account/oauth/:provider", accountHandler.DeleteOAuthAccount)
 	apiRouter.Get("/account/events", accountHandler.GetRecentEvents)
+	apiRouter.Post("/account/avatar", accountHandler.PostUploadAvatar)
+	apiRouter.Delete("/account/avatar", accountHandler.DeleteAvatar)
 }
 
 type webDependencies struct {
@@ -308,6 +313,7 @@ func run(ctx *cli.Context) error {
 		authorizeService = auth.NewAuthorizeService(config.MasterKey, storage, serviceRepo)
 		twoFactorService = twofactor.NewTwoFactorService(config.MasterKey, storage, userFactorRepo)
 		oauthProviders   = mustInitOAuthProviders(config)
+		proxyUploader    = upload.NewProxyUploader(config.ProxyUpload.TargetURL, config.ProxyUpload.Token)
 	)
 
 	audit.Initialize(auditRepo)
@@ -345,11 +351,13 @@ func run(ctx *cli.Context) error {
 	}))
 
 	setupAPIRoutes(router, &apiDependencies{
+		config:           config,
 		globalVars:       globalVars,
 		authorizeService: authorizeService,
 		userService:      userService,
 		twoFactorService: twoFactorService,
 		oauthProviders:   oauthProviders,
+		uploader:         proxyUploader,
 	})
 
 	if !config.APIOnly {

@@ -75,6 +75,11 @@ type RedisConfig struct {
 	ClusterMode bool   `mapstructure:"clusterMode"`
 }
 
+type ProxyUploadConfig struct {
+	TargetURL string `mapstructure:"targetURL"`
+	Token     string `mapstructure:"token"`
+}
+
 type Config struct {
 	Debug         bool          `mapstructure:"debug"`
 	SiteName      string        `mapstructure:"siteName"`
@@ -93,7 +98,8 @@ type Config struct {
 		OAuth map[string]OAuthProviderConfig `mapstructure:"oauth"`
 		Ldap  LdapConfig                     `mapstructure:"ldap"`
 	} `mapstructure:"authProviders"`
-	Captcha CaptchaConfig `mapstructure:"captcha"`
+	Captcha     CaptchaConfig     `mapstructure:"captcha"`
+	ProxyUpload ProxyUploadConfig `mapstructure:"proxyUpload"`
 }
 
 func (c *Config) Sanitize() error {

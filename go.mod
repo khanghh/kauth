@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/go-sql-driver/mysql v1.9.3
-	github.com/gofiber/fiber/v2 v2.52.9
+	github.com/gofiber/fiber/v2 v2.52.10
 	github.com/gofiber/storage/memory/v2 v2.0.1
 	github.com/gofiber/storage/redis/v3 v3.4.1
 	github.com/gofiber/template/html/v2 v2.1.3

@@ -303,6 +303,22 @@ func (s *UserService) UnlinkOAuthAccount(ctx context.Context, userID uint, provi
 	return nil
 }
 
+func (s *UserService) UpdateProfilePicture(ctx context.Context, userID uint, pictureURL string) error {
+	updates := map[string]interface{}{
+		query.ColUserPicture: pictureURL,
+	}
+	ret, err := s.userRepo.Updates(ctx, updates, query.User.ID.Eq(userID))
+	if err != nil {
+		return err
+	}
+
+	if ret.RowsAffected == 0 {
+		return ErrUserNotFound
+	}
+
+	return err
+}
+
 func NewUserService(userRepo UserRepository, userOAuthRepo UserOAuthRepository, userFactorRepo UserFactorRepository, pendingUserRepo PendingUserRepository) *UserService {
 	return &UserService{
 		userRepo:        userRepo,

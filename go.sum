@@ -83,6 +83,8 @@ github.com/gofiber/fiber/v2 v2.52.6 h1:Rfp+ILPiYSvvVuIPvxrBns+HJp8qGLDnLJawAu27X
 github.com/gofiber/fiber/v2 v2.52.6/go.mod h1:YEcBbO/FB+5M1IZNBP9FO3J9281zgPAreiI1oqg8nDw=
 github.com/gofiber/fiber/v2 v2.52.9 h1:YjKl5DOiyP3j0mO61u3NTmK7or8GzzWzCFzkboyP5cw=
 github.com/gofiber/fiber/v2 v2.52.9/go.mod h1:YEcBbO/FB+5M1IZNBP9FO3J9281zgPAreiI1oqg8nDw=
+github.com/gofiber/fiber/v2 v2.52.10 h1:jRHROi2BuNti6NYXmZ6gbNSfT3zj/8c0xy94GOU5elY=
+github.com/gofiber/fiber/v2 v2.52.10/go.mod h1:YEcBbO/FB+5M1IZNBP9FO3J9281zgPAreiI1oqg8nDw=
 github.com/gofiber/storage/memory/v2 v2.0.1 h1:tAETnom9uvEB9B3I2LkgewiuqYDAH0ItrIsmT8MUEwk=
 github.com/gofiber/storage/memory/v2 v2.0.1/go.mod h1:RRo3RfX6nTD/UhERyE/u5LcSfqtMo9dA4ltmieSe+QM=
 github.com/gofiber/storage/redis/v3 v3.4.1 h1:feZc1xv1UuW+a1qnpISPaak7r/r0SkNVFHmg9R7PJ/c=

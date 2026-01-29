@@ -13,6 +13,7 @@ import (
 	"github.com/khanghh/kauth/internal/oauth"
 	"github.com/khanghh/kauth/internal/render"
 	"github.com/khanghh/kauth/internal/twofactor"
+	"github.com/khanghh/kauth/internal/upload"
 	"github.com/khanghh/kauth/internal/users"
 	"github.com/khanghh/kauth/internal/validation"
 	"github.com/pquerna/otp/totp"
@@ -27,13 +28,15 @@ type AccountHandler struct {
 	userService      UserService
 	twofactorService TwoFactorService
 	oauthProviders   []oauth.OAuthProvider
+	uploader         upload.Uploader
 }
 
-func NewAccountHandler(userService UserService, twofactorService TwoFactorService, oauthProviders []oauth.OAuthProvider) *AccountHandler {
+func NewAccountHandler(userService UserService, twofactorService TwoFactorService, oauthProviders []oauth.OAuthProvider, uploader upload.Uploader) *AccountHandler {
 	return &AccountHandler{
 		userService:      userService,
 		twofactorService: twofactorService,
 		oauthProviders:   oauthProviders,
+		uploader:         uploader,
 	}
 }
 
@@ -521,4 +524,62 @@ func (h *AccountHandler) GetRecentEvents(ctx *fiber.Ctx) error {
 		Cursor:  uint64(cursorMs),
 		HasMore: hasMore,
 	}))
+}
+
+func (h *AccountHandler) PostUploadAvatar(ctx *fiber.Ctx) error {
+	session := sessions.Get(ctx)
+	if session == nil || !session.IsAuthenticated() {
+		return ErrUnauthorized
+	}
+
+	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
+	if err != nil {
+		return ErrUnauthorized
+	}
+
+	fileHeader, err := ctx.FormFile("file")
+	if err != nil {
+		return ErrMissingParameters
+	}
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		return ErrInternalServer
+	}
+	defer file.Close()
+
+	uploadedURL, err := h.uploader.Upload(ctx.Context(), fileHeader.Filename, file)
+	if err != nil {
+		if err == upload.ErrUploadServerUnavailable {
+			return ErrUploadServiceUnavailable
+		}
+		return NewAPIError(fiber.StatusBadRequest, err.Error())
+	}
+
+	err = h.userService.UpdateProfilePicture(ctx.Context(), user.ID, uploadedURL)
+	if err != nil {
+		return err
+	}
+
+	return ctx.JSON(NewDataResponse(fiber.Map{
+		"url": uploadedURL,
+	}))
+}
+
+func (h *AccountHandler) DeleteAvatar(ctx *fiber.Ctx) error {
+	session := sessions.Get(ctx)
+	if session == nil || !session.IsAuthenticated() {
+		return ErrUnauthorized
+	}
+
+	user, err := h.userService.GetUserByID(ctx.Context(), session.UserID)
+	if err != nil {
+		return ErrUnauthorized
+	}
+
+	err = h.userService.UpdateProfilePicture(ctx.Context(), user.ID, "")
+	if err != nil {
+		return ErrInternalServer
+	}
+	return ctx.SendStatus(fiber.StatusOK)
 }

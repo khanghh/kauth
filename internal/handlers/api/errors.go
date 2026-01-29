@@ -123,3 +123,10 @@ var (
 		Message: "TOTP verification failed",
 	}
 )
+
+var (
+	ErrUploadServiceUnavailable = &APIError{
+		Code:    fiber.StatusBadGateway,
+		Message: "Upload service unavailable",
+	}
+)

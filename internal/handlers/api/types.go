@@ -49,4 +49,5 @@ type UserService interface {
 	GetAuthFactors(ctx context.Context, userID uint) ([]*model.UserFactor, error)
 	LinkOAuthAccount(ctx context.Context, userID uint, userOAuthID uint) error
 	UnlinkOAuthAccount(ctx context.Context, userID uint, provider string) error
+	UpdateProfilePicture(ctx context.Context, userID uint, avatarURL string) error
 }
