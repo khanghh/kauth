@@ -125,6 +125,16 @@ export const useApi = () => {
       return useHttpGet<CursorResponse<AccountEvent>>('/api/account/events', {
         params: { cursor }
       })
+    },
+    uploadAvatar(file: File): Promise<string> {
+      const formData = new FormData()
+      formData.append('file', file)
+      return useHttpPost<{ url: string }>('/api/account/avatar', {
+        body: formData
+      }).then(res => res.url)
+    },
+    removeAvatar() {
+      return useHttpDelete('/api/account/avatar')
     }
   }
 }

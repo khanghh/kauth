@@ -47,7 +47,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void
-  (e: 'save', result: string): void
+  (e: 'save', result: File): void
 }>()
 
 const zoomLevel = ref(1)
@@ -66,15 +66,50 @@ const onCancel = () => {
   emit('close')
 }
 
-const onApply = () => {
+const canvasSize = 400
+
+const onApply = async () => {
+  if (!props.image) return
   isProcessing.value = true
-  // Simulate upload/processing delay
-  setTimeout(() => {
+
+  try {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    const dataUrl = props.image
+
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve()
+      img.onerror = () => reject(new Error('Failed to load image'))
+      img.src = dataUrl
+    })
+
+    const canvas = document.createElement('canvas')
+    canvas.width = canvasSize
+    canvas.height = canvasSize
+    const ctx = canvas.getContext('2d')!
+
+    // Compute source rect from original image based on zoomLevel.
+    const srcW = Math.max(1, img.naturalWidth / zoomLevel.value)
+    const srcH = Math.max(1, img.naturalHeight / zoomLevel.value)
+    const srcX = Math.max(0, (img.naturalWidth - srcW) / 2)
+    const srcY = Math.max(0, (img.naturalHeight - srcH) / 2)
+
+    ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, canvasSize, canvasSize)
+
+    await new Promise<void>((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (!blob) return reject(new Error('Failed to create blob'))
+        const file = new File([blob], 'avatar.png', { type: 'image/png' })
+        emit('save', file)
+        resolve()
+      }, 'image/png')
+    })
+
+  } catch (err) {
+    console.error('Crop failed', err)
+  } finally {
     isProcessing.value = false
-    // In a real app complexity, we'd use a canvas to actually crop the image based on zoomLevel.
-    // For now, mirroring the existing behavior (simulated crop returning original image).
-    emit('save', props.image)
     emit('close')
-  }, 1000)
+  }
 }
 </script>

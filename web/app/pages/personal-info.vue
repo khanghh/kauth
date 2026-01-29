@@ -50,13 +50,6 @@
               <span v-else class="text-white text-2xl font-bold select-none">{{ userInitial }}</span>
             </div>
 
-            <button
-              type="button"
-              class="absolute bottom-0 right-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center border-2 border-white transition hover:bg-indigo-700 hover:scale-105"
-              @click="triggerAvatarPicker">
-              <Icon name="fa7-solid:pencil" class="text-white w-4 h-4" />
-            </button>
-
             <input ref="fileInputEl" type="file" accept="image/*" class="hidden" @change="onAvatarFileChange" />
           </div>
 
@@ -74,7 +67,8 @@
                 Change
               </button>
               <button type="button"
-                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">
+                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium"
+                @click="onRemoveAvatar">
                 Remove photo
               </button>
             </div>
@@ -160,8 +154,7 @@
                 class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl input-focus transition"
                 placeholder="+1 (555) 000-0000" />
             </div>
-            <p class="mt-2 text-sm text-gray-500">Used for account verification and important security alerts. We will
-              only call or text you with your permission.</p>
+            <p class="mt-2 text-sm text-gray-500">Used for account verification and important security alerts.</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Country</label>
@@ -337,12 +330,49 @@ const onAvatarFileChange = (e: Event) => {
   reader.readAsDataURL(file)
 }
 
-const onCropSaved = (newImage: string) => {
+const onCropSaved = async (file: File) => {
+  if (!file) return
+  // remove any previous temporary preview
   revokePreviewUrl()
   avatarOk.value = true
-  avatarPreviewUrl.value = newImage
-  showSuccess('Profile picture updated successfully!')
-  closeCropper()
+
+  // show immediate local preview while uploading
+  const tempUrl = URL.createObjectURL(file)
+  avatarPreviewUrl.value = tempUrl
+
+  try {
+    const uploadedUrl = await api.uploadAvatar(file)
+    // revoke temp object URL if still set
+    if (avatarPreviewUrl.value === tempUrl) {
+      URL.revokeObjectURL(tempUrl)
+    }
+    avatarPreviewUrl.value = uploadedUrl
+    // update profile picture in memory
+    personalInfo.value.picture = uploadedUrl
+    showSuccess('Avatar updated successfully!')
+  } catch (err: any) {
+    // revoke temp preview and show error
+    if (avatarPreviewUrl.value === tempUrl) {
+      URL.revokeObjectURL(tempUrl)
+      avatarPreviewUrl.value = null
+    }
+    showError(err?.message ?? 'Failed to upload avatar.')
+  } finally {
+    closeCropper()
+  }
+}
+
+const onRemoveAvatar = async () => {
+  try {
+    await api.removeAvatar()
+    revokePreviewUrl()
+    avatarOk.value = false
+    avatarPreviewUrl.value = null
+    personalInfo.value.picture = ''
+    showSuccess('Avatar removed successfully!')
+  } catch (err: any) {
+    showError(err?.message ?? 'Failed to remove avatar.')
+  }
 }
 
 const todayISO = computed(() => {
@@ -386,7 +416,7 @@ const onSubmit = async (e: Event) => {
       original.value = { ...form }
       const now = new Date()
       lastUpdatedText.value = `Last updated: ${now.toLocaleString()}`
-      showSuccess('Profile updated successfully! (mock)')
+      showSuccess('Profile updated successfully!')
       isSubmitting.value = false
     }).catch(err => {
       const errMsg = err.message || 'Internal server error'
