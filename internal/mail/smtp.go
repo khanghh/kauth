@@ -3,8 +3,11 @@ package mail
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"os"
+	"strings"
 
+	"github.com/google/uuid"
 	"gopkg.in/gomail.v2"
 )
 
@@ -14,18 +17,25 @@ type SMTPMailSender struct {
 
 func (s *SMTPMailSender) Send(message *Message) error {
 	msg := gomail.NewMessage()
+	from := defaultFromAddr
 	if message.From != "" {
-		msg.SetHeader("From", message.From)
-	} else {
-		msg.SetHeader("From", defaultFromAddr)
+		from = message.From
 	}
+
+	// Explicitly set Message-ID to satisfy NO_MID rule
+	domain := "localhost"
+	if idx := strings.LastIndex(from, "@"); idx != -1 {
+		domain = strings.TrimRight(from[idx+1:], ">")
+	}
+	msg.SetHeader("Message-ID", fmt.Sprintf("<%s@%s>", uuid.New().String(), domain))
+	msg.SetHeader("From", from)
 	msg.SetHeader("To", message.To...)
 	msg.SetHeader("Cc", message.Cc...)
 	msg.SetHeader("Subject", message.Subject)
 	if message.IsHTML {
-		msg.SetBody("text/html", message.Body)
+		msg.SetBody("text/html", message.Body, gomail.SetPartEncoding(gomail.Base64))
 	} else {
-		msg.SetBody("text/plain", message.Body)
+		msg.SetBody("text/plain", message.Body, gomail.SetPartEncoding(gomail.QuotedPrintable))
 	}
 	for cid, file := range message.Embeds {
 		msg.Embed(file, gomail.SetHeader(map[string][]string{
