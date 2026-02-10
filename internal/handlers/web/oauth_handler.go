@@ -42,6 +42,7 @@ func (h *OAuthHandler) handleOAuthLogin(ctx *fiber.Ctx, userOAuth *model.UserOAu
 	session, err := sessions.Reset(ctx, sessions.SessionData{
 		IP:        ctx.IP(),
 		UserID:    user.ID,
+		Username:  user.Username,
 		LoginTime: time.Now(),
 		OAuthID:   userOAuth.ID,
 	})

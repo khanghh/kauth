@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -79,12 +80,7 @@ func (h *AuthHandler) handleLogin2FA(ctx *fiber.Ctx, session *sessions.Session, 
 		return err
 	}
 
-	session.SetData(ctx.Context(), sessions.SessionData{
-		IP:            ctx.IP(),
-		UserID:        user.ID,
-		LoginTime:     time.Now(),
-		TwoFARequired: isTwoFAEnabled,
-	})
+	session.TwoFARequired = isTwoFAEnabled
 
 	if !isTwoFAEnabled {
 		return redirectAuthorize(ctx, session, serviceNameOrURL, serviceState)
@@ -245,26 +241,27 @@ func (h *AuthHandler) PostAuthorize(ctx *fiber.Ctx) error {
 
 func (h *AuthHandler) GetLogin(ctx *fiber.Ctx) error {
 	serviceNameOrURL := urlutil.RemoveQuery(ctx.Query("service"))
-	serviceState := ctx.Query("state")
-	errorCode := ctx.Query("error")
-	renew := ctx.QueryBool("renew")
-
 	session := sessions.Get(ctx)
-	if session == nil || !session.IsAuthenticated() || renew {
-		var errMsg string
-		if errorCode != "" {
-			errMsg = mapLoginError(errorCode)
+	username := ctx.Query("username", session.Username)
+	serviceState := ctx.Query("state")
+	renew := ctx.QueryBool("renew")
+	errorCode := ctx.Query("error")
+
+	if !renew && session.IsAuthenticated() && username == session.Username {
+		if serviceNameOrURL == "" {
+			return redirect(ctx, "/")
 		}
-		return render.RenderLoginPage(ctx, render.LoginPageData{
-			OAuthLoginURLs: h.getOAuthLoginURLs(serviceNameOrURL, serviceState),
-			ErrorMsg:       errMsg,
-		})
+		return redirectAuthorize(ctx, session, serviceNameOrURL, serviceState)
 	}
 
-	if serviceNameOrURL == "" {
-		return redirect(ctx, "/")
+	var errMsg string
+	if errorCode != "" {
+		errMsg = mapLoginError(errorCode)
 	}
-	return redirectAuthorize(ctx, session, serviceNameOrURL, serviceState)
+	return render.RenderLoginPage(ctx, render.LoginPageData{
+		OAuthLoginURLs: h.getOAuthLoginURLs(serviceNameOrURL, serviceState),
+		ErrorMsg:       errMsg,
+	})
 }
 
 func (h *AuthHandler) PostLogin(ctx *fiber.Ctx) error {
@@ -272,9 +269,10 @@ func (h *AuthHandler) PostLogin(ctx *fiber.Ctx) error {
 	serviceState := ctx.Query("state")
 	username := ctx.FormValue("username")
 	password := ctx.FormValue("password")
+	renew, _ := strconv.ParseBool(ctx.FormValue("renew"))
 
 	session := sessions.Get(ctx)
-	if session != nil && session.IsAuthenticated() {
+	if !renew && session != nil && session.IsAuthenticated() {
 		return ctx.Redirect("/")
 	}
 
@@ -297,6 +295,16 @@ func (h *AuthHandler) PostLogin(ctx *fiber.Ctx) error {
 		pageData.ErrorMsg = MsgLoginWrongCredentials
 		audit.RecordLoginFailure(ctx, user, audit.AuthMethodPassword, "")
 		return render.RenderLoginPage(ctx, pageData)
+	}
+
+	session, err = sessions.Reset(ctx, sessions.SessionData{
+		IP:        ctx.IP(),
+		UserID:    user.ID,
+		Username:  user.Username,
+		LoginTime: time.Now(),
+	})
+	if err != nil {
+		return err
 	}
 
 	audit.RecordLoginSuccess(ctx, user, audit.AuthMethodPassword)

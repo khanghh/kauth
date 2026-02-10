@@ -7,7 +7,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/khanghh/kauth/internal/middlewares/captcha"
 	"github.com/khanghh/kauth/internal/middlewares/sessions"
-	"github.com/khanghh/kauth/internal/twofactor"
 	"github.com/khanghh/kauth/model"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -37,22 +36,6 @@ type loginResponse struct {
 	User          loginUserInfo `json:"user"`
 	TwoFARequired bool          `json:"twoFaRequired"`
 	Methods       []string      `json:"methods,omitempty"`
-}
-
-type login2FAChallengeResponse struct {
-	CID    string `json:"cid"`
-	Method string `json:"method"`
-	OTP    string `json:"otp,omitempty"` // mock/testing only
-}
-
-// helper to build twofactor.Subject from ctx
-func twoFactorSubjectFromCtx(ctx *fiber.Ctx, uid uint) twofactor.Subject {
-	return twofactor.Subject{
-		UserID:    uid,
-		SessionID: "",
-		IPAddress: ctx.IP(),
-		UserAgent: ctx.Get("User-Agent"),
-	}
 }
 
 func get2FAMethodNames(factors []*model.UserFactor) []string {
@@ -118,6 +101,7 @@ func (h *AuthHandler) PostLogin(ctx *fiber.Ctx) error {
 	sessions.Save(ctx, sessions.SessionData{
 		IP:        ctx.IP(),
 		UserID:    user.ID,
+		Username:  user.Username,
 		LoginTime: time.Now(),
 	})
 

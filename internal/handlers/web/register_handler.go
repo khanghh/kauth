@@ -147,6 +147,7 @@ func (h *RegisterHandler) PostRegister(ctx *fiber.Ctx) error {
 		}
 
 		session.UserID = user.ID
+		session.Username = user.Username
 		serviceURL := ctx.Query("service")
 		if serviceURL == "" {
 			return ctx.Redirect("/")

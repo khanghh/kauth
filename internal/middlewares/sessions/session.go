@@ -13,6 +13,7 @@ import (
 type SessionData struct {
 	IP               string    `mapstructure:"ip,omitempty"                   redis:"ip"`                 // client ip address
 	UserID           uint      `mapstructure:"user_id,omitempty"              redis:"user_id"`            // user id
+	Username         string    `mapstructure:"username,omitempty"             redis:"username"`           // username
 	OAuthID          uint      `mapstructure:"oauth_id,omitempty"             redis:"oauth_id"`           // user oauth id
 	LastSeen         time.Time `mapstructure:"last_seen,omitempty"            redis:"last_seen"`          // last request time
 	LoginTime        time.Time `mapstructure:"login_time,omitempty"           redis:"login_time"`         // last login time
