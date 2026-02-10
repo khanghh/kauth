@@ -14,6 +14,7 @@
         </div>
 
         <form class="space-y-6" method="POST">
+          <input type="hidden" name="renew" :value="renew">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Username or email</label>
             <div class="relative">
@@ -105,6 +106,9 @@
 </template>
 
 <script setup lang="ts">
+
+const route = useRoute()
+
 useHead({
   title: useSiteTitle('Login'),
   script: [
@@ -126,5 +130,7 @@ const facebookOAuthURL = useServerVar<string>('facebookOAuthURL', '')
 const discordOAuthURL = useServerVar<string>('discordOAuthURL', '')
 const microsoftOAuthURL = useServerVar<string>('microsoftOAuthURL', '')
 const appleOAuthURL = useServerVar<string>('appleOAuthURL', '')
+
+const renew = computed(() => route.query.renew === 'true' || !!route.query.username)
 
 </script>
