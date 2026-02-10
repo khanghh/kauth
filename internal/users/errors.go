@@ -9,6 +9,7 @@ var (
 	ErrUsernameTaken            = errors.New("username taken")
 	ErrEmailRegisterd           = errors.New("email already registered")
 	ErrPendingUserNotFound      = errors.New("pending registration user not found")
+	ErrPendingUserExists        = errors.New("pending registration user already exists")
 	ErrInvalidVerificationToken = errors.New("invalid verification token")
 	ErrAuthFactorNotSupported   = errors.New("authentication factor not supported")
 	ErrAuthFactorNotSetup       = errors.New("authentication factor not set up")

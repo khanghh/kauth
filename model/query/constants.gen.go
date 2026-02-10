@@ -81,11 +81,9 @@ const ColPendingUserActiveToken = "active_token"
 const ColPendingUserApproved = "approved"
 const ColPendingUserCreatedAt = "created_at"
 const ColPendingUserUpdatedAt = "updated_at"
-const ColPendingUserDeletedAt = "deleted_at"
 // PendingUser index names
 const IdxPendingUserUsername = "idx_pending_user_username"
 const IdxPendingUserEmail = "idx_pending_user_email"
-const IdxPendingUserDeletedAt = "idx_pending_user_deleted_at"
 // UserFactor column names
 const ColUserFactorID = "id"
 const ColUserFactorUserID = "user_id"

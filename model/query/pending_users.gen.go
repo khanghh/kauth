@@ -36,7 +36,6 @@ func newPendingUser(db *gorm.DB, opts ...gen.DOOption) pendingUser {
 	_pendingUser.Approved = field.NewBool(tableName, "approved")
 	_pendingUser.CreatedAt = field.NewTime(tableName, "created_at")
 	_pendingUser.UpdatedAt = field.NewTime(tableName, "updated_at")
-	_pendingUser.DeletedAt = field.NewField(tableName, "deleted_at")
 
 	_pendingUser.fillFieldMap()
 
@@ -57,7 +56,6 @@ type pendingUser struct {
 	Approved    field.Bool
 	CreatedAt   field.Time
 	UpdatedAt   field.Time
-	DeletedAt   field.Field
 
 	fieldMap map[string]field.Expr
 }
@@ -84,7 +82,6 @@ func (p *pendingUser) updateTableName(table string) *pendingUser {
 	p.Approved = field.NewBool(table, "approved")
 	p.CreatedAt = field.NewTime(table, "created_at")
 	p.UpdatedAt = field.NewTime(table, "updated_at")
-	p.DeletedAt = field.NewField(table, "deleted_at")
 
 	p.fillFieldMap()
 
@@ -101,7 +98,7 @@ func (p *pendingUser) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (p *pendingUser) fillFieldMap() {
-	p.fieldMap = make(map[string]field.Expr, 11)
+	p.fieldMap = make(map[string]field.Expr, 10)
 	p.fieldMap["id"] = p.ID
 	p.fieldMap["username"] = p.Username
 	p.fieldMap["full_name"] = p.FullName
@@ -112,7 +109,6 @@ func (p *pendingUser) fillFieldMap() {
 	p.fieldMap["approved"] = p.Approved
 	p.fieldMap["created_at"] = p.CreatedAt
 	p.fieldMap["updated_at"] = p.UpdatedAt
-	p.fieldMap["deleted_at"] = p.DeletedAt
 }
 
 func (p pendingUser) clone(db *gorm.DB) pendingUser {

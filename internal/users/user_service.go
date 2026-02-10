@@ -96,23 +96,6 @@ func (s *UserService) checkUserExist(ctx context.Context, email string, username
 	return nil
 }
 
-func (s *UserService) checkPendingUserExist(ctx context.Context, email string, username string) error {
-	existing, err := s.pendingUserRepo.First(ctx,
-		query.PendingUser.Where(query.PendingUser.Email.Eq(email)).Or(query.PendingUser.Username.Eq(username)),
-		query.PendingUser.CreatedAt.Gt(time.Now().Add(-params.PendingUserExpiration)),
-	)
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return err
-	}
-	if existing != nil {
-		if existing.Username == username {
-			return ErrUsernameTaken
-		}
-		return ErrEmailRegisterd
-	}
-	return nil
-}
-
 func (s *UserService) generateVerificationToken() string {
 	b := make([]byte, 32)
 	_, err := rand.Read(b)
@@ -161,9 +144,6 @@ func (s *UserService) RegisterUser(ctx context.Context, opts CreateUserOptions) 
 	if err := s.checkUserExist(ctx, opts.Email, opts.Username); err != nil {
 		return nil, err
 	}
-	if err := s.checkPendingUserExist(ctx, opts.Email, opts.Username); err != nil {
-		return nil, err
-	}
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(opts.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -179,8 +159,16 @@ func (s *UserService) RegisterUser(ctx context.Context, opts CreateUserOptions) 
 		ActiveToken: s.generateVerificationToken(),
 	}
 
-	if err := s.pendingUserRepo.Create(ctx, &signup); err != nil {
-		return &signup, err
+	existing, err := s.pendingUserRepo.CreateIfNotExists(ctx, &signup)
+	if errors.Is(err, ErrPendingUserExists) {
+		if existing.Username == signup.Username {
+			return nil, ErrUsernameTaken
+		} else if existing.Email == signup.Email {
+			return nil, ErrEmailRegisterd
+		}
+	}
+	if err != nil {
+		return nil, err
 	}
 	return &signup, nil
 }
@@ -189,6 +177,7 @@ func (s *UserService) ApprovePendingUser(ctx context.Context, email string, toke
 	regUser, err := s.pendingUserRepo.First(ctx,
 		query.PendingUser.Email.Eq(email),
 		query.PendingUser.ActiveToken.Eq(token),
+		query.PendingUser.Approved.Is(false),
 		query.PendingUser.CreatedAt.Gt(time.Now().Add(-params.PendingUserExpiration)),
 	)
 	if err != nil {
@@ -199,8 +188,7 @@ func (s *UserService) ApprovePendingUser(ctx context.Context, email string, toke
 	}
 
 	updates := map[string]interface{}{
-		query.ColPendingUserApproved:  true,
-		query.ColPendingUserDeletedAt: time.Now(),
+		query.ColPendingUserApproved: true,
 	}
 	ret, err := s.pendingUserRepo.Updates(ctx,
 		updates,

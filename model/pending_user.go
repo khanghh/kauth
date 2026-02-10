@@ -2,8 +2,6 @@ package model
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type PendingUser struct {
@@ -17,5 +15,4 @@ type PendingUser struct {
 	Approved    bool   `gorm:"default:false;not null"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
 }
