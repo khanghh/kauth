@@ -1,5 +1,6 @@
 import Aura from '@primeuix/themes/aura';
 import path from 'path'
+import { cpSync } from 'node:fs'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -68,6 +69,12 @@ export default defineNuxtConfig({
           }
         }
       },
+      'compiled'(nitro) {
+        const srcDir = path.join(nitro.options.rootDir, 'mail')
+        const targetDir = path.join(nitro.options.output.publicDir, 'mail')
+        cpSync(srcDir, targetDir, { recursive: true })
+        console.log('Nitro: Folder copied to output')
+      }
     }
   },
   experimental: {

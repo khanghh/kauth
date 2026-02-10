@@ -51,8 +51,6 @@ COPY --from=server-builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=server-builder /workdir/kauth /app/kauth
 COPY --from=web-builder /workdir/dist /app/dist
 
-RUN ls -lah /app
-
 EXPOSE 3000
 
 ENTRYPOINT ["/app/kauth", "--config", "/config.yaml"]

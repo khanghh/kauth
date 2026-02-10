@@ -28,6 +28,7 @@
   "devDependencies": {
     "@nuxt/eslint": "1.12.1",
     "@types/node": "^25.0.9",
-    "eslint": "^9.39.2"
+    "eslint": "^9.39.2",
+    "vite-plugin-static-copy": "^3.2.0"
   }
 }
